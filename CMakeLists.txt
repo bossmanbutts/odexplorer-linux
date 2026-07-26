@@ -28,6 +28,8 @@ add_executable(odexplorer
 
     src/journal/JournalWatcher.cpp
     src/journal/JournalWatcher.hpp
+    src/journal/JournalReader.cpp
+    src/journal/StatusReader.cpp
 )
 
 add_subdirectory(src/app)

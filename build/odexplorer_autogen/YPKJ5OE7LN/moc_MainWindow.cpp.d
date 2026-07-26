@@ -1,5 +1,8 @@
 /home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/YPKJ5OE7LN/moc_MainWindow.cpp: /home/milo/Projects/odexplorer-linux/src/ui/MainWindow.hpp \
   /home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/moc_predefs.h \
+  /home/milo/Projects/odexplorer-linux/src/journal/JournalReader.hpp \
+  /home/milo/Projects/odexplorer-linux/src/journal/StatusReader.hpp \
+  /home/milo/Projects/odexplorer-linux/src/model/GameState.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
@@ -227,6 +230,7 @@
   /usr/include/c++/16/ext/numeric_traits.h \
   /usr/include/c++/16/ext/string_conversions.h \
   /usr/include/c++/16/ext/type_traits.h \
+  /usr/include/c++/16/filesystem \
   /usr/include/c++/16/format \
   /usr/include/c++/16/functional \
   /usr/include/c++/16/initializer_list \
@@ -301,6 +305,9 @@
   /usr/include/linux/types.h \
   /usr/include/locale.h \
   /usr/include/pthread.h \
+  /usr/include/qt6/QtCore/QFile \
+  /usr/include/qt6/QtCore/QString \
+  /usr/include/qt6/QtCore/QStringList \
   /usr/include/qt6/QtCore/QTimer \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20bit.h \
@@ -347,6 +354,8 @@
   /usr/include/qt6/QtCore/qendian.h \
   /usr/include/qt6/QtCore/qeventloop.h \
   /usr/include/qt6/QtCore/qexceptionhandling.h \
+  /usr/include/qt6/QtCore/qfile.h \
+  /usr/include/qt6/QtCore/qfiledevice.h \
   /usr/include/qt6/QtCore/qflags.h \
   /usr/include/qt6/QtCore/qfloat16.h \
   /usr/include/qt6/QtCore/qforeach.h \

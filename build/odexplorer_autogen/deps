@@ -6,8 +6,13 @@ odexplorer_autogen/timestamp: \
 	/home/milo/Projects/odexplorer-linux/src/app/main.cpp \
 	/home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.cpp \
 	/home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.hpp \
+	/home/milo/Projects/odexplorer-linux/src/journal/JournalReader.cpp \
+	/home/milo/Projects/odexplorer-linux/src/journal/JournalReader.hpp \
 	/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.cpp \
 	/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.hpp \
+	/home/milo/Projects/odexplorer-linux/src/journal/StatusReader.cpp \
+	/home/milo/Projects/odexplorer-linux/src/journal/StatusReader.hpp \
+	/home/milo/Projects/odexplorer-linux/src/model/GameState.hpp \
 	/home/milo/Projects/odexplorer-linux/src/ui/MainWindow.cpp \
 	/home/milo/Projects/odexplorer-linux/src/ui/MainWindow.hpp \
 	/usr/include/alloca.h \
@@ -237,6 +242,7 @@ odexplorer_autogen/timestamp: \
 	/usr/include/c++/16/ext/numeric_traits.h \
 	/usr/include/c++/16/ext/string_conversions.h \
 	/usr/include/c++/16/ext/type_traits.h \
+	/usr/include/c++/16/filesystem \
 	/usr/include/c++/16/format \
 	/usr/include/c++/16/functional \
 	/usr/include/c++/16/initializer_list \
@@ -311,7 +317,10 @@ odexplorer_autogen/timestamp: \
 	/usr/include/linux/types.h \
 	/usr/include/locale.h \
 	/usr/include/pthread.h \
+	/usr/include/qt6/QtCore/QFile \
 	/usr/include/qt6/QtCore/QObject \
+	/usr/include/qt6/QtCore/QString \
+	/usr/include/qt6/QtCore/QStringList \
 	/usr/include/qt6/QtCore/QTimer \
 	/usr/include/qt6/QtCore/q17memory.h \
 	/usr/include/qt6/QtCore/q20bit.h \
@@ -358,6 +367,8 @@ odexplorer_autogen/timestamp: \
 	/usr/include/qt6/QtCore/qendian.h \
 	/usr/include/qt6/QtCore/qeventloop.h \
 	/usr/include/qt6/QtCore/qexceptionhandling.h \
+	/usr/include/qt6/QtCore/qfile.h \
+	/usr/include/qt6/QtCore/qfiledevice.h \
 	/usr/include/qt6/QtCore/qflags.h \
 	/usr/include/qt6/QtCore/qfloat16.h \
 	/usr/include/qt6/QtCore/qforeach.h \

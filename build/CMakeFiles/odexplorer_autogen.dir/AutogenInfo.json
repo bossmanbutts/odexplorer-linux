@@ -536,9 +536,21 @@
 			null
 		],
 		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/JournalReader.hpp",
+			"MU",
+			"CO5IDNHIYX/moc_JournalReader.cpp",
+			null
+		],
+		[
 			"/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.hpp",
 			"MU",
 			"CO5IDNHIYX/moc_JournalWatcher.cpp",
+			null
+		],
+		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/StatusReader.hpp",
+			"MU",
+			"CO5IDNHIYX/moc_StatusReader.cpp",
 			null
 		],
 		[
@@ -613,7 +625,17 @@
 			null
 		],
 		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/JournalReader.cpp",
+			"MU",
+			null
+		],
+		[
 			"/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/StatusReader.cpp",
 			"MU",
 			null
 		],
