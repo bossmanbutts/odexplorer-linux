@@ -17,14 +17,13 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-add_executable(
-    odexplorer
-    src/app/main.cpp
-    src/ui/MainWindow.cpp
-    src/ui/MainWindow.hpp
-)
+add_executable(odexplorer)
+
+add_subdirectory(src/app)
+add_subdirectory(src/ui)
+add_subdirectory(src/journal)
 
 target_link_libraries(
     odexplorer
     PRIVATE Qt6::Widgets
-)
+    )
