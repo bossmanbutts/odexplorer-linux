@@ -1,0 +1,20 @@
+# ninja log v7
+1	25	1785036295625051506	odexplorer_autogen/timestamp	b2490d166a9a8d9a
+1	25	1785036295625051506	odexplorer_autogen/mocs_compilation.cpp	b2490d166a9a8d9a
+1	25	1785036295625051506	/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/timestamp	b2490d166a9a8d9a
+1	25	1785036295625051506	/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/mocs_compilation.cpp	b2490d166a9a8d9a
+27	34	1785036295634541204	CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o	485739b493ba77e8
+27	34	1785036295634685146	CMakeFiles/odexplorer.dir/src/app/main.cpp.o	faf59dc0a71a2a9
+27	34	1785036295634793291	CMakeFiles/odexplorer.dir/src/ui/MainWindow.cpp.o	adc099a0e89ecddd
+2	19	1785036472319261340	odexplorer_autogen/timestamp	b2490d166a9a8d9a
+2	19	1785036472319261340	odexplorer_autogen/mocs_compilation.cpp	b2490d166a9a8d9a
+2	19	1785036472319261340	/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/timestamp	b2490d166a9a8d9a
+2	19	1785036472319261340	/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/mocs_compilation.cpp	b2490d166a9a8d9a
+1	176	1785036574796001474	odexplorer_autogen/timestamp	b2490d166a9a8d9a
+1	176	1785036574796001474	odexplorer_autogen/mocs_compilation.cpp	b2490d166a9a8d9a
+1	176	1785036574796001474	/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/timestamp	b2490d166a9a8d9a
+1	176	1785036574796001474	/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/mocs_compilation.cpp	b2490d166a9a8d9a
+178	1743	1785036574806616794	CMakeFiles/odexplorer.dir/src/ui/MainWindow.cpp.o	adc099a0e89ecddd
+178	1755	1785036574806329811	CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o	485739b493ba77e8
+178	1758	1785036574806487209	CMakeFiles/odexplorer.dir/src/app/main.cpp.o	faf59dc0a71a2a9
+1758	1886	1785036576386531985	odexplorer	f049b41e5106368f
