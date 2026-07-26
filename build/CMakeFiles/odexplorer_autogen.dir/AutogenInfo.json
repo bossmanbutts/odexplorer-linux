@@ -530,6 +530,18 @@
 	"HEADERS" : 
 	[
 		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.hpp",
+			"MU",
+			"CO5IDNHIYX/moc_JournalLocator.cpp",
+			null
+		],
+		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.hpp",
+			"MU",
+			"CO5IDNHIYX/moc_JournalWatcher.cpp",
+			null
+		],
+		[
 			"/home/milo/Projects/odexplorer-linux/src/ui/MainWindow.hpp",
 			"MU",
 			"YPKJ5OE7LN/moc_MainWindow.cpp",
@@ -595,6 +607,16 @@
 	"SOURCES" : 
 	[
 		[ "/home/milo/Projects/odexplorer-linux/src/app/main.cpp", "MU", null ],
+		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.cpp",
+			"MU",
+			null
+		],
 		[
 			"/home/milo/Projects/odexplorer-linux/src/ui/MainWindow.cpp",
 			"MU",

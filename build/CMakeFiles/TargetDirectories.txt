@@ -3,3 +3,9 @@
 /home/milo/Projects/odexplorer-linux/build/CMakeFiles/rebuild_cache.dir
 /home/milo/Projects/odexplorer-linux/build/CMakeFiles/odexplorer_autogen_timestamp_deps.dir
 /home/milo/Projects/odexplorer-linux/build/CMakeFiles/odexplorer_autogen.dir
+/home/milo/Projects/odexplorer-linux/build/src/app/CMakeFiles/edit_cache.dir
+/home/milo/Projects/odexplorer-linux/build/src/app/CMakeFiles/rebuild_cache.dir
+/home/milo/Projects/odexplorer-linux/build/src/ui/CMakeFiles/edit_cache.dir
+/home/milo/Projects/odexplorer-linux/build/src/ui/CMakeFiles/rebuild_cache.dir
+/home/milo/Projects/odexplorer-linux/build/src/journal/CMakeFiles/edit_cache.dir
+/home/milo/Projects/odexplorer-linux/build/src/journal/CMakeFiles/rebuild_cache.dir

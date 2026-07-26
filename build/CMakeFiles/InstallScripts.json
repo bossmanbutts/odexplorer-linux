@@ -1,7 +1,10 @@
 {
 	"InstallScripts" : 
 	[
-		"/home/milo/Projects/odexplorer-linux/build/cmake_install.cmake"
+		"/home/milo/Projects/odexplorer-linux/build/cmake_install.cmake",
+		"/home/milo/Projects/odexplorer-linux/build/src/app/cmake_install.cmake",
+		"/home/milo/Projects/odexplorer-linux/build/src/ui/cmake_install.cmake",
+		"/home/milo/Projects/odexplorer-linux/build/src/journal/cmake_install.cmake"
 	],
 	"Parallel" : false
 }
