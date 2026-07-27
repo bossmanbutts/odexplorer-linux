@@ -107,6 +107,24 @@ build CMakeFiles/odexplorer.dir/src/journal/StatusReader.cpp.o: CXX_COMPILER__od
   OBJECT_FILE_DIR = CMakeFiles/odexplorer.dir/src/journal
   TARGET_SUPPORT_DIR = CMakeFiles/odexplorer.dir
 
+build CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o: CXX_COMPILER__odexplorer_unscanned_ /home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.cpp || cmake_object_order_depends_target_odexplorer
+  DEFINES = -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB
+  DEP_FILE = CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o.d
+  FLAGS = -std=c++20 -mno-direct-extern-access
+  INCLUDES = -I/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/include -isystem /usr/include/qt6/QtWidgets -isystem /usr/include/qt6 -isystem /usr/include/qt6/QtCore -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtGui
+  OBJECT_DIR = CMakeFiles/odexplorer.dir
+  OBJECT_FILE_DIR = CMakeFiles/odexplorer.dir/src/journal
+  TARGET_SUPPORT_DIR = CMakeFiles/odexplorer.dir
+
+build CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o: CXX_COMPILER__odexplorer_unscanned_ /home/milo/Projects/odexplorer-linux/src/model/GameState.cpp || cmake_object_order_depends_target_odexplorer
+  DEFINES = -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB
+  DEP_FILE = CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o.d
+  FLAGS = -std=c++20 -mno-direct-extern-access
+  INCLUDES = -I/home/milo/Projects/odexplorer-linux/build/odexplorer_autogen/include -isystem /usr/include/qt6/QtWidgets -isystem /usr/include/qt6 -isystem /usr/include/qt6/QtCore -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtGui
+  OBJECT_DIR = CMakeFiles/odexplorer.dir
+  OBJECT_FILE_DIR = CMakeFiles/odexplorer.dir/src/model
+  TARGET_SUPPORT_DIR = CMakeFiles/odexplorer.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target odexplorer
@@ -115,7 +133,7 @@ build CMakeFiles/odexplorer.dir/src/journal/StatusReader.cpp.o: CXX_COMPILER__od
 #############################################
 # Link the executable odexplorer
 
-build odexplorer: CXX_EXECUTABLE_LINKER__odexplorer_ CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o CMakeFiles/odexplorer.dir/src/app/main.cpp.o CMakeFiles/odexplorer.dir/src/ui/MainWindow.cpp.o CMakeFiles/odexplorer.dir/src/journal/JournalLocator.cpp.o CMakeFiles/odexplorer.dir/src/journal/JournalWatcher.cpp.o CMakeFiles/odexplorer.dir/src/journal/JournalReader.cpp.o CMakeFiles/odexplorer.dir/src/journal/StatusReader.cpp.o | /usr/lib/libQt6Widgets.so.6.11.1 /usr/lib/libQt6Gui.so.6.11.1 /usr/lib/libGLX.so /usr/lib/libOpenGL.so /usr/lib/libQt6Core.so.6.11.1 || odexplorer_autogen odexplorer_autogen_timestamp_deps
+build odexplorer: CXX_EXECUTABLE_LINKER__odexplorer_ CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o CMakeFiles/odexplorer.dir/src/app/main.cpp.o CMakeFiles/odexplorer.dir/src/ui/MainWindow.cpp.o CMakeFiles/odexplorer.dir/src/journal/JournalLocator.cpp.o CMakeFiles/odexplorer.dir/src/journal/JournalWatcher.cpp.o CMakeFiles/odexplorer.dir/src/journal/JournalReader.cpp.o CMakeFiles/odexplorer.dir/src/journal/StatusReader.cpp.o CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o | /usr/lib/libQt6Widgets.so.6.11.1 /usr/lib/libQt6Gui.so.6.11.1 /usr/lib/libGLX.so /usr/lib/libOpenGL.so /usr/lib/libQt6Core.so.6.11.1 || odexplorer_autogen odexplorer_autogen_timestamp_deps
   DEP_FILE = CMakeFiles/odexplorer.dir/link.d
   LINK_FLAGS = -Wl,--dependency-file=CMakeFiles/odexplorer.dir/link.d
   LINK_LIBRARIES = /usr/lib/libQt6Widgets.so.6.11.1  /usr/lib/libQt6Gui.so.6.11.1  /usr/lib/libGLX.so  /usr/lib/libOpenGL.so  /usr/lib/libQt6Core.so.6.11.1

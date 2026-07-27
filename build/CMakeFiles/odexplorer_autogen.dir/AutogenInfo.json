@@ -530,6 +530,12 @@
 	"HEADERS" : 
 	[
 		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.hpp",
+			"MU",
+			"CO5IDNHIYX/moc_EventFormatter.cpp",
+			null
+		],
+		[
 			"/home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.hpp",
 			"MU",
 			"CO5IDNHIYX/moc_JournalLocator.cpp",
@@ -551,6 +557,12 @@
 			"/home/milo/Projects/odexplorer-linux/src/journal/StatusReader.hpp",
 			"MU",
 			"CO5IDNHIYX/moc_StatusReader.cpp",
+			null
+		],
+		[
+			"/home/milo/Projects/odexplorer-linux/src/model/GameState.hpp",
+			"MU",
+			"VNQA4LF4BW/moc_GameState.cpp",
 			null
 		],
 		[
@@ -620,6 +632,11 @@
 	[
 		[ "/home/milo/Projects/odexplorer-linux/src/app/main.cpp", "MU", null ],
 		[
+			"/home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.cpp",
+			"MU",
+			null
+		],
+		[
 			"/home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.cpp",
 			"MU",
 			null
@@ -636,6 +653,11 @@
 		],
 		[
 			"/home/milo/Projects/odexplorer-linux/src/journal/StatusReader.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/milo/Projects/odexplorer-linux/src/model/GameState.cpp",
 			"MU",
 			null
 		],

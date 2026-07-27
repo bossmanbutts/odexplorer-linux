@@ -25,11 +25,13 @@ add_executable(odexplorer
 
     src/journal/JournalLocator.cpp
     src/journal/JournalLocator.hpp
-
     src/journal/JournalWatcher.cpp
     src/journal/JournalWatcher.hpp
     src/journal/JournalReader.cpp
     src/journal/StatusReader.cpp
+    src/journal/EventFormatter.cpp
+
+    src/model/GameState.cpp
 )
 
 add_subdirectory(src/app)
