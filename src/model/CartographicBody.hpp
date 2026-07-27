@@ -2,28 +2,31 @@
 
 #include <QString>
 
-struct CartographicBody
-{
-    QString name;
-    QString type;
+struct CartographicBody {
+  QString name;
+  QString type;
 
-    bool mapped = false;
-    bool terraformable = false;
+  bool mapped = false;
+  bool terraformable = false;
+  bool landable = false;
 
-    bool earthLike = false;
-    bool waterWorld = false;
-    bool ammoniaWorld = false;
+  double gravity = 0.0;
+  double temperature = 0.0;
+  double radius = 0.0;
+  double massEM = 0.0;
 
-    bool landable = false;
+  QString atmosphere;
+  QString volcanism;
 
-    QString atmosphere;
-    QString volcanism;
+  int biologicalSignals = 0;
+  int efficiencyTarget = 0;
+  int probesUsed = 0;
 
-    double gravity = 0.0;
-    double surfaceTemperature = 0.0;
-    double temperature = 0.0;
+  double distanceFromArrivalLS = 0.0;
 
-    int biologicalSignals = 0;
+  bool firstDiscovery = false;
+  bool firstMapped = false;
+  bool efficiencyBonus = false;
 
-    qint64 value = 0;
+  qint64 estimatedValue = 0;
 };

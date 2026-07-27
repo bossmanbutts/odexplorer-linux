@@ -19,10 +19,8 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 add_executable(odexplorer
     src/app/main.cpp
-
     src/ui/MainWindow.cpp
     src/ui/MainWindow.hpp
-
     src/journal/JournalLocator.cpp
     src/journal/JournalLocator.hpp
     src/journal/JournalWatcher.cpp
@@ -30,8 +28,8 @@ add_executable(odexplorer
     src/journal/JournalReader.cpp
     src/journal/StatusReader.cpp
     src/journal/EventFormatter.cpp
-
     src/model/GameState.cpp
+    src/exploration/ExplorationValue.cpp
 )
 
 add_subdirectory(src/app)

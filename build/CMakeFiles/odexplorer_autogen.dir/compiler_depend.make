@@ -6,6 +6,8 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
   CMakeFiles/4.4.0/CMakeSystem.cmake \
   odexplorer_autogen/moc_predefs.h \
   /home/milo/Projects/odexplorer-linux/src/app/main.cpp \
+  /home/milo/Projects/odexplorer-linux/src/exploration/ExplorationValue.cpp \
+  /home/milo/Projects/odexplorer-linux/src/exploration/ExplorationValue.hpp \
   /home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.cpp \
   /home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.hpp \
   /home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.cpp \
@@ -923,82 +925,22 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdarg.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stdbool.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/16/include/stddef.h \
-  /usr/share/cmake/Modules/CMakeCXXCompiler.cmake.in \
-  /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp \
   /usr/share/cmake/Modules/CMakeCXXInformation.cmake \
   /usr/share/cmake/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake \
   /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake \
-  /usr/share/cmake/Modules/CMakeCompilerIdDetection.cmake \
-  /usr/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake \
-  /usr/share/cmake/Modules/CMakeDetermineCompiler.cmake \
-  /usr/share/cmake/Modules/CMakeDetermineCompilerABI.cmake \
-  /usr/share/cmake/Modules/CMakeDetermineCompilerId.cmake \
-  /usr/share/cmake/Modules/CMakeDetermineCompilerSupport.cmake \
-  /usr/share/cmake/Modules/CMakeDetermineSystem.cmake \
-  /usr/share/cmake/Modules/CMakeFindBinUtils.cmake \
   /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake \
   /usr/share/cmake/Modules/CMakeGenericSystem.cmake \
   /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake \
   /usr/share/cmake/Modules/CMakeLanguageInformation.cmake \
-  /usr/share/cmake/Modules/CMakeParseImplicitIncludeInfo.cmake \
-  /usr/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake \
-  /usr/share/cmake/Modules/CMakeParseLibraryArchitecture.cmake \
-  /usr/share/cmake/Modules/CMakeSystem.cmake.in \
   /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake \
   /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake \
-  /usr/share/cmake/Modules/CMakeTestCXXCompiler.cmake \
-  /usr/share/cmake/Modules/CMakeTestCompilerCommon.cmake \
-  /usr/share/cmake/Modules/CMakeUnixFindMake.cmake \
   /usr/share/cmake/Modules/CheckCXXCompilerFlag.cmake \
   /usr/share/cmake/Modules/CheckCXXSourceCompiles.cmake \
   /usr/share/cmake/Modules/CheckIncludeFileCXX.cmake \
   /usr/share/cmake/Modules/CheckLibraryExists.cmake \
-  /usr/share/cmake/Modules/Compiler/ADSP-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/ARMCC-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/ARMClang-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/AppleClang-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Borland-DetermineCompiler.cmake \
   /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake \
-  /usr/share/cmake/Modules/Compiler/Clang-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Clang-DetermineCompilerInternal.cmake \
-  /usr/share/cmake/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Cray-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/CrayClang-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Diab-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Embarcadero-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Fujitsu-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/GHS-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake \
   /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake \
-  /usr/share/cmake/Modules/Compiler/GNU-FindBinUtils.cmake \
   /usr/share/cmake/Modules/Compiler/GNU.cmake \
-  /usr/share/cmake/Modules/Compiler/HP-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/IAR-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake \
-  /usr/share/cmake/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Intel-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/MSVC-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/NVHPC-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/NVIDIA-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/OrangeC-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/PGI-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/PathScale-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/PellesC-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Renesas-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/SCO-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/TI-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/TIClang-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Tasking-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/Watcom-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/XL-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake \
-  /usr/share/cmake/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake \
   /usr/share/cmake/Modules/FindOpenGL.cmake \
   /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake \
   /usr/share/cmake/Modules/FindPackageMessage.cmake \
@@ -1007,19 +949,15 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
   /usr/share/cmake/Modules/GNUInstallDirs.cmake \
   /usr/share/cmake/Modules/Internal/CMakeCXXLinkerInformation.cmake \
   /usr/share/cmake/Modules/Internal/CMakeCommonLinkerInformation.cmake \
-  /usr/share/cmake/Modules/Internal/CMakeDetermineLinkerId.cmake \
-  /usr/share/cmake/Modules/Internal/CMakeInspectCXXLinker.cmake \
   /usr/share/cmake/Modules/Internal/CheckCompilerFlag.cmake \
   /usr/share/cmake/Modules/Internal/CheckFlagCommonConfig.cmake \
   /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake \
-  /usr/share/cmake/Modules/Internal/FeatureTesting.cmake \
   /usr/share/cmake/Modules/Linker/GNU-CXX.cmake \
   /usr/share/cmake/Modules/Linker/GNU.cmake \
   /usr/share/cmake/Modules/MacroAddFileDependencies.cmake \
   /usr/share/cmake/Modules/Platform/Linker/GNU.cmake \
   /usr/share/cmake/Modules/Platform/Linker/Linux-GNU-CXX.cmake \
   /usr/share/cmake/Modules/Platform/Linker/Linux-GNU.cmake \
-  /usr/share/cmake/Modules/Platform/Linux-Determine-CXX.cmake \
   /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake \
   /usr/share/cmake/Modules/Platform/Linux-GNU.cmake \
   /usr/share/cmake/Modules/Platform/Linux-Initialize.cmake \
@@ -1039,8 +977,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/share/cmake/Modules/Internal/CheckFlagCommonConfig.cmake:
 
-/usr/share/cmake/Modules/Internal/CMakeDetermineLinkerId.cmake:
-
 /usr/share/cmake/Modules/Internal/CMakeCommonLinkerInformation.cmake:
 
 /usr/share/cmake/Modules/Internal/CMakeCXXLinkerInformation.cmake:
@@ -1051,39 +987,9 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:
 
-/usr/share/cmake/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/Tasking-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/TI-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/Renesas-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/NVIDIA-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake:
-
 /usr/share/cmake/Modules/Compiler/GNU.cmake:
 
 /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake:
-
-/usr/share/cmake/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/Fujitsu-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/Diab-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/CrayClang-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/IAR-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/Clang-DetermineCompiler.cmake:
 
 /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake:
 
@@ -1091,25 +997,7 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/share/cmake/Modules/CheckCXXCompilerFlag.cmake:
 
-/usr/share/cmake/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake:
-
-/usr/share/cmake/Modules/Compiler/AppleClang-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/CMakeUnixFindMake.cmake:
-
-/usr/share/cmake/Modules/CMakeTestCompilerCommon.cmake:
-
 /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake:
-
-/usr/share/cmake/Modules/Compiler/Intel-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/CMakeSystem.cmake.in:
-
-/usr/share/cmake/Modules/CMakeParseLibraryArchitecture.cmake:
-
-/usr/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake:
-
-/usr/share/cmake/Modules/CMakeParseImplicitIncludeInfo.cmake:
 
 /usr/share/cmake/Modules/CMakeLanguageInformation.cmake:
 
@@ -1117,21 +1005,9 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake:
 
-/usr/share/cmake/Modules/CMakeDetermineCompilerSupport.cmake:
-
-/usr/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:
-
-/usr/share/cmake/Modules/CMakeDetermineCompiler.cmake:
-
 /usr/share/cmake/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake:
 
-/usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp:
-
-/usr/share/cmake/Modules/Compiler/GHS-DetermineCompiler.cmake:
-
 /usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsTargetsPrecheck.cmake:
-
-/usr/share/cmake/Modules/Compiler/Cray-DetermineCompiler.cmake:
 
 /usr/lib/cmake/Qt6WidgetsTools/Qt6WidgetsToolsDependencies.cmake:
 
@@ -1146,8 +1022,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/lib/cmake/Qt6Widgets/Qt6WidgetsPlugins.cmake:
 
 /usr/lib/cmake/Qt6Widgets/Qt6WidgetsMacros.cmake:
-
-/usr/share/cmake/Modules/Compiler/Borland-DetermineCompiler.cmake:
 
 /usr/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:
 
@@ -1211,10 +1085,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandWlShellIntegrationPluginTargets-relwithdebinfo.cmake:
 
-/usr/share/cmake/Modules/Compiler/OrangeC-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/Clang-DetermineCompilerInternal.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandWlShellIntegrationPluginConfig.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandIntegrationPluginTargetsPrecheck.cmake:
@@ -1239,8 +1109,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/lib/cmake/Qt6Gui/Qt6QVncIntegrationPluginAdditionalTargetInfo.cmake:
 
-/usr/share/cmake/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginTargets-relwithdebinfo.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QVirtualKeyboardPluginTargets-relwithdebinfo.cmake:
@@ -1257,15 +1125,11 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/lib/cmake/Qt6Gui/Qt6QTuioTouchPluginAdditionalTargetInfo.cmake:
 
-/usr/share/cmake/Modules/CMakeDetermineCompilerId.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QTsLibPluginTargetsPrecheck.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QTsLibPluginConfig.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QTiffPluginTargets.cmake:
-
-/usr/share/cmake/Modules/Compiler/Embarcadero-DetermineCompiler.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QTiffPluginConfig.cmake:
 
@@ -1287,8 +1151,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/lib/cmake/Qt6Gui/Qt6QSvgIconPluginTargets-relwithdebinfo.cmake:
 
-/usr/share/cmake/Modules/Compiler/Watcom-DetermineCompiler.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QSvgIconPluginConfig.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QSvgIconPluginAdditionalTargetInfo.cmake:
@@ -1302,8 +1164,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/lib/cmake/Qt6Gui/Qt6QPdfPluginConfig.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QOffscreenIntegrationPluginTargetsPrecheck.cmake:
-
-/usr/share/cmake/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QOffscreenIntegrationPluginConfig.cmake:
 
@@ -1321,8 +1181,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/lib/cmake/Qt6Gui/Qt6QMinimalEglIntegrationPluginTargets-relwithdebinfo.cmake:
 
-/usr/share/cmake/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QMinimalEglIntegrationPluginAdditionalTargetInfo.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QLinuxFbIntegrationPluginTargetsPrecheck.cmake:
@@ -1330,8 +1188,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/lib/cmake/Qt6Gui/Qt6QLinuxFbIntegrationPluginTargets-relwithdebinfo.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QLinuxFbIntegrationPluginConfig.cmake:
-
-/usr/share/cmake/Modules/Compiler/XL-CXX-DetermineCompiler.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QLinuxFbIntegrationPluginAdditionalTargetInfo.cmake:
 
@@ -1394,8 +1250,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/lib/cmake/Qt6Gui/Qt6QGifPluginTargets.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QGifPluginConfig.cmake:
-
-/usr/share/cmake/Modules/Compiler/GNU-FindBinUtils.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QGifPluginAdditionalTargetInfo.cmake:
 
@@ -1553,8 +1407,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/lib/cmake/Qt6/QtPublicSbomOpsHelpers.cmake:
 
-/usr/share/cmake/Modules/CMakeFindBinUtils.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QTiffPluginTargets-relwithdebinfo.cmake:
 
 /usr/lib/cmake/Qt6/QtPublicSbomExternalReferenceHelpers.cmake:
@@ -1576,8 +1428,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/lib/cmake/Qt6/QtPublicSbomDocumentNamespaceHelpers.cmake:
 
 /usr/lib/cmake/Qt6/QtPublicPluginHelpers_v2.cmake:
-
-/usr/share/cmake/Modules/Compiler/ARMClang-DetermineCompiler.cmake:
 
 /usr/lib/cmake/Qt6/QtPublicGitHelpers.cmake:
 
@@ -1619,7 +1469,9 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/include/sys/types.h:
 
-/usr/include/bits/types/struct_tm.h:
+/usr/include/sys/select.h:
+
+/usr/include/sys/cdefs.h:
 
 /usr/include/c++/16/format:
 
@@ -1651,8 +1503,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/include/qt6/QtCore/qmargins.h:
 
-/usr/share/cmake/Modules/Compiler/NVHPC-DetermineCompiler.cmake:
-
 /usr/include/linux/sched/types.h:
 
 /usr/include/c++/16/ctime:
@@ -1669,11 +1519,15 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/include/c++/16/functional:
 
+/home/milo/Projects/odexplorer-linux/src/exploration/ExplorationValue.hpp:
+
 /usr/include/c++/16/bits/version.h:
 
 /usr/include/c++/16/bits/unique_ptr.h:
 
 /usr/include/c++/16/bits/streambuf_iterator.h:
+
+/home/milo/Projects/odexplorer-linux/src/exploration/ExplorationValue.cpp:
 
 /usr/include/bits/types/__sigset_t.h:
 
@@ -1705,8 +1559,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/include/bits/locale.h:
 
-/usr/share/cmake/Modules/Compiler/HP-CXX-DetermineCompiler.cmake:
-
 /usr/include/c++/16/bits/stl_multimap.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QVncIntegrationPluginTargets-relwithdebinfo.cmake:
@@ -1716,10 +1568,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/include/qt6/QtCore/qhashfunctions.h:
 
 /usr/include/qt6/QtWidgets/qabstractspinbox.h:
-
-/usr/include/c++/16/bits/stl_relops.h:
-
-/usr/include/c++/16/bits/stl_iterator_base_types.h:
 
 /usr/include/time.h:
 
@@ -1742,8 +1590,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/lib/cmake/Qt6Gui/Qt6QIbusPlatformInputContextPluginTargetsPrecheck.cmake:
 
 /usr/include/c++/16/bits/stl_iterator_base_funcs.h:
-
-/usr/share/cmake/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake:
 
 /usr/include/c++/16/cassert:
 
@@ -1777,10 +1623,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/include/bits/stdint-least.h:
 
-/usr/include/c++/16/limits:
-
-/usr/share/cmake/Modules/Compiler/SCO-DetermineCompiler.cmake:
-
 /usr/include/c++/16/bits/align.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QXcbIntegrationPluginTargets-relwithdebinfo.cmake:
@@ -1798,8 +1640,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/include/c++/16/bits/ranges_algobase.h:
 
 /usr/include/c++/16/bits/postypes.h:
-
-/usr/share/cmake/Modules/Platform/Linux-Determine-CXX.cmake:
 
 /usr/include/c++/16/bits/parse_numbers.h:
 
@@ -1844,8 +1684,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/include/qt6/QtCore/qyieldcpu.h:
 
 /usr/include/c++/16/bits/ios_base.h:
-
-/usr/share/cmake/Modules/Internal/FeatureTesting.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QXdgDesktopPortalThemePluginTargets-relwithdebinfo.cmake:
 
@@ -1897,17 +1735,9 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/include/c++/16/tr1/exp_integral.tcc:
 
-/usr/include/c++/16/bits/locale_classes.tcc:
+/usr/share/cmake/Modules/Linker/GNU-CXX.cmake:
 
-/usr/include/bits/types/struct_timeval.h:
-
-/usr/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake:
-
-/home/milo/Projects/odexplorer-linux/src/ui/MainWindow.cpp:
-
-/usr/include/c++/16/pstl/pstl_config.h:
-
-/usr/include/qt6/QtWidgets/qabstractitemview.h:
+/usr/include/c++/16/bits/cxxabi_init_exception.h:
 
 /usr/include/bits/types/error_t.h:
 
@@ -1943,8 +1773,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 
 /usr/include/c++/16/ext/aligned_buffer.h:
 
-/usr/include/sys/select.h:
-
 /usr/include/bits/types/cookie_io_functions_t.h:
 
 /usr/include/c++/16/cctype:
@@ -1962,8 +1790,6 @@ odexplorer_autogen/timestamp: /home/milo/Projects/odexplorer-linux/CMakeLists.tx
 /usr/include/bits/endian.h:
 
 odexplorer_autogen/moc_predefs.h:
-
-/usr/share/cmake/Modules/Compiler/PellesC-DetermineCompiler.cmake:
 
 /usr/include/c++/16/filesystem:
 
@@ -2039,26 +1865,6 @@ odexplorer_autogen/moc_predefs.h:
 
 /usr/include/asm/posix_types_64.h:
 
-/usr/include/bits/endianness.h:
-
-/usr/include/c++/16/compare:
-
-/usr/lib/cmake/Qt6/Qt6VersionlessAliasTargets.cmake:
-
-/usr/include/qt6/QtWidgets/qwidget.h:
-
-/usr/lib/cmake/Qt6Gui/Qt6QEglFSEmulatorIntegrationPluginTargets.cmake:
-
-/usr/include/c++/16/bits/ranges_cmp.h:
-
-CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
-
-/usr/share/cmake/Modules/Compiler/TIClang-DetermineCompiler.cmake:
-
-/usr/include/c++/16/ext/type_traits.h:
-
-/usr/include/bits/uio_lim.h:
-
 /usr/lib/cmake/Qt6Gui/Qt6QMngPluginTargets-relwithdebinfo.cmake:
 
 /usr/include/c++/16/bits/iterator_concepts.h:
@@ -2073,29 +1879,15 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 
 /usr/include/bits/local_lim.h:
 
-/usr/share/cmake/Modules/Compiler/PathScale-DetermineCompiler.cmake:
-
-/usr/share/cmake/Modules/CMakeCXXCompiler.cmake.in:
-
 /usr/lib/cmake/Qt6Gui/Qt6QEglFSEmulatorIntegrationPluginTargets-relwithdebinfo.cmake:
 
 /usr/include/qt6/QtCore/qtcoreexports.h:
-
-/usr/include/bits/stdio_lim.h:
-
-/usr/include/c++/16/bits/stream_iterator.h:
-
-/usr/include/bits/types/__mbstate_t.h:
 
 /usr/include/c++/16/bits/chrono_io.h:
 
 /usr/include/c++/16/bits/exception.h:
 
 /usr/include/c++/16/bits/std_function.h:
-
-/usr/include/c++/16/iterator:
-
-/usr/include/endian.h:
 
 /usr/include/qt6/QtCore/qitemselectionmodel.h:
 
@@ -2119,18 +1911,6 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 
 /home/milo/Projects/odexplorer-linux/src/journal/JournalLocator.hpp:
 
-/usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginAdditionalTargetInfo.cmake:
-
-/usr/lib/cmake/Qt6/QtPublicSbomGenerationCycloneDXHelpers.cmake:
-
-/usr/include/c++/16/cerrno:
-
-/usr/include/c++/16/bits/stl_tree.h:
-
-/usr/include/c++/16/bits/istream.tcc:
-
-/usr/include/qt6/QtCore/qtcore-config.h:
-
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandWlShellIntegrationPluginAdditionalTargetInfo.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginConfig.cmake:
@@ -2141,7 +1921,13 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 
 /usr/include/qt6/QtCore/QTimer:
 
-/usr/share/cmake/Modules/CMakeTestCXXCompiler.cmake:
+/home/milo/Projects/odexplorer-linux/src/ui/MainWindow.cpp:
+
+/usr/include/bits/types/struct_timeval.h:
+
+/usr/include/c++/16/pstl/pstl_config.h:
+
+/usr/include/qt6/QtWidgets/qabstractitemview.h:
 
 /usr/include/c++/16/tr1/riemann_zeta.tcc:
 
@@ -2155,6 +1941,28 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 
 /usr/include/qt6/QtCore/qxptype_traits.h:
 
+/usr/include/bits/endianness.h:
+
+/usr/include/c++/16/compare:
+
+/usr/lib/cmake/Qt6/Qt6VersionlessAliasTargets.cmake:
+
+/usr/include/qt6/QtWidgets/qwidget.h:
+
+/usr/lib/cmake/Qt6Gui/Qt6QEglFSEmulatorIntegrationPluginTargets.cmake:
+
+/usr/include/c++/16/bits/ranges_cmp.h:
+
+CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
+
+/usr/include/c++/16/ext/type_traits.h:
+
+/usr/include/bits/uio_lim.h:
+
+/home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.hpp:
+
+/usr/include/asm/bitsperlong.h:
+
 /usr/lib/cmake/Qt6/QtPublicSbomSystemDepHelpers.cmake:
 
 /usr/include/c++/16/bits/new_allocator.h:
@@ -2162,10 +1970,6 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 /usr/include/c++/16/map:
 
 /home/milo/Projects/odexplorer-linux/src/journal/StatusReader.cpp:
-
-/home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.hpp:
-
-/usr/include/asm/bitsperlong.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QTsLibPluginTargets-relwithdebinfo.cmake:
 
@@ -2201,8 +2005,6 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 
 /usr/include/qt6/QtCore/qtmetamacros.h:
 
-/usr/share/cmake/Modules/Internal/CMakeInspectCXXLinker.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QXcbGlxIntegrationPluginTargets-relwithdebinfo.cmake:
 
 /usr/include/c++/16/istream:
@@ -2231,11 +2033,27 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 
 /usr/include/bits/posix2_lim.h:
 
-/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.hpp:
-
 /usr/include/bits/thread-shared-types.h:
 
 /home/milo/Projects/odexplorer-linux/src/model/GameState.hpp:
+
+/home/milo/Projects/odexplorer-linux/src/journal/JournalWatcher.hpp:
+
+/usr/include/c++/16/bits/stl_iterator_base_types.h:
+
+/usr/include/c++/16/bits/stl_relops.h:
+
+/usr/include/c++/16/bits/cxxabi_forced.h:
+
+/usr/include/c++/16/cwctype:
+
+/usr/include/bits/types/struct_sched_param.h:
+
+/usr/lib/cmake/Qt6Gui/Qt6DmaBufServerBufferPluginTargets-relwithdebinfo.cmake:
+
+/usr/include/bits/waitflags.h:
+
+/usr/include/qt6/QtCore/qcompilerdetection.h:
 
 /usr/include/c++/16/bits/stl_multiset.h:
 
@@ -2246,6 +2064,26 @@ CMakeFiles/4.4.0/CMakeCXXCompiler.cmake:
 /usr/include/c++/16/clocale:
 
 /usr/include/c++/16/bits/stl_map.h:
+
+/usr/include/c++/16/bits/stream_iterator.h:
+
+/usr/include/bits/types/__mbstate_t.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/c++/16/bits/locale_classes.tcc:
+
+/usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginAdditionalTargetInfo.cmake:
+
+/usr/lib/cmake/Qt6/QtPublicSbomGenerationCycloneDXHelpers.cmake:
+
+/usr/include/c++/16/cerrno:
+
+/usr/include/c++/16/bits/stl_tree.h:
+
+/usr/include/c++/16/bits/istream.tcc:
+
+/usr/include/qt6/QtCore/qtcore-config.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QEvdevMousePluginTargets-relwithdebinfo.cmake:
 
@@ -2309,8 +2147,6 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 
 /usr/include/bits/types/__fpos64_t.h:
 
-/usr/share/cmake/Modules/Compiler/ADSP-DetermineCompiler.cmake:
-
 /usr/include/c++/16/string_view:
 
 /usr/include/bits/types/__locale_t.h:
@@ -2337,12 +2173,6 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 
 /usr/include/bits/types/sigset_t.h:
 
-/usr/include/c++/16/cwctype:
-
-/usr/share/cmake/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake:
-
-/usr/include/c++/16/bits/cxxabi_forced.h:
-
 /usr/include/c++/16/bits/std_abs.h:
 
 /usr/lib/cmake/Qt6/Qt6ConfigVersionImpl.cmake:
@@ -2359,15 +2189,15 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 
 /usr/include/qt6/QtCore/q20type_traits.h:
 
-/usr/lib/cmake/Qt6Gui/Qt6DmaBufServerBufferPluginTargets-relwithdebinfo.cmake:
-
-/usr/include/bits/waitflags.h:
-
-/usr/include/qt6/QtCore/qcompilerdetection.h:
-
 /usr/include/bits/types/struct_timespec.h:
 
 /usr/include/qt6/QtCore/qiterable.h:
+
+/usr/include/bits/types/struct_tm.h:
+
+/usr/include/endian.h:
+
+/usr/include/c++/16/iterator:
 
 /usr/include/bits/timesize.h:
 
@@ -2499,11 +2329,7 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 
 /usr/include/c++/16/bits/concept_check.h:
 
-/usr/include/bits/types/struct_sched_param.h:
-
-/usr/share/cmake/Modules/Linker/GNU-CXX.cmake:
-
-/usr/include/c++/16/bits/cxxabi_init_exception.h:
+/usr/include/c++/16/limits:
 
 /usr/lib/cmake/Qt6Gui/Qt6QJpegPluginTargets-relwithdebinfo.cmake:
 
@@ -2647,8 +2473,6 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 
 /usr/include/qt6/QtCore/qatomic.h:
 
-/usr/share/cmake/Modules/Compiler/ARMCC-DetermineCompiler.cmake:
-
 /usr/include/qt6/QtCore/qtypes.h:
 
 /usr/include/qt6/QtCore/qtconfiginclude.h:
@@ -2748,8 +2572,6 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 /usr/include/qt6/QtCore/qchar.h:
 
 /usr/include/qt6/QtCore/qcompare.h:
-
-/usr/share/cmake/Modules/CMakeCompilerIdDetection.cmake:
 
 /usr/include/qt6/QtCore/qcomparehelpers.h:
 
@@ -2857,8 +2679,6 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 
 /usr/include/qt6/QtCore/qmetatype.h:
 
-/usr/share/cmake/Modules/CMakeDetermineSystem.cmake:
-
 /usr/include/qt6/QtCore/qnamespace.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QIbusPlatformInputContextPluginTargets.cmake:
@@ -2940,8 +2760,6 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 /usr/include/qt6/QtCore/qtdeprecationmarkers.h:
 
 /usr/include/qt6/QtCore/qtenvironmentvariables.h:
-
-/usr/share/cmake/Modules/Compiler/MSVC-DetermineCompiler.cmake:
 
 /usr/include/qt6/QtCore/qtextstream.h:
 
@@ -3027,8 +2845,6 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 
 /usr/include/qt6/QtGui/qtguiglobal.h:
 
-/usr/share/cmake/Modules/Compiler/PGI-DetermineCompiler.cmake:
-
 /usr/lib/cmake/Qt6Gui/Qt6QEvdevTabletPluginTargetsPrecheck.cmake:
 
 /usr/include/qt6/QtGui/qvalidator.h:
@@ -3072,5 +2888,3 @@ CMakeFiles/4.4.0/CMakeSystem.cmake:
 /usr/include/qt6/QtWidgets/qtwidgetsglobal.h:
 
 /usr/include/string.h:
-
-/usr/include/sys/cdefs.h:

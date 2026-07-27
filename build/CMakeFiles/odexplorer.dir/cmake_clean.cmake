@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o.d"
   "CMakeFiles/odexplorer.dir/src/app/main.cpp.o"
   "CMakeFiles/odexplorer.dir/src/app/main.cpp.o.d"
+  "CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o"
+  "CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o.d"
   "CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o"
   "CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o.d"
   "CMakeFiles/odexplorer.dir/src/journal/JournalLocator.cpp.o"

@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 #include "../journal/EventFormatter.hpp"
 #include "../journal/JournalLocator.hpp"
+#include "../exploration/ExplorationValue.hpp"
 #include <QAbstractItemView>
 #include <QHeaderView>
 #include <QJsonArray>
@@ -239,31 +240,28 @@ void MainWindow::updateJournal() {
             obj["TerraformState"].toString() == "Terraformable";
 
         body.type = planet;
-        body.landable = obj["Landable"].toBool();
-        body.atmosphere = obj["Atmosphere"].toString();
-        body.volcanism = obj["Volcanism"].toString();
-        body.gravity = obj["SurfaceGravity"].toDouble();
-        body.surfaceTemperature = obj["SurfaceTemperature"].toDouble();
         body.terraformable = terraformable;
+        body.landable = obj["Landable"].toBool();
+        body.radius = obj["Radius"].toDouble();
         body.gravity = obj["SurfaceGravity"].toDouble();
         body.temperature = obj["SurfaceTemperature"].toDouble();
         body.atmosphere = obj["AtmosphereType"].toString();
         body.volcanism = obj["Volcanism"].toString();
+        body.massEM = obj["MassEM"].toDouble();
+        body.distanceFromArrivalLS = obj["DistanceFromArrivalLS"].toDouble();
+        body.firstDiscovery = !obj["WasDiscovered"].toBool();
+        body.firstMapped = !obj["WasMapped"].toBool();
 
-        if (planet == "Earthlike body") {
+        body.estimatedValue = ExplorationValue::calculateBodyValue(body);
+
+        if (planet == "Earthlike body")
           gameState_.earthLikes++;
-          body.earthLike = true;
-        }
 
-        if (planet == "Water world") {
+        if (planet == "Water world")
           gameState_.waterWorlds++;
-          body.waterWorld = true;
-        }
 
-        if (planet == "Ammonia world") {
+        if (planet == "Ammonia world")
           gameState_.ammoniaWorlds++;
-          body.ammoniaWorld = true;
-        }
 
         if (terraformable)
           gameState_.terraformables++;
@@ -282,50 +280,60 @@ void MainWindow::updateJournal() {
       }
 
       if (!found)
-        bool found = false;
-
-      for (auto &existing : gameState_.cartographicBodies) {
-        if (existing.name == body.name) {
-          existing = body;
-          found = true;
-          break;
-        }
-      }
-
-      if (!found)
         gameState_.cartographicBodies.append(body);
     }
 
     else if (event == "SAAScanComplete") {
       gameState_.mappedBodies++;
 
-      QString mappedBody = obj["BodyName"].toString();
+      const QString bodyName = obj["BodyName"].toString();
 
       for (auto &body : gameState_.cartographicBodies) {
-        if (body.name == mappedBody) {
-          body.mapped = true;
-          break;
-        }
+        if (body.name != bodyName)
+          continue;
+
+        body.mapped = true;
+
+        if (obj.contains("EfficiencyTarget"))
+          body.efficiencyTarget = obj["EfficiencyTarget"].toInt();
+
+        if (obj.contains("ProbesUsed"))
+          body.probesUsed = obj["ProbesUsed"].toInt();
+
+        body.efficiencyBonus = obj["EfficiencyTargetAchieved"].toBool();
+
+        body.estimatedValue = ExplorationValue::calculateBodyValue(body);
+
+        break;
       }
     }
 
     else if (event == "FSSBodySignals") {
-      QJsonArray signalArray = obj["Signals"].toArray();
+      const QString bodyName = obj["BodyName"].toString();
 
-      for (const QJsonValue &value : signalArray) {
-        QJsonObject signal = value.toObject();
+      for (auto &body : gameState_.cartographicBodies) {
+        if (body.name != bodyName)
+          continue;
 
-        if (signal["Type"].toString() == "$SAA_SignalType_Biological;") {
-          gameState_.biologicalSignals += signal["Count"].toInt();
-          QString bodyName = obj["BodyName"].toString();
+        body.biologicalSignals = 0;
 
-          for (auto &body : gameState_.cartographicBodies) {
-            if (body.name == bodyName) {
-              body.biologicalSignals = signal["Count"].toInt();
-              break;
-            }
+        if (obj.contains("Signals")) {
+          for (const auto &value : obj["Signals"].toArray()) {
+            const auto signal = value.toObject();
+
+            const QString type = signal["Type"].toString();
+            const int count = signal["Count"].toInt();
+
+            if (type.contains("Biological"))
+              body.biologicalSignals += count;
           }
         }
+        gameState_.biologicalSignals = 0;
+
+        for (const auto &b : gameState_.cartographicBodies)
+          gameState_.biologicalSignals += b.biologicalSignals;
+        
+        break;
       }
     }
 
@@ -449,9 +457,8 @@ void MainWindow::onCartographicBodySelected(int row, int) {
   bodyTerraformableLabel_->setText(
       QString("Terraformable: %1").arg(body.terraformable ? "Yes" : "No"));
 
-  bodyValueLabel_->setText(
-      QString("Estimated Value: %1 Cr").arg(QLocale().toString(body.value)));
-
+  bodyValueLabel_->setText(QString("Estimated Value: %1 Cr")
+                               .arg(QLocale().toString(body.estimatedValue)));
   bodyGravityLabel_->setText(
       QString("Gravity: %1 G").arg(body.gravity / 9.81, 0, 'f', 2));
 
@@ -469,14 +476,16 @@ void MainWindow::onCartographicBodySelected(int row, int) {
       QString("Landable: %1").arg(body.landable ? "Yes" : "No"));
 
   bodyGravityLabel_->setText(
-      QString("Gravity: %1 g").arg(body.gravity / 9.80665, 0, 'f', 2));
+      QString("Gravity: %1 G").arg(body.gravity / 9.80665, 0, 'f', 2));
 
   bodyTemperatureLabel_->setText(
-      QString("Temperature: %1 K").arg(body.surfaceTemperature, 0, 'f', 0));
+      QString("Temperature: %1 K").arg(body.temperature, 0, 'f', 0));
 
   bodyAtmosphereLabel_->setText(
-      "Atmosphere: " + (body.atmosphere.isEmpty() ? "None" : body.atmosphere));
+      QString("Atmosphere: %1")
+          .arg(body.atmosphere.isEmpty() ? "None" : body.atmosphere));
 
   bodyVolcanismLabel_->setText(
-      "Volcanism: " + (body.volcanism.isEmpty() ? "None" : body.volcanism));
+      QString("Volcanism: %1")
+          .arg(body.volcanism.isEmpty() ? "None" : body.volcanism));
 }

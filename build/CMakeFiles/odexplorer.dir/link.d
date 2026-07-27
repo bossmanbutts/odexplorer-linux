@@ -11,6 +11,7 @@ odexplorer: \
   CMakeFiles/odexplorer.dir/src/journal/StatusReader.cpp.o \
   CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o \
   CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o \
+  CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o \
   /usr/lib/libQt6Widgets.so.6.11.1 \
   /usr/lib/libQt6Gui.so.6.11.1 \
   /usr/lib/libGLX.so \
@@ -114,6 +115,8 @@ CMakeFiles/odexplorer.dir/src/journal/StatusReader.cpp.o:
 CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o:
 
 CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o:
+
+CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o:
 
 /usr/lib/libQt6Widgets.so.6.11.1:
 

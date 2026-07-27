@@ -203,6 +203,30 @@ src/app/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/odexplorer.dir/build.make CMakeFiles/odexplorer.dir/src/app/main.cpp.s
 .PHONY : src/app/main.cpp.s
 
+src/exploration/ExplorationValue.o: src/exploration/ExplorationValue.cpp.o
+.PHONY : src/exploration/ExplorationValue.o
+
+# target to build an object file
+src/exploration/ExplorationValue.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/odexplorer.dir/build.make CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o
+.PHONY : src/exploration/ExplorationValue.cpp.o
+
+src/exploration/ExplorationValue.i: src/exploration/ExplorationValue.cpp.i
+.PHONY : src/exploration/ExplorationValue.i
+
+# target to preprocess a source file
+src/exploration/ExplorationValue.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/odexplorer.dir/build.make CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.i
+.PHONY : src/exploration/ExplorationValue.cpp.i
+
+src/exploration/ExplorationValue.s: src/exploration/ExplorationValue.cpp.s
+.PHONY : src/exploration/ExplorationValue.s
+
+# target to generate assembly for a file
+src/exploration/ExplorationValue.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/odexplorer.dir/build.make CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.s
+.PHONY : src/exploration/ExplorationValue.cpp.s
+
 src/journal/EventFormatter.o: src/journal/EventFormatter.cpp.o
 .PHONY : src/journal/EventFormatter.o
 
@@ -388,6 +412,9 @@ help:
 	@echo "... src/app/main.o"
 	@echo "... src/app/main.i"
 	@echo "... src/app/main.s"
+	@echo "... src/exploration/ExplorationValue.o"
+	@echo "... src/exploration/ExplorationValue.i"
+	@echo "... src/exploration/ExplorationValue.s"
 	@echo "... src/journal/EventFormatter.o"
 	@echo "... src/journal/EventFormatter.i"
 	@echo "... src/journal/EventFormatter.s"
