@@ -399,14 +399,15 @@ CMakeFiles/odexplorer.dir/src/ui/MainWindow.cpp.o: \
  /home/milo/Projects/odexplorer-linux/src/ui/../model/GameState.hpp \
  /usr/include/qt6/QtCore/QString \
  /home/milo/Projects/odexplorer-linux/src/ui/../model/CartographicBody.hpp \
- /usr/include/qt6/QtCore/QVector /usr/include/qt6/QtCore/qvector.h \
+ /usr/include/qt6/QtCore/QStringList /usr/include/qt6/QtCore/QVector \
+ /usr/include/qt6/QtCore/qvector.h \
  /home/milo/Projects/odexplorer-linux/src/ui/../journal/JournalReader.hpp \
  /usr/include/qt6/QtCore/QFile /usr/include/qt6/QtCore/qfile.h \
  /usr/include/qt6/QtCore/qfiledevice.h /usr/include/c++/16/filesystem \
  /usr/include/c++/16/bits/fs_fwd.h /usr/include/c++/16/bits/fs_path.h \
  /usr/include/c++/16/iomanip /usr/include/c++/16/bits/quoted_string.h \
  /usr/include/c++/16/codecvt /usr/include/c++/16/bits/fs_dir.h \
- /usr/include/c++/16/bits/fs_ops.h /usr/include/qt6/QtCore/QStringList \
+ /usr/include/c++/16/bits/fs_ops.h \
  /home/milo/Projects/odexplorer-linux/src/ui/../journal/StatusReader.hpp \
  /home/milo/Projects/odexplorer-linux/src/ui/../journal/EventFormatter.hpp \
  /usr/include/qt6/QtCore/QJsonObject \

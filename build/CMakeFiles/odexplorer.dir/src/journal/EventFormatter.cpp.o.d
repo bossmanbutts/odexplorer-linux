@@ -350,4 +350,5 @@ CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o: \
  /usr/include/qt6/QtCore/QString \
  /home/milo/Projects/odexplorer-linux/src/journal/../model/GameState.hpp \
  /home/milo/Projects/odexplorer-linux/src/journal/../model/CartographicBody.hpp \
- /usr/include/qt6/QtCore/QVector /usr/include/qt6/QtCore/qvector.h
+ /usr/include/qt6/QtCore/QStringList /usr/include/qt6/QtCore/QVector \
+ /usr/include/qt6/QtCore/qvector.h

@@ -272,4 +272,13 @@ CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o: \
  /usr/include/qt6/QtCore/qstringtokenizer.h \
  /usr/include/qt6/QtCore/qstringbuilder.h \
  /usr/include/qt6/QtCore/qstringconverter.h \
- /usr/include/qt6/QtCore/qstringconverter_base.h
+ /usr/include/qt6/QtCore/qstringconverter_base.h \
+ /usr/include/qt6/QtCore/QStringList \
+ /usr/include/qt6/QtCore/qstringlist.h /usr/include/qt6/QtCore/qlist.h \
+ /usr/include/qt6/QtCore/qhashfunctions.h /usr/include/c++/16/numeric \
+ /usr/include/c++/16/bits/stl_numeric.h \
+ /usr/include/c++/16/pstl/glue_numeric_defs.h \
+ /usr/include/qt6/QtCore/qiterator.h /usr/include/c++/16/ranges \
+ /usr/include/c++/16/span /usr/include/qt6/QtCore/qbytearraylist.h \
+ /usr/include/qt6/QtCore/qalgorithms.h /usr/include/qt6/QtCore/q20bit.h \
+ /usr/include/qt6/QtCore/qstringmatcher.h

@@ -1337,6 +1337,7 @@ CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o: /home/milo/Pro
   /usr/include/c++/16/bits/stl_iterator.h \
   /usr/include/c++/16/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/16/bits/stl_iterator_base_types.h \
+  /usr/include/c++/16/bits/stl_numeric.h \
   /usr/include/c++/16/bits/stl_pair.h \
   /usr/include/c++/16/bits/stl_raw_storage_iter.h \
   /usr/include/c++/16/bits/stl_relops.h \
@@ -1388,11 +1389,15 @@ CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o: /home/milo/Pro
   /usr/include/c++/16/memory \
   /usr/include/c++/16/new \
   /usr/include/c++/16/numbers \
+  /usr/include/c++/16/numeric \
   /usr/include/c++/16/optional \
   /usr/include/c++/16/pstl/execution_defs.h \
   /usr/include/c++/16/pstl/glue_algorithm_defs.h \
   /usr/include/c++/16/pstl/glue_memory_defs.h \
+  /usr/include/c++/16/pstl/glue_numeric_defs.h \
   /usr/include/c++/16/pstl/pstl_config.h \
+  /usr/include/c++/16/ranges \
+  /usr/include/c++/16/span \
   /usr/include/c++/16/stdexcept \
   /usr/include/c++/16/stdlib.h \
   /usr/include/c++/16/streambuf \
@@ -1446,11 +1451,14 @@ CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o: /home/milo/Pro
   /usr/include/math.h \
   /usr/include/pthread.h \
   /usr/include/qt6/QtCore/QString \
+  /usr/include/qt6/QtCore/QStringList \
   /usr/include/qt6/QtCore/q17memory.h \
+  /usr/include/qt6/QtCore/q20bit.h \
   /usr/include/qt6/QtCore/q20functional.h \
   /usr/include/qt6/QtCore/q20memory.h \
   /usr/include/qt6/QtCore/q20type_traits.h \
   /usr/include/qt6/QtCore/q23type_traits.h \
+  /usr/include/qt6/QtCore/qalgorithms.h \
   /usr/include/qt6/QtCore/qanystringview.h \
   /usr/include/qt6/QtCore/qarraydata.h \
   /usr/include/qt6/QtCore/qarraydataops.h \
@@ -1461,6 +1469,7 @@ CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o: /home/milo/Pro
   /usr/include/qt6/QtCore/qbasicatomic.h \
   /usr/include/qt6/QtCore/qbytearray.h \
   /usr/include/qt6/QtCore/qbytearrayalgorithms.h \
+  /usr/include/qt6/QtCore/qbytearraylist.h \
   /usr/include/qt6/QtCore/qbytearrayview.h \
   /usr/include/qt6/QtCore/qchar.h \
   /usr/include/qt6/QtCore/qcompare.h \
@@ -1479,7 +1488,10 @@ CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o: /home/milo/Pro
   /usr/include/qt6/QtCore/qgenericatomic.h \
   /usr/include/qt6/QtCore/qglobal.h \
   /usr/include/qt6/QtCore/qglobalstatic.h \
+  /usr/include/qt6/QtCore/qhashfunctions.h \
+  /usr/include/qt6/QtCore/qiterator.h \
   /usr/include/qt6/QtCore/qlatin1stringview.h \
+  /usr/include/qt6/QtCore/qlist.h \
   /usr/include/qt6/QtCore/qlogging.h \
   /usr/include/qt6/QtCore/qmalloc.h \
   /usr/include/qt6/QtCore/qminmax.h \
@@ -1496,6 +1508,8 @@ CMakeFiles/odexplorer.dir/src/exploration/ExplorationValue.cpp.o: /home/milo/Pro
   /usr/include/qt6/QtCore/qstringconverter.h \
   /usr/include/qt6/QtCore/qstringconverter_base.h \
   /usr/include/qt6/QtCore/qstringfwd.h \
+  /usr/include/qt6/QtCore/qstringlist.h \
+  /usr/include/qt6/QtCore/qstringmatcher.h \
   /usr/include/qt6/QtCore/qstringtokenizer.h \
   /usr/include/qt6/QtCore/qstringview.h \
   /usr/include/qt6/QtCore/qswap.h \
@@ -1878,6 +1892,7 @@ CMakeFiles/odexplorer.dir/src/journal/EventFormatter.cpp.o: /home/milo/Projects/
   /usr/include/pthread.h \
   /usr/include/qt6/QtCore/QJsonObject \
   /usr/include/qt6/QtCore/QString \
+  /usr/include/qt6/QtCore/QStringList \
   /usr/include/qt6/QtCore/QVector \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20bit.h \
@@ -3775,6 +3790,7 @@ CMakeFiles/odexplorer.dir/src/journal/StatusReader.cpp.o: /home/milo/Projects/od
   /usr/include/qt6/QtCore/QJsonDocument \
   /usr/include/qt6/QtCore/QJsonObject \
   /usr/include/qt6/QtCore/QString \
+  /usr/include/qt6/QtCore/QStringList \
   /usr/include/qt6/QtCore/QVector \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20bit.h \
@@ -4223,6 +4239,7 @@ CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o: /home/milo/Projects/odexplo
   /usr/include/math.h \
   /usr/include/pthread.h \
   /usr/include/qt6/QtCore/QString \
+  /usr/include/qt6/QtCore/QStringList \
   /usr/include/qt6/QtCore/QVector \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20bit.h \

@@ -72,8 +72,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   auto *cartoSplit = new QHBoxLayout;
 
   cartoTable_ = new QTableWidget(this);
-  cartoTable_->setColumnCount(3);
-  cartoTable_->setHorizontalHeaderLabels({"Body", "Type", "Mapped"});
+  cartoTable_->setColumnCount(6);
+  cartoTable_->setHorizontalHeaderLabels(
+      {"Body", "Type", "Mapped", "Bio", "Scan Value", "Exobio Value"});
   cartoTable_->horizontalHeader()->setStretchLastSection(true);
   cartoTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
   cartoTable_->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -91,34 +92,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   bodyMappedLabel_ = new QLabel("Mapped:");
   bodyTerraformableLabel_ = new QLabel("Terraformable:");
   bodyValueLabel_ = new QLabel("Estimated Value:");
+  cartoDetailsLabel_ = new QLabel("Exploration: 0 Cr\nExobiology: 0 Cr");
+  bodyLandableLabel_ = new QLabel("Landable:");
   bodyGravityLabel_ = new QLabel("Gravity:");
   bodyTemperatureLabel_ = new QLabel("Temperature:");
   bodyAtmosphereLabel_ = new QLabel("Atmosphere:");
   bodyVolcanismLabel_ = new QLabel("Volcanism:");
   bodyBioSignalsLabel_ = new QLabel("Biological Signals:");
-  bodyLandableLabel_ = new QLabel;
-  bodyGravityLabel_ = new QLabel;
-  bodyTemperatureLabel_ = new QLabel;
-  bodyAtmosphereLabel_ = new QLabel;
-  bodyVolcanismLabel_ = new QLabel;
 
-  detailsLayout->addWidget(bodyLandableLabel_);
-  detailsLayout->addWidget(bodyGravityLabel_);
-  detailsLayout->addWidget(bodyTemperatureLabel_);
-  detailsLayout->addWidget(bodyAtmosphereLabel_);
-  detailsLayout->addWidget(bodyVolcanismLabel_);
   detailsLayout->addWidget(bodyNameLabel_);
   detailsLayout->addWidget(bodyTypeLabel_);
   detailsLayout->addWidget(bodyMappedLabel_);
   detailsLayout->addWidget(bodyTerraformableLabel_);
   detailsLayout->addWidget(bodyValueLabel_);
+  detailsLayout->addWidget(cartoDetailsLabel_);
+  detailsLayout->addWidget(bodyLandableLabel_);
   detailsLayout->addWidget(bodyGravityLabel_);
   detailsLayout->addWidget(bodyTemperatureLabel_);
   detailsLayout->addWidget(bodyAtmosphereLabel_);
   detailsLayout->addWidget(bodyVolcanismLabel_);
   detailsLayout->addWidget(bodyBioSignalsLabel_);
   detailsLayout->addStretch();
-
   cartoSplit->addWidget(cartoTable_, 3);
   cartoSplit->addWidget(detailsWidget, 1);
 
@@ -267,6 +261,11 @@ void MainWindow::updateJournal() {
           gameState_.terraformables++;
       } else if (obj.contains("StarType")) {
         body.type = obj["StarType"].toString();
+
+        body.firstDiscovery = !obj["WasDiscovered"].toBool();
+        body.firstMapped = !obj["WasMapped"].toBool();
+
+        body.estimatedValue = ExplorationValue::calculateBodyValue(body);
       }
 
       bool found = false;
@@ -316,6 +315,7 @@ void MainWindow::updateJournal() {
           continue;
 
         body.biologicalSignals = 0;
+        body.genera.clear();
 
         if (obj.contains("Signals")) {
           for (const auto &value : obj["Signals"].toArray()) {
@@ -324,15 +324,28 @@ void MainWindow::updateJournal() {
             const QString type = signal["Type"].toString();
             const int count = signal["Count"].toInt();
 
-            if (type.contains("Biological"))
-              body.biologicalSignals += count;
+            if (!type.contains("Biological"))
+              continue;
+
+            body.biologicalSignals += count;
+
+            QString genus = type.section('_', -1);
+
+            if (!body.genera.contains(genus))
+              body.genera.append(genus);
           }
         }
+
+        body.genusCount = body.genera.size();
+
+        body.estimatedExobiologyValue =
+            ExplorationValue::calculateExobiologyValue(body);
+
         gameState_.biologicalSignals = 0;
 
         for (const auto &b : gameState_.cartographicBodies)
           gameState_.biologicalSignals += b.biologicalSignals;
-        
+
         break;
       }
     }
@@ -445,11 +458,14 @@ void MainWindow::refreshCartographyTable() {
 }
 
 void MainWindow::onCartographicBodySelected(int row, int) {
+  if (row < 0 || row >= gameState_.cartographicBodies.size())
+    return;
+
   const auto &body = gameState_.cartographicBodies[row];
 
   bodyNameLabel_->setText(body.name);
 
-  bodyTypeLabel_->setText("Type: " + body.type);
+  bodyTypeLabel_->setText(QString("Type: %1").arg(body.type));
 
   bodyMappedLabel_->setText(
       QString("Mapped: %1").arg(body.mapped ? "Yes" : "No"));
@@ -459,18 +475,11 @@ void MainWindow::onCartographicBodySelected(int row, int) {
 
   bodyValueLabel_->setText(QString("Estimated Value: %1 Cr")
                                .arg(QLocale().toString(body.estimatedValue)));
-  bodyGravityLabel_->setText(
-      QString("Gravity: %1 G").arg(body.gravity / 9.81, 0, 'f', 2));
 
-  bodyTemperatureLabel_->setText(
-      QString("Temperature: %1 K").arg(body.temperature, 0, 'f', 0));
-
-  bodyAtmosphereLabel_->setText("Atmosphere: " + body.atmosphere);
-
-  bodyVolcanismLabel_->setText("Volcanism: " + body.volcanism);
-
-  bodyBioSignalsLabel_->setText(
-      QString("Biological Signals: %1").arg(body.biologicalSignals));
+  cartoDetailsLabel_->setText(
+      QString("Exploration: %1 Cr\nExobiology: %2 Cr")
+          .arg(QLocale().toString(body.estimatedValue))
+          .arg(QLocale().toString(body.estimatedExobiologyValue)));
 
   bodyLandableLabel_->setText(
       QString("Landable: %1").arg(body.landable ? "Yes" : "No"));
@@ -488,4 +497,7 @@ void MainWindow::onCartographicBodySelected(int row, int) {
   bodyVolcanismLabel_->setText(
       QString("Volcanism: %1")
           .arg(body.volcanism.isEmpty() ? "None" : body.volcanism));
+
+  bodyBioSignalsLabel_->setText(
+      QString("Biological Signals: %1").arg(body.biologicalSignals));
 }

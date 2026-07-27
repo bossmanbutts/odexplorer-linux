@@ -2,7 +2,11 @@
 
 #include "../model/CartographicBody.hpp"
 
-namespace ExplorationValue
-{
-    qint64 calculateBodyValue(const CartographicBody& body);
-}
+class ExplorationValue {
+public:
+  static int calculateBodyValue(const CartographicBody &body);
+  static int calculateExobiologyValue(const CartographicBody &body);
+
+private:
+  static double basePlanetValue(double k, double mass);
+};

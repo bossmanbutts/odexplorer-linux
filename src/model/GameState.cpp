@@ -11,3 +11,21 @@ void GameState::resetExploration() {
 
   cartographicBodies.clear();
 }
+
+qint64 GameState::totalEstimatedValue() const {
+  qint64 total = 0;
+
+  for (const auto &body : cartographicBodies)
+    total += body.estimatedValue;
+
+  return total;
+}
+
+qint64 GameState::totalEstimatedExobiologyValue() const {
+  qint64 total = 0;
+
+  for (const auto &body : cartographicBodies)
+    total += body.estimatedExobiologyValue;
+
+  return total;
+}

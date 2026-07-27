@@ -53,5 +53,8 @@ struct GameState {
   int terraformables = 0;
   int biologicalSignals = 0;
 
+  qint64 totalEstimatedValue() const;
+  qint64 totalEstimatedExobiologyValue() const;
+
   void resetExploration();
 };
