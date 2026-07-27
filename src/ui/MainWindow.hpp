@@ -24,13 +24,24 @@ private:
     void refreshCartographyTable();
     void onCartographicBodySelected(int row, int column);
 
-    QLabel* commanderLabel_;
-    QLabel* systemLabel_;
-    QLabel* shipLabel_;
-    QLabel* creditsLabel_;
+    QLabel *commanderLabel_;
+    QLabel *systemLabel_;
+    QLabel *shipLabel_;
+    QLabel *creditsLabel_;
     QLabel *fuelLabel_;
-    QLabel* explorationLabel_;
+    QLabel *explorationLabel_;
     QLabel *cartoDetailsLabel_;
+    QLabel *bodyNameLabel_;
+    QLabel *bodyTypeLabel_;
+    QLabel *bodyMappedLabel_;
+    QLabel *bodyTerraformableLabel_;
+    QLabel *bodyLandableLabel_;
+    QLabel *bodyGravityLabel_;
+    QLabel *bodyTemperatureLabel_;
+    QLabel *bodyAtmosphereLabel_;
+    QLabel *bodyVolcanismLabel_;
+    QLabel *bodyBioSignalsLabel_;
+    QLabel *bodyValueLabel_;
 
     QTextEdit* logView_;
 

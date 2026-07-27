@@ -1,17 +1,17 @@
 #include "MainWindow.hpp"
+#include "../journal/EventFormatter.hpp"
+#include "../journal/JournalLocator.hpp"
+#include <QAbstractItemView>
+#include <QHeaderView>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QLocale>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <QTableWidget>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QTableWidget>
-#include <QAbstractItemView>
-#include <QHeaderView>
-#include "../journal/JournalLocator.hpp"
-#include "../journal/EventFormatter.hpp"
 
 namespace {
 const QString kJournalDirectory =
@@ -68,23 +68,60 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   systemLayout->addWidget(explorationLabel_);
   systemLayout->addWidget(logView_);
 
+  auto *cartoSplit = new QHBoxLayout;
+
   cartoTable_ = new QTableWidget(this);
-  cartoTable_->setColumnCount(4);
-  cartoTable_->setHorizontalHeaderLabels(
-      {"Body", "Type", "Mapped", "Terraformable"});
-  cartoTable_->setSortingEnabled(true);
-  cartoTable_->setAlternatingRowColors(true);
+  cartoTable_->setColumnCount(3);
+  cartoTable_->setHorizontalHeaderLabels({"Body", "Type", "Mapped"});
+  cartoTable_->horizontalHeader()->setStretchLastSection(true);
   cartoTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
   cartoTable_->setSelectionMode(QAbstractItemView::SingleSelection);
   cartoTable_->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  cartoTable_->horizontalHeader()->setStretchLastSection(true);
-  cartoTable_->horizontalHeader()->setSectionResizeMode(
-      QHeaderView::ResizeToContents);
-  cartoDetailsLabel_ = new QLabel("Select a body");
+  cartoTable_->setSortingEnabled(true);
+
   connect(cartoTable_, &QTableWidget::cellClicked, this,
           &MainWindow::onCartographicBodySelected);
-  cartoLayout->addWidget(cartoTable_);
-  cartoLayout->addWidget(cartoDetailsLabel_);
+
+  auto *detailsWidget = new QWidget;
+  auto *detailsLayout = new QVBoxLayout(detailsWidget);
+
+  bodyNameLabel_ = new QLabel("Name:");
+  bodyTypeLabel_ = new QLabel("Type:");
+  bodyMappedLabel_ = new QLabel("Mapped:");
+  bodyTerraformableLabel_ = new QLabel("Terraformable:");
+  bodyValueLabel_ = new QLabel("Estimated Value:");
+  bodyGravityLabel_ = new QLabel("Gravity:");
+  bodyTemperatureLabel_ = new QLabel("Temperature:");
+  bodyAtmosphereLabel_ = new QLabel("Atmosphere:");
+  bodyVolcanismLabel_ = new QLabel("Volcanism:");
+  bodyBioSignalsLabel_ = new QLabel("Biological Signals:");
+  bodyLandableLabel_ = new QLabel;
+  bodyGravityLabel_ = new QLabel;
+  bodyTemperatureLabel_ = new QLabel;
+  bodyAtmosphereLabel_ = new QLabel;
+  bodyVolcanismLabel_ = new QLabel;
+
+  detailsLayout->addWidget(bodyLandableLabel_);
+  detailsLayout->addWidget(bodyGravityLabel_);
+  detailsLayout->addWidget(bodyTemperatureLabel_);
+  detailsLayout->addWidget(bodyAtmosphereLabel_);
+  detailsLayout->addWidget(bodyVolcanismLabel_);
+  detailsLayout->addWidget(bodyNameLabel_);
+  detailsLayout->addWidget(bodyTypeLabel_);
+  detailsLayout->addWidget(bodyMappedLabel_);
+  detailsLayout->addWidget(bodyTerraformableLabel_);
+  detailsLayout->addWidget(bodyValueLabel_);
+  detailsLayout->addWidget(bodyGravityLabel_);
+  detailsLayout->addWidget(bodyTemperatureLabel_);
+  detailsLayout->addWidget(bodyAtmosphereLabel_);
+  detailsLayout->addWidget(bodyVolcanismLabel_);
+  detailsLayout->addWidget(bodyBioSignalsLabel_);
+  detailsLayout->addStretch();
+
+  cartoSplit->addWidget(cartoTable_, 3);
+  cartoSplit->addWidget(detailsWidget, 1);
+
+  cartoLayout->addLayout(cartoSplit);
 
   exoLayout->addWidget(new QLabel("Exobiology database coming soon."));
 
@@ -132,7 +169,7 @@ void MainWindow::updateJournal() {
     QJsonObject obj = doc.object();
 
     QString event = obj["event"].toString();
-    
+
     if (event == "LoadGame") {
       gameState_.commander = obj["Commander"].toString();
       gameState_.ship = obj["Ship"].toString();
@@ -202,7 +239,16 @@ void MainWindow::updateJournal() {
             obj["TerraformState"].toString() == "Terraformable";
 
         body.type = planet;
+        body.landable = obj["Landable"].toBool();
+        body.atmosphere = obj["Atmosphere"].toString();
+        body.volcanism = obj["Volcanism"].toString();
+        body.gravity = obj["SurfaceGravity"].toDouble();
+        body.surfaceTemperature = obj["SurfaceTemperature"].toDouble();
         body.terraformable = terraformable;
+        body.gravity = obj["SurfaceGravity"].toDouble();
+        body.temperature = obj["SurfaceTemperature"].toDouble();
+        body.atmosphere = obj["AtmosphereType"].toString();
+        body.volcanism = obj["Volcanism"].toString();
 
         if (planet == "Earthlike body") {
           gameState_.earthLikes++;
@@ -271,6 +317,14 @@ void MainWindow::updateJournal() {
 
         if (signal["Type"].toString() == "$SAA_SignalType_Biological;") {
           gameState_.biologicalSignals += signal["Count"].toInt();
+          QString bodyName = obj["BodyName"].toString();
+
+          for (auto &body : gameState_.cartographicBodies) {
+            if (body.name == bodyName) {
+              body.biologicalSignals = signal["Count"].toInt();
+              break;
+            }
+          }
         }
       }
     }
@@ -283,13 +337,12 @@ void MainWindow::updateJournal() {
 
     QString message = EventFormatter::format(obj, gameState_);
 
-    if (!message.isEmpty()) 
-    {
-        logView_->append(message);
+    if (!message.isEmpty()) {
+      logView_->append(message);
     }
 
     if (event == "Undocked")
-        gameState_.station.clear();
+      gameState_.station.clear();
 
     statusBar()->showMessage(
         QString("%1 | %2").arg(event).arg(gameState_.system));
@@ -301,10 +354,9 @@ void MainWindow::updateJournal() {
   shipLabel_->setText("Ship: " + gameState_.ship);
   creditsLabel_->setText(
       QString("Credits: %1 Cr").arg(QLocale().toString(gameState_.credits)));
-  fuelLabel_->setText(
-      QString("Fuel: %1 / %2 t")
-      .arg(gameState_.fuelMain, 0, 'f', 1)
-      .arg(gameState_.fuelReservoir, 0, 'f', 1));
+  fuelLabel_->setText(QString("Fuel: %1 / %2 t")
+                          .arg(gameState_.fuelMain, 0, 'f', 1)
+                          .arg(gameState_.fuelReservoir, 0, 'f', 1));
   explorationLabel_->setText(QString("Exploration\n"
                                      "Scanned: %1\n"
                                      "Mapped: %2\n"
@@ -323,57 +375,45 @@ void MainWindow::updateJournal() {
   refreshCartographyTable();
 }
 
-void MainWindow::logSystemSummary()
-{
-    if (gameState_.scannedBodies == 0 &&
-        gameState_.mappedBodies == 0 &&
-        gameState_.biologicalSignals == 0)
-    {
-        return;
-    }
+void MainWindow::logSystemSummary() {
+  if (gameState_.scannedBodies == 0 && gameState_.mappedBodies == 0 &&
+      gameState_.biologicalSignals == 0) {
+    return;
+  }
 
-    logView_->append("");
-    logView_->append(QString("=== %1 Summary ===").arg(gameState_.system));
+  logView_->append("");
+  logView_->append(QString("=== %1 Summary ===").arg(gameState_.system));
 
-    logView_->append(
-        QString("%1 bodies scanned")
-            .arg(gameState_.scannedBodies));
+  logView_->append(QString("%1 bodies scanned").arg(gameState_.scannedBodies));
 
-    logView_->append(
-        QString("%1 bodies mapped")
-            .arg(gameState_.mappedBodies));
+  logView_->append(QString("%1 bodies mapped").arg(gameState_.mappedBodies));
 
-    if (gameState_.earthLikes > 0)
-        logView_->append(
-            QString("%1 Earth-like World%2")
-                .arg(gameState_.earthLikes)
-                .arg(gameState_.earthLikes == 1 ? "" : "s"));
+  if (gameState_.earthLikes > 0)
+    logView_->append(QString("%1 Earth-like World%2")
+                         .arg(gameState_.earthLikes)
+                         .arg(gameState_.earthLikes == 1 ? "" : "s"));
 
-    if (gameState_.waterWorlds > 0)
-        logView_->append(
-            QString("%1 Water World%2")
-                .arg(gameState_.waterWorlds)
-                .arg(gameState_.waterWorlds == 1 ? "" : "s"));
+  if (gameState_.waterWorlds > 0)
+    logView_->append(QString("%1 Water World%2")
+                         .arg(gameState_.waterWorlds)
+                         .arg(gameState_.waterWorlds == 1 ? "" : "s"));
 
-    if (gameState_.ammoniaWorlds > 0)
-        logView_->append(
-            QString("%1 Ammonia World%2")
-                .arg(gameState_.ammoniaWorlds)
-                .arg(gameState_.ammoniaWorlds == 1 ? "" : "s"));
+  if (gameState_.ammoniaWorlds > 0)
+    logView_->append(QString("%1 Ammonia World%2")
+                         .arg(gameState_.ammoniaWorlds)
+                         .arg(gameState_.ammoniaWorlds == 1 ? "" : "s"));
 
-    if (gameState_.terraformables > 0)
-        logView_->append(
-            QString("%1 Terraformable%2")
-                .arg(gameState_.terraformables)
-                .arg(gameState_.terraformables == 1 ? "" : "s"));
+  if (gameState_.terraformables > 0)
+    logView_->append(QString("%1 Terraformable%2")
+                         .arg(gameState_.terraformables)
+                         .arg(gameState_.terraformables == 1 ? "" : "s"));
 
-    if (gameState_.biologicalSignals > 0)
-        logView_->append(
-            QString("%1 Biological Signal%2")
-                .arg(gameState_.biologicalSignals)
-                .arg(gameState_.biologicalSignals == 1 ? "" : "s"));
+  if (gameState_.biologicalSignals > 0)
+    logView_->append(QString("%1 Biological Signal%2")
+                         .arg(gameState_.biologicalSignals)
+                         .arg(gameState_.biologicalSignals == 1 ? "" : "s"));
 
-    logView_->append("");
+  logView_->append("");
 }
 
 void MainWindow::refreshCartographyTable() {
@@ -387,26 +427,56 @@ void MainWindow::refreshCartographyTable() {
     auto *nameItem = new QTableWidgetItem(body.name);
     auto *typeItem = new QTableWidgetItem(body.type);
     auto *mappedItem = new QTableWidgetItem(body.mapped ? "Yes" : "");
-    auto *terraformItem = new QTableWidgetItem(body.terraformable ? "Yes" : "");
 
     cartoTable_->setItem(i, 0, nameItem);
     cartoTable_->setItem(i, 1, typeItem);
     cartoTable_->setItem(i, 2, mappedItem);
-    cartoTable_->setItem(i, 3, terraformItem);
   }
 
   cartoTable_->setSortingEnabled(true);
 }
 
-void MainWindow::onCartographicBodySelected(int row, int)
-{
-    if (row < 0 || row >= gameState_.cartographicBodies.size())
-        return;
+void MainWindow::onCartographicBodySelected(int row, int) {
+  const auto &body = gameState_.cartographicBodies[row];
 
-    const auto &body = gameState_.cartographicBodies[row];
+  bodyNameLabel_->setText(body.name);
 
-    statusBar()->showMessage(
-        QString("%1 (%2)")
-            .arg(body.name)
-            .arg(body.type));
+  bodyTypeLabel_->setText("Type: " + body.type);
+
+  bodyMappedLabel_->setText(
+      QString("Mapped: %1").arg(body.mapped ? "Yes" : "No"));
+
+  bodyTerraformableLabel_->setText(
+      QString("Terraformable: %1").arg(body.terraformable ? "Yes" : "No"));
+
+  bodyValueLabel_->setText(
+      QString("Estimated Value: %1 Cr").arg(QLocale().toString(body.value)));
+
+  bodyGravityLabel_->setText(
+      QString("Gravity: %1 G").arg(body.gravity / 9.81, 0, 'f', 2));
+
+  bodyTemperatureLabel_->setText(
+      QString("Temperature: %1 K").arg(body.temperature, 0, 'f', 0));
+
+  bodyAtmosphereLabel_->setText("Atmosphere: " + body.atmosphere);
+
+  bodyVolcanismLabel_->setText("Volcanism: " + body.volcanism);
+
+  bodyBioSignalsLabel_->setText(
+      QString("Biological Signals: %1").arg(body.biologicalSignals));
+
+  bodyLandableLabel_->setText(
+      QString("Landable: %1").arg(body.landable ? "Yes" : "No"));
+
+  bodyGravityLabel_->setText(
+      QString("Gravity: %1 g").arg(body.gravity / 9.80665, 0, 'f', 2));
+
+  bodyTemperatureLabel_->setText(
+      QString("Temperature: %1 K").arg(body.surfaceTemperature, 0, 'f', 0));
+
+  bodyAtmosphereLabel_->setText(
+      "Atmosphere: " + (body.atmosphere.isEmpty() ? "None" : body.atmosphere));
+
+  bodyVolcanismLabel_->setText(
+      "Volcanism: " + (body.volcanism.isEmpty() ? "None" : body.volcanism));
 }
