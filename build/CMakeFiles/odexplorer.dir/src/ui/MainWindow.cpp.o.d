@@ -409,6 +409,7 @@ CMakeFiles/odexplorer.dir/src/ui/MainWindow.cpp.o: \
  /usr/include/c++/16/codecvt /usr/include/c++/16/bits/fs_dir.h \
  /usr/include/c++/16/bits/fs_ops.h \
  /home/milo/Projects/odexplorer-linux/src/ui/../journal/StatusReader.hpp \
+ /home/milo/Projects/odexplorer-linux/src/ui/../exploration/ExplorationValue.hpp \
  /home/milo/Projects/odexplorer-linux/src/ui/../journal/EventFormatter.hpp \
  /usr/include/qt6/QtCore/QJsonObject \
  /usr/include/qt6/QtCore/qjsonobject.h \
@@ -419,7 +420,6 @@ CMakeFiles/odexplorer.dir/src/ui/MainWindow.cpp.o: \
  /usr/include/qt6/QtCore/quuid.h /usr/include/qt6/QtCore/qjsondocument.h \
  /usr/include/qt6/QtCore/qjsonparseerror.h \
  /home/milo/Projects/odexplorer-linux/src/ui/../journal/JournalLocator.hpp \
- /home/milo/Projects/odexplorer-linux/src/ui/../exploration/ExplorationValue.hpp \
  /usr/include/qt6/QtWidgets/QAbstractItemView \
  /usr/include/qt6/QtCore/QJsonArray /usr/include/qt6/QtCore/qjsonarray.h \
  /usr/include/qt6/QtCore/QJsonDocument /usr/include/qt6/QtCore/QLocale \

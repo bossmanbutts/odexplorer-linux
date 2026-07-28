@@ -13,11 +13,13 @@ struct CartographicBody {
   bool firstDiscovery = false;
   bool firstMapped = false;
   bool efficiencyBonus = false;
+  bool isStar = false;
 
   double gravity = 0.0;
   double temperature = 0.0;
   double radius = 0.0;
   double massEM = 0.0;
+  double stellarMass = 0.0;
   double distanceFromArrivalLS = 0.0;
   QString atmosphere;
   QString volcanism;

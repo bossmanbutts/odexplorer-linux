@@ -1,7 +1,7 @@
 #include "MainWindow.hpp"
+#include "../exploration/ExplorationValue.hpp"
 #include "../journal/EventFormatter.hpp"
 #include "../journal/JournalLocator.hpp"
-#include "../exploration/ExplorationValue.hpp"
 #include <QAbstractItemView>
 #include <QHeaderView>
 #include <QJsonArray>
@@ -247,6 +247,11 @@ void MainWindow::updateJournal() {
         body.firstMapped = !obj["WasMapped"].toBool();
 
         body.estimatedValue = ExplorationValue::calculateBodyValue(body);
+        qDebug() << "PLANET:" << body.name << body.type
+                 << "MassEM =" << body.massEM << "Mapped =" << body.mapped
+                 << "FirstMapped =" << body.firstMapped
+                 << "FirstDiscovery =" << body.firstDiscovery
+                 << "Estimated =" << body.estimatedValue;
 
         if (planet == "Earthlike body")
           gameState_.earthLikes++;
@@ -259,13 +264,19 @@ void MainWindow::updateJournal() {
 
         if (terraformable)
           gameState_.terraformables++;
+
       } else if (obj.contains("StarType")) {
+        body.isStar = true;
         body.type = obj["StarType"].toString();
+        body.stellarMass = obj["StellarMass"].toDouble();
 
         body.firstDiscovery = !obj["WasDiscovered"].toBool();
         body.firstMapped = !obj["WasMapped"].toBool();
 
         body.estimatedValue = ExplorationValue::calculateBodyValue(body);
+        qDebug() << "STAR:" << body.name << body.type
+                 << "StellarMass =" << body.stellarMass
+                 << "Estimated =" << body.estimatedValue;
       }
 
       bool found = false;
@@ -292,6 +303,7 @@ void MainWindow::updateJournal() {
           continue;
 
         body.mapped = true;
+        body.firstMapped = true;
 
         if (obj.contains("EfficiencyTarget"))
           body.efficiencyTarget = obj["EfficiencyTarget"].toInt();
@@ -302,6 +314,9 @@ void MainWindow::updateJournal() {
         body.efficiencyBonus = obj["EfficiencyTargetAchieved"].toBool();
 
         body.estimatedValue = ExplorationValue::calculateBodyValue(body);
+
+        if (cartoTable_->currentRow() >= 0)
+          onCartographicBodySelected(cartoTable_->currentRow(), 0);
 
         break;
       }
@@ -480,7 +495,6 @@ void MainWindow::onCartographicBodySelected(int row, int) {
       QString("Exploration: %1 Cr\nExobiology: %2 Cr")
           .arg(QLocale().toString(body.estimatedValue))
           .arg(QLocale().toString(body.estimatedExobiologyValue)));
-
   bodyLandableLabel_->setText(
       QString("Landable: %1").arg(body.landable ? "Yes" : "No"));
 
