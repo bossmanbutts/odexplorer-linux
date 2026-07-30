@@ -3,6 +3,7 @@
 #include "../journal/EventFormatter.hpp"
 #include "../journal/JournalLocator.hpp"
 #include <QAbstractItemView>
+#include <QDateTime>
 #include <QHeaderView>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -227,6 +228,14 @@ void MainWindow::updateJournal() {
 
       CartographicBody body;
       body.name = obj["BodyName"].toString();
+      body.scanTimestampUtc =
+          QDateTime::fromString(obj["timestamp"].toString(), Qt::ISODate);
+
+      if (obj.contains("WasDiscovered"))
+        body.wasDiscovered = obj["WasDiscovered"].toBool();
+
+      if (obj.contains("WasMapped"))
+        body.wasMapped = obj["WasMapped"].toBool();
 
       if (obj.contains("PlanetClass")) {
         QString planet = obj["PlanetClass"].toString();
@@ -303,6 +312,7 @@ void MainWindow::updateJournal() {
           continue;
 
         body.mapped = true;
+        body.mappedByCommander = true;
         body.firstMapped = true;
 
         if (obj.contains("EfficiencyTarget"))
@@ -312,6 +322,7 @@ void MainWindow::updateJournal() {
           body.probesUsed = obj["ProbesUsed"].toInt();
 
         body.efficiencyBonus = obj["EfficiencyTargetAchieved"].toBool();
+        body.efficientlyMapped = body.efficiencyBonus;
 
         body.estimatedValue = ExplorationValue::calculateBodyValue(body);
 

@@ -1,11 +1,22 @@
 #pragma once
 
+#include <optional>
+
+#include <QDateTime>
 #include <QString>
 #include <QStringList>
 
 struct CartographicBody {
   QString name;
   QString type;
+
+  QDateTime scanTimestampUtc;
+  bool odyssey = true;
+  std::optional<bool> wasDiscovered;
+  std::optional<bool> wasMapped;
+  bool mappedByCommander = false;
+  bool efficientlyMapped = false;
+  bool isWebSourced = false;
 
   bool mapped = false;
   bool terraformable = false;

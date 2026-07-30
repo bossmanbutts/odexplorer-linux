@@ -348,6 +348,7 @@ CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o: odexplorer_
   /usr/include/locale.h \
   /usr/include/math.h \
   /usr/include/pthread.h \
+  /usr/include/qt6/QtCore/QDateTime \
   /usr/include/qt6/QtCore/QFile \
   /usr/include/qt6/QtCore/QObject \
   /usr/include/qt6/QtCore/QString \
@@ -382,6 +383,7 @@ CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o: odexplorer_
   /usr/include/qt6/QtCore/qbytearrayalgorithms.h \
   /usr/include/qt6/QtCore/qbytearraylist.h \
   /usr/include/qt6/QtCore/qbytearrayview.h \
+  /usr/include/qt6/QtCore/qcalendar.h \
   /usr/include/qt6/QtCore/qchar.h \
   /usr/include/qt6/QtCore/qcheckedint_impl.h \
   /usr/include/qt6/QtCore/qcompare.h \
@@ -396,6 +398,7 @@ CMakeFiles/odexplorer.dir/odexplorer_autogen/mocs_compilation.cpp.o: odexplorer_
   /usr/include/qt6/QtCore/qcontiguouscache.h \
   /usr/include/qt6/QtCore/qdarwinhelpers.h \
   /usr/include/qt6/QtCore/qdatastream.h \
+  /usr/include/qt6/QtCore/qdatetime.h \
   /usr/include/qt6/QtCore/qdeadlinetimer.h \
   /usr/include/qt6/QtCore/qdebug.h \
   /usr/include/qt6/QtCore/qendian.h \
@@ -5248,8 +5251,6 @@ CMakeFiles/odexplorer.dir/src/app/main.cpp.o:
 
 /usr/include/qt6/QtCore/qjsondocument.h:
 
-/usr/include/qt6/QtCore/qdatetime.h:
-
 /usr/include/qt6/QtCore/qcborvalue.h:
 
 /home/milo/Projects/odexplorer-linux/src/journal/EventFormatter.hpp:
@@ -5319,6 +5320,10 @@ CMakeFiles/odexplorer.dir/src/app/main.cpp.o:
 /usr/include/qt6/QtWidgets/qlabel.h:
 
 /usr/include/qt6/QtWidgets/qheaderview.h:
+
+/usr/include/qt6/QtWidgets/qabstractspinbox.h:
+
+/usr/include/qt6/QtWidgets/qabstractscrollarea.h:
 
 /usr/include/c++/16/ext/concurrence.h:
 
@@ -5744,6 +5749,8 @@ odexplorer_autogen/mocs_compilation.cpp:
 
 /usr/include/c++/16/version:
 
+/usr/include/qt6/QtCore/qdatetime.h:
+
 /usr/include/qt6/QtCore/qxptype_traits.h:
 
 /usr/include/bits/types/clockid_t.h:
@@ -5768,8 +5775,6 @@ odexplorer_autogen/mocs_compilation.cpp:
 
 odexplorer_autogen/CO5IDNHIYX/moc_JournalWatcher.cpp:
 
-/usr/include/qt6/QtWidgets/qabstractscrollarea.h:
-
 /usr/include/bits/uintn-identity.h:
 
 /usr/include/qt6/QtCore/qlist.h:
@@ -5791,8 +5796,6 @@ odexplorer_autogen/CO5IDNHIYX/moc_JournalWatcher.cpp:
 /usr/include/c++/16/bits/stl_multimap.h:
 
 /usr/include/qt6/QtCore/qhashfunctions.h:
-
-/usr/include/qt6/QtWidgets/qabstractspinbox.h:
 
 /usr/include/bits/endianness.h:
 
@@ -6210,6 +6213,8 @@ CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o:
 
 /usr/include/math.h:
 
+/usr/include/qt6/QtCore/QDateTime:
+
 /usr/include/c++/16/bits/char_traits.h:
 
 /usr/include/qt6/QtCore/QFile:
@@ -6269,6 +6274,8 @@ CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o:
 /usr/include/qt6/QtCore/qbytearraylist.h:
 
 /usr/include/qt6/QtCore/qbytearrayview.h:
+
+/usr/include/qt6/QtCore/qstringview.h:
 
 /usr/include/qt6/QtCore/qchar.h:
 
@@ -6418,8 +6425,6 @@ CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o:
 
 /usr/include/qt6/QtCore/qstringtokenizer.h:
 
-/usr/include/qt6/QtCore/qstringview.h:
-
 /usr/include/qt6/QtCore/qswap.h:
 
 /usr/include/qt6/QtCore/qsysinfo.h:
@@ -6449,6 +6454,12 @@ CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o:
 /usr/include/c++/16/bits/nested_exception.h:
 
 /usr/include/qt6/QtCore/qtpreprocessorsupport.h:
+
+/usr/include/qt6/QtWidgets/qabstractslider.h:
+
+/usr/include/c++/16/bit:
+
+/usr/include/qt6/QtCore/qtypeinfo.h:
 
 /usr/include/qt6/QtGui/qpalette.h:
 
@@ -6513,9 +6524,3 @@ CMakeFiles/odexplorer.dir/src/model/GameState.cpp.o:
 /usr/include/qt6/QtWidgets/QTabWidget:
 
 /usr/include/qt6/QtWidgets/qabstractitemdelegate.h:
-
-/usr/include/c++/16/bit:
-
-/usr/include/qt6/QtCore/qtypeinfo.h:
-
-/usr/include/qt6/QtWidgets/qabstractslider.h:
