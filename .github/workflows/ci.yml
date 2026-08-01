@@ -1,23 +1,18 @@
 name: CI
 
-on:
-  push:
-    branches: [ main, migration/*, '**' ]
-  pull_request:
-    branches: [ main ]
+on: [push,pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
       - name: Restore
-        run: dotnet restore
-      - name: Build ODExplorer.Core
-        run: dotnet build src/ODExplorer.Core/ODExplorer.Core.csproj -c Release --no-restore
+        run: dotnet restore ODExplorer.sln
+      - name: Build
+        run: dotnet build ODExplorer.sln -c Release --no-restore
       - name: Build TestApp
-        run: dotnet build src/TestApp/TestApp.csproj -c Release --no-restore
+        run: dotnet run --project src/TestApp/TestApp.csproj -c Release --no-build
