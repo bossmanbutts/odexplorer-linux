@@ -20,12 +20,59 @@ namespace ODExplorer.UI.Avalonia.Services
         {
             try
             {
-                var app = Application.Current;
-                app?.Clipboard?.SetTextAsync(text);
+                // Try platform-specific clipboard helpers
+                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                {
+                    var psi = new ProcessStartInfo("powershell", $"-Command \"Set-Clipboard -Value \"{text.Replace("\"", "\"\"")}\"\"") { UseShellExecute = false };
+                    Process.Start(psi);
+                    return;
+                }
+
+                // Try wl-copy (Wayland)
+                try
+                {
+                    var psi = new ProcessStartInfo("wl-copy") { UseShellExecute = false, RedirectStandardInput = true };
+                    var p = Process.Start(psi);
+                    if (p != null)
+                    {
+                        p.StandardInput.Write(text);
+                        p.StandardInput.Close();
+                    }
+                    return;
+                }
+                catch { }
+
+                // Try xclip (X11)
+                try
+                {
+                    var psi = new ProcessStartInfo("xclip", "-selection clipboard") { UseShellExecute = false, RedirectStandardInput = true };
+                    var p = Process.Start(psi);
+                    if (p != null)
+                    {
+                        p.StandardInput.Write(text);
+                        p.StandardInput.Close();
+                    }
+                    return;
+                }
+                catch { }
+
+                // macOS pbcopy
+                try
+                {
+                    var psi = new ProcessStartInfo("pbcopy") { UseShellExecute = false, RedirectStandardInput = true };
+                    var p = Process.Start(psi);
+                    if (p != null)
+                    {
+                        p.StandardInput.Write(text);
+                        p.StandardInput.Close();
+                    }
+                    return;
+                }
+                catch { }
             }
             catch
             {
-                // fallback: nothing
+                // swallow
             }
         }
 
