@@ -2,14 +2,11 @@
 using ODExplorer.Models;
 using ODUtils.Dialogs.ViewModels;
 using System;
-using System.Windows;
-using System.Windows.Controls;
 using System.Linq;
-using ODUtils.Models;
 using System.Collections.ObjectModel;
 using ODExplorer.Extensions;
 using ODExplorer.Stores;
-using ToolTip = System.Windows.Controls.ToolTip;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {
@@ -100,53 +97,43 @@ namespace ODExplorer.ViewModels.ModelVMs
             }
         }
 
-        private ContextMenu? contextMenu;
-        public ContextMenu ContextMenu
+        private IReadOnlyList<ODExplorer.Models.MenuItemModel>? _menuItems;
+        public IReadOnlyList<ODExplorer.Models.MenuItemModel> MenuItems
         {
             get
             {
-                if (contextMenu is null)
+                if (_menuItems is null)
                 {
-                    contextMenu = new();
+                    var items = new List<ODExplorer.Models.MenuItemModel>();
 
-                    MenuItem menuItem = new();
                     if (string.IsNullOrEmpty(EdsmUrl))
                     {
-                        menuItem.Header = "System Not Known to EDSM";
-                        menuItem.IsEnabled = false;
+                        items.Add(new ODExplorer.Models.MenuItemModel { Header = "System Not Known to EDSM", IsEnabled = false });
                     }
                     else
                     {
-                        menuItem.Header = "Open System on EDSM";
-                        menuItem.Click += OpenEDSMUrl;
+                        items.Add(new ODExplorer.Models.MenuItemModel { Header = "Open System on EDSM", Execute = () => ODExplorer.Adapters.OdUtilsAdapterProvider.Current?.OpenUrl(EdsmUrl) });
                     }
 
-                    _ = contextMenu.Items.Add(menuItem);
+                    items.Add(new ODExplorer.Models.MenuItemModel { Header = $"Copy '{Name}' to Clipboard", Execute = () => notificationStore.CopyToClipBoard(Name) });
 
-                    menuItem = new MenuItem
-                    {
-                        Header = $"Copy '{Name}' to Clipboard",
-
-                    };
-                    menuItem.Click += CopySystemNameToClipboard;
-
-                    _ = contextMenu.Items.Add(menuItem);
+                    _menuItems = items;
                 }
 
-                return contextMenu;
+                return _menuItems;
             }
         }
 
-        public ToolTip JumponiumToolTip
+        public string JumponiumToolTipText
         {
             get
             {
                 return GreenSystem switch
                 {
-                    Jumponium.Basic => new() { Content = "Jumponium - This system contains the materials required for a basic synth" },
-                    Jumponium.Standard => new() { Content = "Jumponium - This system contains the materials required for a standard synth" },
-                    Jumponium.Premium => new() { Content = "Jumponium - This system contains the materials required for a premium synth" },
-                    _ => new() { Content = "Jumponium - This system does not contain the materials required for a synth" },
+                    Jumponium.Basic => "Jumponium - This system contains the materials required for a basic synth",
+                    Jumponium.Standard => "Jumponium - This system contains the materials required for a standard synth",
+                    Jumponium.Premium => "Jumponium - This system contains the materials required for a premium synth",
+                    _ => "Jumponium - This system does not contain the materials required for a synth",
                 };
             }
         }

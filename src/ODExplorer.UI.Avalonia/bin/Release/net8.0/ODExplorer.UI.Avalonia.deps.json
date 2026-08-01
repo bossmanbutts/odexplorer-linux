@@ -12,7 +12,6 @@
           "Avalonia.Desktop": "12.1.0",
           "Avalonia.Fonts.Inter": "12.1.0",
           "Avalonia.Themes.Fluent": "12.1.0",
-          "AvaloniaUI.DiagnosticsSupport": "2.2.3",
           "ODExplorer.Core": "1.0.0"
         },
         "runtime": {
@@ -232,18 +231,6 @@
           "lib/net8.0/Avalonia.X11.dll": {
             "assemblyVersion": "12.1.0.0",
             "fileVersion": "12.1.0.0"
-          }
-        }
-      },
-      "AvaloniaUI.DiagnosticsSupport/2.2.3": {
-        "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "9.0.0",
-          "Microsoft.IO.RecyclableMemoryStream": "3.0.1"
-        },
-        "runtime": {
-          "lib/net8.0/AvaloniaUI.DiagnosticsSupport.Avalonia.dll": {
-            "assemblyVersion": "2.2.3.0",
-            "fileVersion": "2.2.3.0"
           }
         }
       },
@@ -897,14 +884,6 @@
           }
         }
       },
-      "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
-        "runtime": {
-          "lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll": {
-            "assemblyVersion": "3.0.1.0",
-            "fileVersion": "3.0.1.0"
-          }
-        }
-      },
       "NetTopologySuite/2.5.0": {
         "runtime": {
           "lib/netstandard2.0/NetTopologySuite.dll": {
@@ -1398,13 +1377,6 @@
       "path": "avalonia.x11/12.1.0",
       "hashPath": "avalonia.x11.12.1.0.nupkg.sha512"
     },
-    "AvaloniaUI.DiagnosticsSupport/2.2.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-kQCInYusi2c9tjd9hV05Lln6Csbo07kiC672M3G7dsalDBe2j+pOk3We2nzdyy5ptQYy/9gQiC8ZaHhb6u/5Kw==",
-      "path": "avaloniaui.diagnosticssupport/2.2.3",
-      "hashPath": "avaloniaui.diagnosticssupport.2.2.3.nupkg.sha512"
-    },
     "EFCore.BulkExtensions.Core/8.1.2": {
       "type": "package",
       "serviceable": true,
@@ -1719,13 +1691,6 @@
       "sha512": "sha512-N3qEBzmLMYiASUlKxxFIISP4AiwuPTHF5uCh+2CWSwwzAJiIYx0kBJsS30cp1nvhSySFAVi30jecD307jV+8Kg==",
       "path": "microsoft.extensions.primitives/9.0.0",
       "hashPath": "microsoft.extensions.primitives.9.0.0.nupkg.sha512"
-    },
-    "Microsoft.IO.RecyclableMemoryStream/3.0.1": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-s/s20YTVY9r9TPfTrN5g8zPF1YhwxyqO6PxUkrYTGI2B+OGPe9AdajWZrLhFqXIvqIW23fnUE4+ztrUWNU1+9g==",
-      "path": "microsoft.io.recyclablememorystream/3.0.1",
-      "hashPath": "microsoft.io.recyclablememorystream.3.0.1.nupkg.sha512"
     },
     "NetTopologySuite/2.5.0": {
       "type": "package",

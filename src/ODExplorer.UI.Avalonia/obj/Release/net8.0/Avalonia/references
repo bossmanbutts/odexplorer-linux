@@ -21,7 +21,6 @@
 /home/milo/.nuget/packages/avalonia.win32/12.1.0/lib/net8.0/Avalonia.Win32.Automation.dll
 /home/milo/.nuget/packages/avalonia.win32/12.1.0/lib/net8.0/Avalonia.Win32.dll
 /home/milo/.nuget/packages/avalonia.x11/12.1.0/lib/net8.0/Avalonia.X11.dll
-/home/milo/.nuget/packages/avaloniaui.diagnosticssupport/2.2.3/lib/net8.0/AvaloniaUI.DiagnosticsSupport.Avalonia.dll
 /home/milo/.nuget/packages/efcore.bulkextensions.core/8.1.2/lib/net8.0/EFCore.BulkExtensions.Core.dll
 /home/milo/.nuget/packages/efcore.bulkextensions.sqlite/8.1.2/lib/net8.0/EFCore.BulkExtensions.Sqlite.dll
 /home/milo/.nuget/packages/harfbuzzsharp/8.3.1.3/lib/net8.0/HarfBuzzSharp.dll
@@ -64,7 +63,6 @@
 /home/milo/.nuget/packages/microsoft.extensions.options.configurationextensions/9.0.0/lib/net8.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll
 /home/milo/.nuget/packages/microsoft.extensions.options/9.0.0/lib/net8.0/Microsoft.Extensions.Options.dll
 /home/milo/.nuget/packages/microsoft.extensions.primitives/9.0.0/lib/net8.0/Microsoft.Extensions.Primitives.dll
-/home/milo/.nuget/packages/microsoft.io.recyclablememorystream/3.0.1/lib/net6.0/Microsoft.IO.RecyclableMemoryStream.dll
 /usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.29/ref/net8.0/Microsoft.VisualBasic.Core.dll
 /usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.29/ref/net8.0/Microsoft.VisualBasic.dll
 /usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.29/ref/net8.0/Microsoft.Win32.Primitives.dll

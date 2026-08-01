@@ -34,7 +34,6 @@
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Avalonia.Win32.Automation.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Avalonia.Win32.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Avalonia.X11.dll
-/home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/AvaloniaUI.DiagnosticsSupport.Avalonia.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/EFCore.BulkExtensions.Core.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/EFCore.BulkExtensions.Sqlite.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/HarfBuzzSharp.dll
@@ -76,7 +75,6 @@
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Microsoft.Extensions.Options.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Microsoft.Extensions.Primitives.dll
-/home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Microsoft.IO.RecyclableMemoryStream.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/NetTopologySuite.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/NetTopologySuite.IO.SpatiaLite.dll
 /home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/bin/Release/net8.0/Newtonsoft.Json.dll
