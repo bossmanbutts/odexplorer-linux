@@ -1,10 +1,8 @@
 using System;
 using Avalonia.Threading;
-using ODExplorer.Models;
-
 namespace ODExplorer.UI.Avalonia.Services
 {
-    public class DispatcherAdapter : IDispatcher
+    public class DispatcherAdapter : global::ODExplorer.Models.IDispatcher
     {
         public void Invoke(Action action)
         {
