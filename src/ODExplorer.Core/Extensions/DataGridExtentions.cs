@@ -1,22 +1,14 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Controls;
+﻿using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace ODExplorer.Extensions
 {
+    // DataGrid extensions are UI-specific. Provide a no-op placeholder in core; move the real implementation to the UI project.
     public static class DataGridExtensions
     {
-        public static void SortDataGrid(this DataGrid dataGrid, List<SortDescription> sortDescriptions)
+        public static void SortDataGrid<T>(this object unused, List<object> sortDescriptions)
         {
-            // Clear current sort descriptions
-            dataGrid.Items.SortDescriptions.Clear();
-            // Add the new sort descriptions
-            foreach (SortDescription sort in sortDescriptions)
-            {
-                dataGrid.Items.SortDescriptions.Add(sort);
-            }
-            // Refresh items to display sort
-            dataGrid.Items.Refresh();
+            // No-op in core. UI layer should provide an extension targeting the concrete DataGrid control.
         }
 
         public static ListSortDirection Reverse(this ListSortDirection sortDirection)

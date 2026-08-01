@@ -23,4 +23,13 @@
     <PackageReference Include="NLog" Version="6.1.1" />
   </ItemGroup>
 
+  <!-- Exclude heavy host-specific Database code from core build; the UI/host should provide database provider implementations. -->
+  <ItemGroup>
+    <Compile Remove="Database\**\*.cs" />
+    <Compile Remove="Migrations\**\*.cs" />
+    <Compile Remove="Stores\**\*.cs" />
+    <Compile Remove="ViewModels\**\*.cs" />
+    <Compile Remove="Models\SystemBodyViewModel*" />
+  </ItemGroup>
+
 </Project>

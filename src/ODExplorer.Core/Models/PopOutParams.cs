@@ -16,33 +16,37 @@ namespace ODExplorer.Models
         public object? AdditionalSettings { get; set; }
         public double ZoomLevel { get; set; } = 1d;
 
-        public static PopOutParams CreateParams(PopOutBase popOut, int count, bool active)
+        public static PopOutParams CreateParams(object popOut, int count, bool active)
         {
+            // Expect popOut to implement ODExplorer.Controls.IPopOutBase in the UI; use dynamic to avoid compile-time dependency.
+            dynamic d = popOut;
+            var pos = (ODExplorer.ViewModels.ModelVMs.WindowPositionViewModel?)d.Position ?? new();
             return new()
             {
-                Title = popOut.Title,
+                Title = d.Title ?? string.Empty,
                 Count = count,
-                Position = popOut.Position.Clone(),
-                Mode = popOut.Mode,
-                AlwaysOnTop = popOut.AlwaysOnTop,
-                ShowTitle = popOut.ShowTitle,
-                ShowInTaskBar = popOut.ShowInTaskBar,
+                Position = pos.Clone(),
+                Mode = (ODExplorer.Models.PopOutMode)(d.Mode ?? PopOutMode.Normal),
+                AlwaysOnTop = d.AlwaysOnTop,
+                ShowTitle = d.ShowTitle,
+                ShowInTaskBar = d.ShowInTaskBar,
                 Active = active,
-                AdditionalSettings = popOut.AdditionalSettings,
-                ZoomLevel = popOut.ZoomLevel,
+                AdditionalSettings = d.AdditionalSettings,
+                ZoomLevel = d.ZoomLevel,
             };
         }
 
-        public void UpdateParams(PopOutBase popOut, bool active)
+        public void UpdateParams(object popOut, bool active)
         {
-            Position = popOut.Position.Clone();
-            Mode = popOut.Mode;
-            AlwaysOnTop = popOut.AlwaysOnTop;
-            ShowTitle = popOut.ShowTitle;
-            ShowInTaskBar = popOut.ShowInTaskBar;
+            dynamic d = popOut;
+            Position = ((ODExplorer.ViewModels.ModelVMs.WindowPositionViewModel?)d.Position ?? new()).Clone();
+            Mode = (ODExplorer.Models.PopOutMode)(d.Mode ?? PopOutMode.Normal);
+            AlwaysOnTop = d.AlwaysOnTop;
+            ShowTitle = d.ShowTitle;
+            ShowInTaskBar = d.ShowInTaskBar;
             Active = active;
-            AdditionalSettings = popOut.AdditionalSettings;
-            ZoomLevel = popOut.ZoomLevel;
+            AdditionalSettings = d.AdditionalSettings;
+            ZoomLevel = d.ZoomLevel;
         }
     }
 }

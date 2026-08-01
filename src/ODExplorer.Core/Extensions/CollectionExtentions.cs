@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 
 namespace ODExplorer.Extensions
 {
@@ -12,8 +11,6 @@ namespace ODExplorer.Extensions
         /// <summary>
         /// Clears a collection on the main ui thread
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
         public static void ClearCollection<T>(this ObservableCollection<T> collection)
         {
             if (!collection.Any())
@@ -21,17 +18,12 @@ namespace ODExplorer.Extensions
                 return;
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                collection.Clear();
-            });
+            ODExplorer.Models.DispatcherHelper.Invoke(() => collection.Clear());
         }
+
         /// <summary>
         /// Adds a single object to a collection on the main ui thread
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="objectToAdd"></param>
         public static void AddToCollection<T>(this ObservableCollection<T> collection, T objectToAdd)
         {
             if (objectToAdd is null)
@@ -39,20 +31,15 @@ namespace ODExplorer.Extensions
                 return;
             }
 
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                collection.Add(objectToAdd);
-            });
+            ODExplorer.Models.DispatcherHelper.Invoke(() => collection.Add(objectToAdd));
         }
+
         /// <summary>
         /// Add a range of a collection to a collection on the main ui thread
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="collectionToAdd"></param>
         public static void AddRangeToCollection<T>(this ObservableCollection<T> collection, IEnumerable<T> collectionToAdd)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 if (collectionToAdd == null || !collectionToAdd.Any())
                 {
@@ -65,12 +52,10 @@ namespace ODExplorer.Extensions
                 }
             });
         }
+
         /// <summary>
         /// Removes an object from a collection on the main ui thread
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="objectToRemove"></param>
         public static void RemoveFromCollection<T>(this ObservableCollection<T> collection, T objectToRemove)
         {
             if (objectToRemove is null)
@@ -78,10 +63,7 @@ namespace ODExplorer.Extensions
                 return;
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                collection.Remove(objectToRemove);
-            });
+            ODExplorer.Models.DispatcherHelper.Invoke(() => collection.Remove(objectToRemove));
         }
 
         public static void RemoveAtIndexFromCollection<T>(this ObservableCollection<T> collection, int index)
@@ -91,10 +73,7 @@ namespace ODExplorer.Extensions
                 return;
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                collection.RemoveAt(index);
-            });
+            ODExplorer.Models.DispatcherHelper.Invoke(() => collection.RemoveAt(index));
         }
 
         public static void RemoveAllBeforeItem<T>(this ObservableCollection<T> collection, T item, bool removeItem = false)
@@ -104,7 +83,7 @@ namespace ODExplorer.Extensions
                 return;
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 int index = collection.IndexOf(item) - (removeItem ? 0 : 1);
 
@@ -122,9 +101,9 @@ namespace ODExplorer.Extensions
 
         public static void Sort<T>(this ObservableCollection<T> collection) where T : IComparable
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
-                List<T> sorted = [.. collection.OrderBy(x => x)];
+                List<T> sorted = collection.OrderBy(x => x).ToList();
                 for (int i = 0; i < sorted.Count; i++)
                 {
                     collection.Move(collection.IndexOf(sorted[i]), i);

@@ -1,9 +1,26 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace ODExplorer.Models
 {
+    // Core-independent message box event args. UI layer must map these enums to WPF/Avalonia equivalents.
+    public enum MessageBoxButton
+    {
+        OK,
+        OKCancel,
+        YesNo,
+        YesNoCancel
+    }
+
+    public enum MessageBoxResult
+    {
+        None,
+        OK,
+        Cancel,
+        Yes,
+        No
+    }
+
     public sealed class MessageBoxEventArgsAsync(string title, string message, MessageBoxButton buttons, Func<Task>? callbackYes = null, Func<Task>? callbackNo = null)
     {
         public string Title { get; } = title;

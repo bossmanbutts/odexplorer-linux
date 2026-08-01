@@ -38,7 +38,7 @@ namespace ODExplorer.Stores
         private readonly NotificationStore notificationStore;
         private readonly OdExplorerDatabaseProvider databaseProvider;
         private readonly CountdownTimer fleetCarrierTimer = new(new(0, 20, 0));
-        private Dictionary<CsvType, SpanshCsvContainer> containers = [];
+        private Dictionary<CsvType, SpanshCsvContainer> containers = new Dictionary<CsvType, SpanshCsvContainer>();
         private CsvType currentContainerType;
         private string carrierName = string.Empty;
 
@@ -144,7 +144,7 @@ namespace ODExplorer.Stores
                 return container;
             }
 
-            var ret = new SpanshCsvContainer([], 0);
+            var ret = new SpanshCsvContainer(new System.Collections.Generic.List<ExplorationTarget>(), 0);
             CurrentIndex = -1;
             CurrentContainer = ret;
             return ret;
@@ -171,7 +171,7 @@ namespace ODExplorer.Stores
             parserStore.UnregisterParser(this);
         }
 
-        public JournalHistoryArgs GetEventsToParse(DateTime defaultAge) => new([JournalTypeEnum.CarrierStats, JournalTypeEnum.CarrierJumpRequest, JournalTypeEnum.CarrierLocation, JournalTypeEnum.CarrierJumpCancelled], defaultAge, this, ParseHistoryStream);
+        public JournalHistoryArgs GetEventsToParse(DateTime defaultAge) => new(new[] { JournalTypeEnum.CarrierStats, JournalTypeEnum.CarrierJumpRequest, JournalTypeEnum.CarrierLocation, JournalTypeEnum.CarrierJumpCancelled }, defaultAge, this, ParseHistoryStream);
 
         public void ParseHistory(IEnumerable<JournalEntry> journalEntries, int currentCmdrId) { }
 
