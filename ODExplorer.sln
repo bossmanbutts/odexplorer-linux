@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ODExplorer.Core", "src\ODExplorer.Core\ODExplorer.Core.csproj", "{F2C4E8A5-5B8F-4D2F-9E1A-2B3C4D5E6F7G}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ODExplorer.UI.Avalonia", "src\ODExplorer.UI.Avalonia\ODExplorer.UI.Avalonia.csproj", "{A1B2C3D4-E5F6-47A8-B9C0-D1E2F3G4H5I6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F2C4E8A5-5B8F-4D2F-9E1A-2B3C4D5E6F7G}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2C4E8A5-5B8F-4D2F-9E1A-2B3C4D5E6F7G}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2C4E8A5-5B8F-4D2F-9E1A-2B3C4D5E6F7G}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2C4E8A5-5B8F-4D2F-9E1A-2B3C4D5E6F7G}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-47A8-B9C0-D1E2F3G4H5I6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-47A8-B9C0-D1E2F3G4H5I6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-47A8-B9C0-D1E2F3G4H5I6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-47A8-B9C0-D1E2F3G4H5I6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
