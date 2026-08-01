@@ -229,31 +229,20 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         private void OnResetExoValue(object? obj)
         {
-            var mb = ODMessageBox.Show(null, "Reset Exo Value?", "Reset : Resets Exo Value to 0\nRestore : Restores Exo Value", System.Windows.MessageBoxButton.YesNoCancel, "Reset", "Restore");
-            switch (mb)
-            {
-                case System.Windows.MessageBoxResult.Yes:
-                    settingsStore.IgnoredExoDate = DateTime.UtcNow;
-                    break;
-                case System.Windows.MessageBoxResult.No:
-                    settingsStore.IgnoredExoDate = DateTime.MinValue;
-                    break;
-            }
+            var args = new MessageBoxEventArgsAsync("Reset Exo Value?", "Reset : Resets Exo Value to 0\nRestore : Restores Exo Value", MessageBoxButton.YesNo,
+                callbackYes: async () => { settingsStore.IgnoredExoDate = DateTime.UtcNow; await Task.CompletedTask; },
+                callbackNo: async () => { settingsStore.IgnoredExoDate = DateTime.MinValue; await Task.CompletedTask; });
+
+            MessageBoxRequester.Request(args);
         }
 
         private void OnResetCartoValue(object? obj)
         {
-            var mb = ODMessageBox.Show(null, "Reset Carto Value?", "Reset : Resets Carto Value to 0\nRestore : Restores Carto Value", System.Windows.MessageBoxButton.YesNoCancel, "Reset", "Restore");
+            var args = new MessageBoxEventArgsAsync("Reset Carto Value?", "Reset : Resets Carto Value to 0\nRestore : Restores Carto Value", MessageBoxButton.YesNo,
+                callbackYes: async () => { settingsStore.IgnoredCartoDate = DateTime.UtcNow; await Task.CompletedTask; },
+                callbackNo: async () => { settingsStore.IgnoredCartoDate = DateTime.MinValue; await Task.CompletedTask; });
 
-            switch (mb)
-            {
-                case System.Windows.MessageBoxResult.Yes:
-                    settingsStore.IgnoredCartoDate = DateTime.UtcNow;
-                    break;
-                case System.Windows.MessageBoxResult.No:
-                    settingsStore.IgnoredCartoDate = DateTime.MinValue;
-                    break;
-            }
+            MessageBoxRequester.Request(args);
         }
         private void BuildUnsoldSystems()
         {
