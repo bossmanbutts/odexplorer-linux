@@ -1,6 +1,7 @@
 ﻿using EliteJournalReader;
 using ODExplorer.Models;
 using ODUtils.Dialogs.ViewModels;
+using ODUtils.Models;
 using System;
 using System.Linq;
 using System.Collections.ObjectModel;
@@ -164,12 +165,12 @@ namespace ODExplorer.ViewModels.ModelVMs
             OnPropertyChanged(nameof(EdsmPercentage));
         }
 
-        private void OpenEDSMUrl(object sender, RoutedEventArgs e)
+        private void OpenEDSMUrl(object? sender, System.EventArgs e)
         {
             ODUtils.Helpers.OperatingSystem.OpenUrl(EdsmUrl);
         }
 
-        private void CopySystemNameToClipboard(object sender, RoutedEventArgs e)
+        private void CopySystemNameToClipboard(object? sender, System.EventArgs e)
         {
             notificationStore.CopyToClipBoard(Name);
         }

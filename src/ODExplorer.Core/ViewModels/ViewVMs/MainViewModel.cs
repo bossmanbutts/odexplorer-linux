@@ -3,7 +3,6 @@ using ODExplorer.Extensions;
 using ODExplorer.Models;
 using ODExplorer.Stores;
 using ODExplorer.ViewModels.ModelVMs;
-using ODExplorer.Windows;
 using ODUtils.Commands;
 using ODUtils.Database.Interfaces;
 using ODUtils.Dialogs.ViewModels;
@@ -14,7 +13,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ViewVMs
 {
@@ -97,7 +95,7 @@ namespace ODExplorer.ViewModels.ViewVMs
         private readonly SpanshCsvStore spanshCsvStore;
         private readonly IOdToolsDatabaseProvider databaseProvider;
         private int currentCommanderId;
-        private List<PopOutBase> ActivePopOuts { get; set; } = [];
+        private List<ODExplorer.Models.PopOutBase> ActivePopOuts { get; set; } = [];
         #endregion
 
         #region View Propetires
@@ -247,6 +245,8 @@ namespace ODExplorer.ViewModels.ViewVMs
         public event EventHandler<SystemBodyViewModel>? OnBioUpdated;
         public event EventHandler<SystemBodyViewModel?>? OnSelectedBodyUpdated;
         public event EventHandler? WindowReset;
+        /// <summary>Raised when core wants to open a pop-out panel. UI subscribes and creates the platform window.</summary>
+        public event EventHandler<ODExplorer.Models.PopOutBase>? OpenPopoutRequested;
         private void Settings_OnSystemGridSettingsUpdatedEvent(object? sender, EventArgs e)
         {
             if (OrganicSignals.Count != 0)
@@ -656,10 +656,10 @@ namespace ODExplorer.ViewModels.ViewVMs
                               .CurrentDomain
                               .GetAssemblies()
                               .SelectMany(assembly => assembly.GetTypes())
-                              .Where(type => typeof(PopOutBase)
+                              .Where(type => typeof(ODExplorer.Models.PopOutBase)
                               .IsAssignableFrom(type))
                               .Where(type => !(type.IsAbstract || type.IsGenericTypeDefinition || type.IsInterface))
-                              .Select(x => Activator.CreateInstance(x) as PopOutBase)
+                              .Select(x => Activator.CreateInstance(x) as ODExplorer.Models.PopOutBase)
                               .Where(x => x != null && x.Title != string.Empty);
 
                 foreach (var activePopout in active)
@@ -671,28 +671,23 @@ namespace ODExplorer.ViewModels.ViewVMs
                         continue;
                     }
 
-                    if (Activator.CreateInstance(popOut.GetType()) is not PopOutBase newPopOut)
+                    if (Activator.CreateInstance(popOut.GetType()) is not ODExplorer.Models.PopOutBase newPopOut)
                         continue;
 
                     OpenPopout(newPopOut, activePopout.Count);
                 }
             });
         }
-        public void OpenPopout(PopOutBase popOut, int count = 0)
+        public void OpenPopout(ODExplorer.Models.PopOutBase popOut, int count = 0)
         {
             var popOutParams = SettingsStore.GetParams(popOut, count, currentCommanderId);
             popOut.ApplyParams(popOutParams);
             popOut.DataContext = this;
 
-            var popOutWindow = new PopOutWindow(popOut)
-            {
-                Owner = Application.Current.MainWindow,
-            };
-
-            popOutWindow.Show();
+            OpenPopoutRequested?.Invoke(this, popOut);
             ActivePopOuts.Add(popOut);
         }
-        internal void OnPopOutClose(PopOutBase popOutBase)
+        internal void OnPopOutClose(ODExplorer.Models.PopOutBase popOutBase)
         {
             SettingsStore.SaveParams(popOutBase, false, currentCommanderId);
             ActivePopOuts.Remove(popOutBase);

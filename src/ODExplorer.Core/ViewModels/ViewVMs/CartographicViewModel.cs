@@ -8,7 +8,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Data;
 using System.Windows.Input;
 using ODExplorer.Models;
 
@@ -43,8 +42,15 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
-                if(CurrentSystem != null) 
-                    currentSystemBodies = new(CurrentSystem?.Bodies);
+                if (CurrentSystem != null)
+                {
+                    var gridSettings = settingsStore.SystemGridSetting;
+                    var comparer = new SystemBodyViewModelMainComparer(gridSettings);
+                    var filtered = CurrentSystem.Bodies
+                        .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
+                        .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b) => comparer.Compare(a, b)));
+                    currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);
+                }
 
                 _ = Task.Factory.StartNew(() =>
                 {
@@ -76,13 +82,10 @@ namespace ODExplorer.ViewModels.ViewVMs
             }
         }
 
-        private ListCollectionView? currentSystemBodies;
-        public ListCollectionView? CurrentSystemBodies
+        private ObservableCollection<SystemBodyViewModel>? currentSystemBodies;
+        public ObservableCollection<SystemBodyViewModel>? CurrentSystemBodies
         {
-            get
-            {
-                return currentSystemBodies;
-            }
+            get => currentSystemBodies;
             set
             {
                 currentSystemBodies = value;
@@ -195,53 +198,17 @@ namespace ODExplorer.ViewModels.ViewVMs
             ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 var gridSettings = settingsStore.SystemGridSetting;
-                currentSystemBodies = new ListCollectionView(CurrentSystem?.Bodies)
-                {
-                    IsLiveSorting = true,
-                    CustomSort = new SystemBodyViewModelMainComparer(gridSettings)
-                };
+                var comparer = new SystemBodyViewModelMainComparer(gridSettings);
+                var filtered = CurrentSystem.Bodies
+                    .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
+                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)));
 
-                currentSystemBodies.LiveSortingProperties.Add("IsStar");
-                currentSystemBodies.LiveSortingProperties.Add("IsEdsmVb");
-                currentSystemBodies.LiveSortingProperties.Add("SurfaceGravity");
-                currentSystemBodies.LiveSortingProperties.Add("DistanceFromArrival");
-                currentSystemBodies.LiveSortingProperties.Add("PlanetClassDescription");
-                currentSystemBodies.LiveSortingProperties.Add("Name");
-                currentSystemBodies.LiveSortingProperties.Add("BodyID");
-                currentSystemBodies.LiveSortingProperties.Add("BiologicalSignals");
-                currentSystemBodies.LiveSortingProperties.Add("GeologicalSignals");
-                currentSystemBodies.LiveSortingProperties.Add("WorthMapping");
-                currentSystemBodies.LiveSortingProperties.Add("MappedValueActual");
-
-                if (gridSettings.IgnoreNonBodies)
-                {
-                    currentSystemBodies.Filter += IgnoreSystemBodiesFilter;
-                }
-
-                currentSystemBodies?.Refresh();
+                currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);
                 OnPropertyChanged(nameof(CurrentSystemBodies));
             });
         }
 
-        private bool IgnoreSystemBodiesFilter(object obj)
-        {
-            if (obj is SystemBodyViewModel body)
-            {
-                return !body.IsNonBody;
-               
-            }
-            return false;
-        }
-
-        private void IgnoreSystemBodiesFilter(object sender, FilterEventArgs e)
-        {
-            if (e.Item is SystemBodyViewModel body)
-            {
-                e.Accepted = !body.IsNonBody;
-                return;
-            }
-            e.Accepted = false;
-        }
+        private bool IgnoreSystemBodiesFilter(SystemBodyViewModel body) => !body.IsNonBody;
 
         public override void Dispose()
         {
@@ -280,7 +247,21 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         private void RefreshBodiesView()
         {
-            ODExplorer.Models.DispatcherHelper.Invoke(() => currentSystemBodies?.Refresh());
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
+            {
+                if (currentSystemBodies == null || CurrentSystem == null)
+                    return;
+                var gridSettings = settingsStore.SystemGridSetting;
+                var comparer = new SystemBodyViewModelMainComparer(gridSettings);
+                var filtered = CurrentSystem.Bodies
+                    .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
+                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
+                    .ToList();
+                currentSystemBodies.Clear();
+                foreach (var item in filtered)
+                    currentSystemBodies.Add(item);
+                OnPropertyChanged(nameof(CurrentSystemBodies));
+            });
         }
 
         private void ExplorationData_OnFSDJump(object? sender, string e)

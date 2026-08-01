@@ -48,4 +48,13 @@ namespace EliteJournalReader.Events
     {
         public sealed class CarrierJumpCancelledEventArgs { public string CarrierType { get; set; } = string.Empty; public System.DateTime Timestamp { get; set; } }
     }
+
+    public struct PlanetRing
+    {
+        public string Name { get; set; }
+        public string RingClass { get; set; }
+        public double MassMT { get; set; }
+        public double InnerRad { get; set; }
+        public double OuterRad { get; set; }
+    }
 }
