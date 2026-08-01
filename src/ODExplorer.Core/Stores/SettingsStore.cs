@@ -94,7 +94,7 @@ namespace ODExplorer.Stores
                 windowPosition.Left = left;
                 windowPosition.Width = windowWidth > 1920 ? 1920 : windowWidth;
                 windowPosition.Height = windowHeight > 1080 ? 1080 : windowHeight;
-                windowPosition.State = WindowState.Normal;
+                windowPosition.State = Models.WindowState.Normal;
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace ODExplorer.Stores
             windowPosition.Left = 10;
             windowPosition.Width = 800;
             windowPosition.Height = 600;
-            windowPosition.State = WindowState.Normal;
+            windowPosition.State = Models.WindowState.Normal;
         }
         #endregion
 

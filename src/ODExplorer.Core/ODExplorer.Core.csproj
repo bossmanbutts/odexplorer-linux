@@ -32,4 +32,9 @@
     <Compile Remove="Models\SystemBodyViewModel*" />
   </ItemGroup>
 
+  <!-- Include SettingsStore in core API surface (it is adapted to be core-friendly) -->
+  <ItemGroup>
+    <Compile Include="Stores\SettingsStore.cs" />
+  </ItemGroup>
+
 </Project>

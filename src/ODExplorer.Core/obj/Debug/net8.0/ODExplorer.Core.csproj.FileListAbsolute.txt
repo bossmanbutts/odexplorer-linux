@@ -1,0 +1,6 @@
+/home/milo/Projects/odexplorer-linux/src/ODExplorer.Core/obj/Debug/net8.0/ODExplorer.Core.csproj.AssemblyReference.cache
+/home/milo/Projects/odexplorer-linux/src/ODExplorer.Core/obj/Debug/net8.0/ODExplorer.Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/milo/Projects/odexplorer-linux/src/ODExplorer.Core/obj/Debug/net8.0/ODExplorer.Core.AssemblyInfoInputs.cache
+/home/milo/Projects/odexplorer-linux/src/ODExplorer.Core/obj/Debug/net8.0/ODExplorer.Core.AssemblyInfo.cs
+/home/milo/Projects/odexplorer-linux/src/ODExplorer.Core/obj/Debug/net8.0/ODExplorer.Core.csproj.CoreCompileInputs.cache
+/home/milo/Projects/odexplorer-linux/src/ODExplorer.Core/obj/Debug/net8.0/ODExplorer.Core.sourcelink.json
