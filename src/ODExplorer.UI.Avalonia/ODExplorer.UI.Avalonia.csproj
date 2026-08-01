@@ -16,4 +16,9 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ODExplorer.Core\ODExplorer.Core.csproj" />
+  </ItemGroup>
+
 </Project>
