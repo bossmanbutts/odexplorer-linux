@@ -13,8 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ViewVMs
 {
@@ -394,14 +394,13 @@ namespace ODExplorer.ViewModels.ViewVMs
         #region Commander Methods
         private void OnCommandersUpdated(object? sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 JournalCommanders.Clear();
                 foreach (var journalCommander in _journalParserStore.JournalCommanders)
                 {
                     JournalCommanders.Add(new JournalCommaderViewModel(journalCommander));
                 }
-                ;
 
                 OnPropertyChanged(nameof(JournalCommanders));
 
@@ -421,7 +420,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         private void OnCurrentSystemUpdated(object? sender, StarSystem? e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 InHyperSpace = false;
                 currentSystem = null;
@@ -440,7 +439,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
                     if (e.SystemBodies != null && e.SystemBodies.Count > 0)
                     {
-                        Application.Current.Dispatcher.Invoke(() =>
+                        ODExplorer.Models.DispatcherHelper.Invoke(() =>
                         {
                             foreach (var body in e.SystemBodies)
                             {
@@ -519,7 +518,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             if (system != null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                ODExplorer.Models.DispatcherHelper.Invoke(() =>
                 {
                     var body = system.UpdateBody(e);
 
@@ -580,7 +579,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             if (known == null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                ODExplorer.Models.DispatcherHelper.Invoke(() =>
                 {
                     known = new SystemBodyViewModel(e.Body, _settings);
                     known.AddOrganicItems();
@@ -601,7 +600,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             if (known == null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                ODExplorer.Models.DispatcherHelper.Invoke(() =>
                 {
                     known = new SystemBodyViewModel(e, _settings);
 
@@ -651,7 +650,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             if (active.Count == 0)
                 return;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 var allPopOuts = AppDomain
                               .CurrentDomain

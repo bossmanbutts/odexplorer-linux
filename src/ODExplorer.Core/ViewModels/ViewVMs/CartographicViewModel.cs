@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using Application = System.Windows.Application;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ViewVMs
 {
@@ -41,7 +41,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             OpenValuableBodiesPopOut = new RelayCommand(OnOpenValuableBodiesPopOut);
             OpenExobiologyPopOut = new RelayCommand(OnOpenExobiologyPopOut);
 
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 if(CurrentSystem != null) 
                     currentSystemBodies = new(CurrentSystem?.Bodies);
@@ -173,7 +173,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         private void MainView_OnCurrentSystemUpdatedEvent(object? sender, StarSystemViewModel? e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 InHyperSpace = false;
                 HyperSpaceText = string.Empty;
@@ -192,7 +192,7 @@ namespace ODExplorer.ViewModels.ViewVMs
                 return;
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 var gridSettings = settingsStore.SystemGridSetting;
                 currentSystemBodies = new ListCollectionView(CurrentSystem?.Bodies)
@@ -280,7 +280,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         private void RefreshBodiesView()
         {
-            Application.Current.Dispatcher.Invoke(() => currentSystemBodies?.Refresh());
+            ODExplorer.Models.DispatcherHelper.Invoke(() => currentSystemBodies?.Refresh());
         }
 
         private void ExplorationData_OnFSDJump(object? sender, string e)

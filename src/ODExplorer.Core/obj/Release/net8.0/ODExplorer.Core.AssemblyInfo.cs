@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ODExplorer.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8d6da9e03e79943201836b9d6cd86193bfe87938")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6530a82525932271a5215adc546c840d52e86c36")]
 [assembly: System.Reflection.AssemblyProductAttribute("ODExplorer.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ODExplorer.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

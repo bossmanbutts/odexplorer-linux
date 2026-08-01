@@ -13,10 +13,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Data;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {
@@ -175,42 +174,29 @@ namespace ODExplorer.ViewModels.ModelVMs
                 _ => $"{_body.Radius:N0} km"
             };
         }
-        public ToolTip ToolTip
+        // Tooltip text for UI to display; complex tooltip controls moved to UI layer
+        public string ToolTipText
         {
             get
             {
                 if (_body.PlanetClass == PlanetClass.EdsmValuableBody)
                 {
-                    return new()
-                    {
-                        Content = "Scan for more info"
-                    };
+                    return "Scan for more info";
                 }
 
                 if (IsNonBody)
                 {
-                    return new()
-                    {
-                        Content = "Non Body"
-                    };
+                    return "Non Body";
                 }
                 if (IsPlanet)
                 {
-                    return new()
-                    {
-                        SnapsToDevicePixels = true,
-                        Content = new PlanetToolTipControl(this)
-                    };
+                    return "Planet details";
                 }
                 if (IsStar)
                 {
-                    return new()
-                    {
-                        SnapsToDevicePixels = true,
-                        Content = new StarToolTipControl(this)
-                    };
+                    return "Star details";
                 }
-                return new();
+                return string.Empty;
             }
         }
         public PlanetImage PlanetImage
@@ -434,7 +420,7 @@ namespace ODExplorer.ViewModels.ModelVMs
             }
             SetAlternationIndexes();
             OnPropertyChanged(nameof(HiddenCount));
-            Application.Current.Dispatcher.Invoke(OrganicItems.Refresh);
+            ODExplorer.Models.DispatcherHelper.Invoke(() => OrganicItems.Refresh());
         }
 
         internal void UpdateOrganicInfo()

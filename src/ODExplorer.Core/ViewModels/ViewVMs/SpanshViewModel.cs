@@ -9,7 +9,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 
 namespace ODExplorer.ViewModels.ViewVMs
@@ -47,13 +46,13 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         private void CsvStore_OnCarrierTimeTick(object? sender, string e)
         {
-            Application.Current.Dispatcher.Invoke(() => CarrierTimerString = e);
+            ODExplorer.Models.DispatcherHelper.Invoke(() => CarrierTimerString = e);
 
         }
 
         private void CsvStore_OnCarrierTimerRunning(object? sender, bool e)
         {
-            Application.Current.Dispatcher.Invoke(() => OnPropertyChanged(nameof(CarrierTimerRunning)));
+            ODExplorer.Models.DispatcherHelper.Invoke(() => OnPropertyChanged(nameof(CarrierTimerRunning)));
         }
 
         private void SetCSVType(CsvType type)
