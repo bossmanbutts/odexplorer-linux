@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ODExplorer.UI.Avalonia.Views.LoadingView"
+             x:DataType="vm:LoadingViewModel">
+    <StackPanel VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Spacing="16">
+        <TextBlock Text="{Binding StatusText}"
+                   FontSize="18"
+                   TextWrapping="Wrap"
+                   TextAlignment="Center" />
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Spacing="8">
+            <Button Content="GitHub" Command="{Binding OpenGitHub}" />
+            <Button Content="PayPal" Command="{Binding OpenPayPal}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
