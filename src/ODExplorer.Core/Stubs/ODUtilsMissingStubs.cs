@@ -127,6 +127,17 @@ namespace ODUtils.Journal
 {
     public sealed class JournalCommander
     {
+        public JournalCommander() { }
+
+        public JournalCommander(int id, string name, string? journalPath, string? lastFile, bool isHidden)
+        {
+            Id = id;
+            Name = name;
+            JournalPath = journalPath;
+            LastFile = lastFile;
+            IsHidden = isHidden;
+        }
+
         public string Name { get; set; } = string.Empty;
         public int Id { get; set; }
         public string? JournalPath { get; set; }
@@ -334,5 +345,9 @@ namespace ODExplorer.Database
         public void AddEdAstroPois(System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi> pois) { }
         public void AddIgnoreSystem(long address, string name, int commanderId) { }
         public void RemoveIgnoreSystem(long address, int commanderId) { }
+        public System.Collections.Generic.List<ODExplorer.Models.IgnoredSystem> GetIgnoredSystems(int cmdrId)
+            => new();
+        public System.Threading.Tasks.Task DeleteCommander(int commanderID)
+            => System.Threading.Tasks.Task.CompletedTask;
     }
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "uTZP5jKF96o=",
+  "dgSpecHash": "h9eQqyfVYlo=",
   "success": true,
   "projectFilePath": "/home/milo/Projects/odexplorer-linux/src/ODExplorer.Core/ODExplorer.Core.csproj",
   "expectedPackageFiles": [
@@ -82,8 +82,7 @@
     "/home/milo/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
     "/home/milo/.nuget/packages/system.text.encodings.web/9.0.0/system.text.encodings.web.9.0.0.nupkg.sha512",
     "/home/milo/.nuget/packages/system.text.json/9.0.0/system.text.json.9.0.0.nupkg.sha512",
-    "/home/milo/.nuget/packages/system.threading.channels/7.0.0/system.threading.channels.7.0.0.nupkg.sha512",
-    "/home/milo/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.29/microsoft.aspnetcore.app.ref.8.0.29.nupkg.sha512"
+    "/home/milo/.nuget/packages/system.threading.channels/7.0.0/system.threading.channels.7.0.0.nupkg.sha512"
   ],
   "logs": []
 }

@@ -212,6 +212,6 @@ namespace ODExplorer.Stores
             MinExoValueChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public ActiveViewModel ActiveView { get; set; } = ActiveViewModel.Cartographic;
+        public ActiveViewModel ActiveView { get; set; } = ActiveViewModel.Carto;
     }
 }

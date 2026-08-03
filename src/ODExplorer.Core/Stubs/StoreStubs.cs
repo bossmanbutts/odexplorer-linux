@@ -51,7 +51,7 @@ namespace ODExplorer.Stores
         public string? CurrentSystemName { get; } = null;
         public string CurrentSystemRegion { get; } = string.Empty;
         public List<ODExplorer.Models.EdAstroPoi> EdAstroPois { get; } = new();
-        public ObservableCollection<OrganicScanItemViewModel> OrganicScanItems { get; } = new();
+        public List<SystemBody> OrganicScanItems { get; } = new();
         public List<StarSystem> Route { get; } = new();
         public long SelectedBodyId { get; set; }
 
@@ -66,25 +66,15 @@ namespace ODExplorer.Stores
     // ─── OrganicCheckListDataStore ─────────────────────────────────────────────
     public sealed class OrganicCheckListDataStore
     {
-        private static readonly System.Collections.Generic.List<OrganicCheckListItemViewModel> _empty = new();
         public event EventHandler? OnOrganicScanDetailsUpdated;
         public event EventHandler<string>? OnSpeciesUpdated;
 
-        // Indexer returning list of checklist items by genus key
-        public System.Collections.Generic.IReadOnlyList<OrganicCheckListItemViewModel> this[string key] => _empty;
-
-        // Named property with indexer for OrganicScanItems
-        public OrganicScanItemsCollection OrganicScanItems { get; } = new();
+        // Species checklist keyed by genus codex, matching the real store
+        public Dictionary<string, List<OrganicChecklistItem>> OrganicScanItems { get; } = new();
 
         public OrganicCheckListDataStore(JournalParserStore parserStore,
                                           ODUtils.Exobiology.ExoData exoData,
                                           SettingsStore settings) { }
-    }
-
-    public sealed class OrganicScanItemsCollection
-    {
-        private static readonly System.Collections.Generic.List<OrganicCheckListItemViewModel> _empty = new();
-        public System.Collections.Generic.IReadOnlyList<OrganicCheckListItemViewModel> this[string key] => _empty;
     }
 
     // ─── SpanshCsvStore ───────────────────────────────────────────────────────
@@ -102,8 +92,8 @@ namespace ODExplorer.Stores
         public ExplorationTarget? NextTarget { get; } = null;
 
         public SpanshCsvContainer? GetCurrentContainer(CsvType csvType) => null;
-        public SpanshCsvContainer? ParseCSV(string fileName) => null;
-        public SpanshCsvContainer? ForceParseCSV(string fileName, CsvType csvType) => null;
+        public bool ParseCSV(string fileName) => false;
+        public bool ForceParseCSV(string fileName, CsvType csvType) => false;
         public void SaveCSVs() { }
         public void StartFleetCarrierTimer() { }
         public void StopFleetCarrierTimer() { }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ido6KCyCSDI=",
+  "dgSpecHash": "t3CXMLUce+E=",
   "success": true,
   "projectFilePath": "/home/milo/Projects/odexplorer-linux/src/ODExplorer.UI.Avalonia/ODExplorer.UI.Avalonia.csproj",
   "expectedPackageFiles": [
@@ -86,9 +86,7 @@
     "/home/milo/.nuget/packages/system.memory/4.5.4/system.memory.4.5.4.nupkg.sha512",
     "/home/milo/.nuget/packages/system.text.encodings.web/9.0.0/system.text.encodings.web.9.0.0.nupkg.sha512",
     "/home/milo/.nuget/packages/system.text.json/9.0.0/system.text.json.9.0.0.nupkg.sha512",
-    "/home/milo/.nuget/packages/tmds.dbus.protocol/0.94.1/tmds.dbus.protocol.0.94.1.nupkg.sha512",
-    "/home/milo/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.29/microsoft.aspnetcore.app.ref.8.0.29.nupkg.sha512",
-    "/home/milo/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.29/microsoft.netcore.app.host.linux-x64.8.0.29.nupkg.sha512"
+    "/home/milo/.nuget/packages/tmds.dbus.protocol/0.94.1/tmds.dbus.protocol.0.94.1.nupkg.sha512"
   ],
   "logs": []
 }

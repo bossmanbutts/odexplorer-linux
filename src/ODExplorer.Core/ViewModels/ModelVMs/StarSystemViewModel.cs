@@ -226,7 +226,7 @@ namespace ODExplorer.ViewModels.ModelVMs
                 //mats.AddRange(body.Materials.Where(x => mats.Contains(x.Name) == false).Select(x => x.Name));
                 foreach (var material in body.Materials)
                 {
-                    mats |= material.Name;
+                    mats |= material.Name_AsMaterial;
                 }
             }
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ODExplorer.UI.Avalonia")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6530a82525932271a5215adc546c840d52e86c36")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5afcc8a9feb1637020454e5cbff2d309d52a2ad1")]
 [assembly: System.Reflection.AssemblyProductAttribute("ODExplorer.UI.Avalonia")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ODExplorer.UI.Avalonia")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,0 +1,252 @@
+Migration Handoff Note — ODExplorer core extraction + UI adapter implementation
+
+Status (2026-07-31T21:47:00-04:00):
+- Branch: migration/extract-core-from-windows-app (MERGED into main). Extracted core, removed WPF deps, added adapter interfaces + NoOp defaults.
+- Branch: migration/implement-ui-adapters (MERGED into main). Implemented UI adapter services (Dispatcher, Audio, Notifications, OdUtils, PlatformPaths); wired in App startup.
+- Core (ODExplorer.Core) builds successfully (net8.0).
+- UI (ODExplorer.UI.Avalonia) builds successfully (net8.0), references ODExplorer.Core.
+- TestApp runs: SettingsStore.LoadSettings() with NoOp/shell adapters.
+- CI workflow at .github/workflows/ci.yml builds both projects and runs TestApp on ubuntu-latest. All checks passing.
+
+Files changed (complete list):
+
+**Core extraction (migration/extract-core-from-windows-app):**
+- Added:
+  - src/ODExplorer.Core/Adapters/IOdUtilsAdapter.cs (minimal interface + NoOp)
+  - src/ODExplorer.Core/Adapters/IEliteJournalReaderAdapter.cs (CoreJournalEntry DTO)
+  - src/ODExplorer.Core/Adapters/INotificationAdapter.cs (NotificationModel + NoOp)
+  - src/ODExplorer.Core/Adapters/IPlatformPaths.cs (paths interface + NoOp)
+  - src/ODExplorer.Core/Audio/IAudioPlayer.cs (play/stop/status)
+  - src/ODExplorer.Core/Audio/IAudioPlayerProvider.cs (static Current provider)
+  - src/ODExplorer.Core/Stubs/* (minimal compile-time stubs for ODUtils/EliteJournalReader types)
+  - src/TestApp/* (minimal console app; wires NoOp adapters, loads SettingsStore)
+  - .github/workflows/ci.yml (builds on ubuntu-latest: restore, build, run TestApp)
+- Modified:
+  - src/ODExplorer.Core/Models/PropertyChangeNotify.cs (DispatcherHelper/IDispatcher)
+  - src/ODExplorer.Core/Extensions/CollectionExtentions.cs (use DispatcherHelper instead of WPF dispatcher)
+  - src/ODExplorer.Core/Extensions/DataGridExtentions.cs (UI placeholder)
+  - src/ODExplorer.Core/Models/GridSize.cs (GridLength/GridUnitType core enums)
+  - src/ODExplorer.Core/Models/MessageBoxEventArgsAsync.cs (core enums for MessageBox)
+  - src/ODExplorer.Core/Stores/NotificationStore.cs (core facade, uses INotificationAdapter)
+  - src/ODExplorer.Core/Stores/SettingsStore.cs (no System.Windows; DB provider is dynamic)
+  - src/ODExplorer.Core/ODExplorer.Core.csproj (no WPF packages; excluded host-only code)
+
+**UI adapter implementation (migration/implement-ui-adapters):**
+- Added:
+  - src/ODExplorer.UI.Avalonia/Services/DispatcherAdapter.cs (implements ODExplorer.Models.IDispatcher; uses Avalonia.Threading.Dispatcher.UIThread)
+  - src/ODExplorer.UI.Avalonia/Services/AudioPlayer.cs (implements IAudioPlayer; uses paplay/aplay fallback for Linux)
+  - src/ODExplorer.UI.Avalonia/Services/OdUtilsAdapter.cs (implements IOdUtilsAdapter; parses GalacticRegions enum)
+  - src/ODExplorer.UI.Avalonia/Services/NotificationAdapter.cs (implements INotificationAdapter; uses notify-send on Linux)
+  - src/ODExplorer.UI.Avalonia/Services/PlatformPaths.cs (implements IPlatformPaths; uses Assembly location + env paths)
+- Modified:
+  - src/ODExplorer.UI.Avalonia/App.axaml.cs (OnFrameworkInitializationCompleted wires adapters: sets DispatcherHelper.Current, IAudioPlayerProvider.Current)
+  - src/ODExplorer.UI.Avalonia/ODExplorer.UI.Avalonia.csproj (added ProjectReference to ODExplorer.Core; target net8.0; qualified IDispatcher to avoid Avalonia conflict)
+
+Build & Test Commands (local development):
+- dotnet restore
+- dotnet build ODExplorer.sln -c Release (or build individual projects)
+- dotnet run --project src/TestApp/TestApp.csproj -c Release (verify core + adapters)
+- dotnet run --project src/ODExplorer.UI.Avalonia/ODExplorer.UI.Avalonia.csproj -c Release (run Avalonia app; may require desktop runtime)
+
+Testing steps for the next agent (what to validate after cloning):
+1) Clone and fetch latest main:
+   git clone https://github.com/bossmanbutts/odexplorer-linux.git
+   cd odexplorer-linux
+   git fetch origin main
+   git checkout main (or main/master depending on default branch name)
+2) Restore and build solution:
+   dotnet restore
+   dotnet build ODExplorer.sln -c Release
+   Expected: both ODExplorer.Core and ODExplorer.UI.Avalonia build successfully.
+3) Run TestApp (core + adapter smoke test):
+   dotnet run --project src/TestApp/TestApp.csproj -c Release
+   Expected output: "Settings loaded successfully (no-op provider)."
+4) Optionally run Avalonia UI:
+   dotnet run --project src/ODExplorer.UI.Avalonia/ODExplorer.UI.Avalonia.csproj -c Release
+   Expected: window appears (may be minimal since WPF views not yet ported).
+5) Check CI:
+   Visit https://github.com/bossmanbutts/odexplorer-linux/actions
+   Verify latest main branch build passed (should show green checkmarks).
+
+What the next agent should do (step-by-step):
+
+**Phase 1: Verify state (immediate)**
+1) Clone and build (see Testing steps above).
+2) Run CI locally and via Actions.
+3) Run TestApp and verify output.
+4) If any build/run error: investigate and fix surgically.
+
+**Phase 2: Replace NoOp adapters and stubs (medium-term)**
+1) Replace IOdUtilsAdapter NoOp with real implementation (or vendor minimal ODUtils types from source library if available).
+2) Replace INotificationAdapter shell invocation with a robust cross-platform notification library (consider libappindicator3-dev for Linux, or Avalonia's built-in toast).
+3) Replace IAudioPlayer shell invocation with a real audio library (recommend ManagedBass or LibVLCSharp for cross-platform support).
+4) Remove Stubs/ directory and reconcile types with actual external libraries (ODUtils, EliteJournalReader).
+5) Rebuild, test, commit: "feat(adapters): replace NoOp implementations with real cross-platform libraries".
+
+**Phase 3: Port remaining ViewModel/Store code to UI layer (medium-term)**
+1) Audit remaining ViewModels in src/ODExplorer.Core/ViewModels/ for WPF/UI dependencies.
+2) Move UI-specific ViewModels into src/ODExplorer.UI.Avalonia/ViewModels/ or refactor to use INotificationAdapter/IDialogService/etc.
+3) Remove any remaining System.Windows references from core.
+4) Rebuild and test.
+5) Commit: "refactor: migrate remaining ViewModel UI logic to UI layer".
+
+**Phase 4: Port WPF Views to Avalonia (long-term)**
+1) Port Views/*.xaml (and handlers) to ODExplorer.UI.Avalonia/Views/*.axaml.
+2) Rewrite converters to Avalonia equivalents.
+3) Replace WPF commands with Avalonia RoutedCommands or ReactiveUI.
+4) Incrementally test each view.
+
+**Phase 5: Harden CI and documentation (ongoing)**
+1) Extend CI to run unit tests if tests exist.
+2) Add solution-wide build step (currently only Core + TestApp).
+3) Update README.md with build instructions, architecture notes, and porting checklist.
+4) Create ARCHITECTURE.md describing the three-layer structure (Core, UI, Host adapters).
+
+TODOs / Known issues (next agent fill these in as they work):
+- [ ] Replace shell-based audio (paplay/aplay) with real library (ManagedBass or LibVLCSharp).
+- [ ] Replace shell-based notifications (notify-send) with libappindicator3-dev or Avalonia UI.
+- [ ] Reconcile stubs (src/ODExplorer.Core/Stubs/*) with actual ODUtils/EliteJournalReader/ToastNotifications packages.
+- [ ] Port Views/*.xaml from WPF to Avalonia.
+- [ ] Test on actual Linux desktop (desktop environment, GNOME/KDE/etc.) to verify notifications/audio work end-to-end.
+- [ ] Consider packaging strategy (dotnet publish + AppImage, Flatpak, or snap) for distribution.
+
+Notes & rationale:
+- Option C (adapter/wrapper pattern) was chosen to keep core platform-agnostic and small.
+- Small in-repo stubs were added only to satisfy compilation and must be reconciled with source libraries (ODUtils, EliteJournalReader) later.
+
+Where to find artifacts in this session:
+- Bundle (if needed): /home/milo/Projects/odexplorer-linux/migration-extract-core-from-windows-app.bundle
+- Local repo: /home/milo/Projects/odexplorer-linux
+
+Contact points and resources for next agent:
+- Core branch (merged): migration/extract-core-from-windows-app → see git log for commit details
+- UI adapters branch (merged): migration/implement-ui-adapters → see git log for commit details
+- CI workflow path: .github/workflows/ci.yml
+- Test app path: src/TestApp/Program.cs + src/TestApp/TestApp.csproj
+- Core interfaces: src/ODExplorer.Core/Adapters/ and src/ODExplorer.Core/Audio/
+- UI adapter implementations: src/ODExplorer.UI.Avalonia/Services/
+- App wiring: src/ODExplorer.UI.Avalonia/App.axaml.cs (OnFrameworkInitializationCompleted)
+- Stubs (TODO: reconcile): src/ODExplorer.Core/Stubs/
+
+Key design decisions (rationale):
+- Option C (adapter/wrapper pattern) was chosen to keep core platform-agnostic, isolated from WPF, and testable with NoOp defaults.
+- Shell-based fallbacks (paplay, notify-send) were used to avoid adding heavy native deps; next agent should replace with real libraries.
+- Small in-repo stubs were added only to satisfy compilation; they must be reconciled with actual external libraries (ODUtils, EliteJournalReader) for production use.
+- DispatcherHelper.Current is a static singleton; next agent may refactor to dependency injection if core becomes part of a larger DI container.
+
+Keep this file updated as changes progress. Include exact git commands and CI logs for traceability.
+
+Recent porting snapshot (what was just done)
+- Replaced several WPF UI types in core ViewModels with UI-agnostic models/events:
+  - StarSystemViewModel: removed System.Windows.ContextMenu/ToolTip and introduced MenuItemModel + MenuItems list
+  - CartoDetailsViewModel: replaced blocking ODMessageBox.Show calls with MessageBoxRequester.Request (async event + callbacks)
+  - NotificationStore: now calls OdUtilsAdapterProvider.Current.CopyToClipboard when available
+- Added OdUtilsAdapterProvider static hook so the UI can provide clipboard/OpenUrl helpers at runtime
+- Implemented concrete UI adapters in ODExplorer.UI.Avalonia/Services:
+  - DispatcherAdapter, AudioPlayer (shell fallback), NotificationAdapter (notify-send), OdUtilsAdapter (clipboard/open-url), PlatformPaths
+- Wired adapters in App startup and hooked MessageBoxRequester to show a non-blocking toast (temporary)
+- Verified solution builds and Avalonia window opens; TestApp runs successfully
+
+Instructions for the next agent (no repo access)
+- To reproduce locally (commands to run on your machine):
+  1) Fetch the latest main branch and adapter branch (if using bundles provided in this session):
+     - If using bundles: git fetch /path/to/migration-implement-ui-adapters-v2.bundle migration/implement-ui-adapters:refs/heads/migration/implement-ui-adapters
+     - Otherwise: git clone https://github.com/bossmanbutts/odexplorer-linux.git && cd odexplorer-linux && git fetch && git checkout main
+  2) Build & run smoke tests:
+     - dotnet restore
+     - dotnet build ODExplorer.sln -c Release
+     - dotnet run --project src/TestApp/TestApp.csproj -c Release  # expect "Settings loaded successfully"
+     - dotnet run --project src/ODExplorer.UI.Avalonia/ODExplorer.UI.Avalonia.csproj -c Release  # optional GUI smoke test
+
+- If you cannot push changes from this session, apply changes by fetching the bundle and pushing from your machine; then open PRs via the GitHub web UI.
+
+Exact files to inspect first (for review or further porting):
+- Core (focus on removing UI deps):
+  - src/ODExplorer.Core/ViewModels/** (look for remaining System.Windows and convert as done above)
+  - src/ODExplorer.Core/Stores/NotificationStore.cs
+  - src/ODExplorer.Core/Models/MessageBoxEventArgsAsync.cs
+  - src/ODExplorer.Core/Models/MessageBoxRequester.cs
+  - src/ODExplorer.Core/Adapters/* and src/ODExplorer.Core/Audio/*
+- UI adapter implementations:
+  - src/ODExplorer.UI.Avalonia/Services/* (DispatcherAdapter, OdUtilsAdapter, NotificationAdapter, AudioPlayer, PlatformPaths)
+  - src/ODExplorer.UI.Avalonia/App.axaml.cs (wiring)
+
+Priority next tasks (for an autonomous agent without repo access):
+1) Grep for remaining System.Windows, RoutedEventArgs, ContextMenu, ToolTip, MessageBox, DataGrid, ToastNotifications, NAudio, System.Drawing. Produce a prioritized list of files by frequency and complexity.
+2) For each high-priority file, create a small transformation plan (1–3 edits) to replace UI types with core-friendly models/events or move UI logic to the UI project. Example: replace ContextMenu => MenuItemModel list (as done), replace MessageBox.Show => MessageBoxRequester.Request.
+3) Implement an interactive MessageBox dialog in Avalonia (UI): subscribe to MessageBoxRequester.Requested and show a dialog that executes callbackYes/callbackNo appropriately.
+4) Replace shell-based notification/audio with proper cross-platform libraries in UI; leave TODOs linking to recommended libs (ManagedBass, LibVLCSharp, libappindicator/Avalonia toast).
+5) Remove stubs (src/ODExplorer.Core/Stubs/*) once actual libraries are vendored or adapters are implemented; update csproj references if needed.
+6) Update README.md and add ARCHITECTURE.md describing adapter pattern, how to wire adapters, and test instructions.
+
+Handoff and traceability guidance (how to operate without repo access):
+- Use the provided bundle(s) in this session if direct git push/pull isn't possible. Bundles created in this session:
+  - /home/milo/Projects/odexplorer-linux/migration-implement-ui-adapters-v2.bundle
+  - /home/milo/Projects/odexplorer-linux/migration-implement-ui-adapters.bundle
+  - /home/milo/Projects/odexplorer-linux/migration-extract-core-from-windows-app.bundle
+- Always run dotnet restore then explicit dotnet build ODExplorer.sln -c Release (don’t rely on default dotnet commands in a folder with multiple sln files)
+- When opening PRs use GitHub web UI (compare main...branch) and paste migration_notes.md content as PR body; include the checklist and TODOs above
+
+When you finish work, update migration_notes.md with:
+- exact git commit SHAs, files changed, CI run URLs, and any runtime test outputs (console logs)
+- short developer notes on why each UI-related change was made and next action items
+
+Recent update (automated porting step):
+- Replaced remaining System.Windows dispatcher calls with DispatcherHelper across ViewModels (SpanshViewModel, MainViewModel, CartographicViewModel, SystemBodyViewModel and others).
+- Introduced ODExplorer.Models.Visibility enum to replace System.Windows.Visibility in core (used by SettingsViewModel, OrganicViewModel).
+- Replaced WPF ToolTip property in SystemBodyViewModel with ToolTipText (string) and moved complex tooltip controls to the UI layer.
+- Replaced WindowState usage to rely on existing project stub (avoided duplicate definitions).
+- Verified: dotnet build ODExplorer.sln -c Release succeeded locally (ODExplorer.Core and ODExplorer.UI.Avalonia built).
+
+Files touched in this step:
+- src/ODExplorer.Core/Models/Visibility.cs (added)
+- src/ODExplorer.Core/ViewModels/ViewVMs/SpanshViewModel.cs (replaced dispatcher calls)
+- src/ODExplorer.Core/ViewModels/ViewVMs/MainViewModel.cs (replaced dispatcher calls)
+- src/ODExplorer.Core/ViewModels/ViewVMs/SettingsViewModel.cs (remove System.Windows usage; use Visibility enum)
+- src/ODExplorer.Core/ViewModels/ViewVMs/CartographicViewModel.cs (replaced dispatcher calls)
+- src/ODExplorer.Core/ViewModels/ViewVMs/OrganicViewModel.cs (use Visibility from ODExplorer.Models)
+- src/ODExplorer.Core/ViewModels/ModelVMs/SystemBodyViewModel.cs (ToolTip -> ToolTipText; replaced dispatcher call)
+- src/ODExplorer.Core/ViewModels/ModelVMs/WindowPositionViewModel.cs (now uses ODExplorer.Models.WindowState stub)
+- src/ODExplorer.Core/ViewModels/ModelVMs/OrganicScanItemViewModel.cs (removed System.Windows using)
+
+Notes and next actions:
+- Some ViewModels still reference WPF collection/view types (ListCollectionView, CollectionViewSource) — these require a more involved refactor or a UI-side wrapper. Prioritize moving heavy view code into ODExplorer.UI.Avalonia/ViewModels.
+- Implement an Avalonia MessageBox dialog to subscribe to MessageBoxRequester.Requests (next high-priority UI task).
+- Run full test on a desktop Linux environment to verify notifications, audio, and clipboard functions from the UI adapters.
+
+Latest handoff update (2026-07-31 23:05 -04:00)
+- Paused because credits are low and the remaining work is a broad stub/compile cleanup.
+- The immediate blocker is the remaining missing core/stub types needed to finish Core ViewModel compilation.
+- Re-add the dropped import in `src/ODExplorer.Core/ViewModels/ModelVMs/StarSystemViewModel.cs`: `using ODUtils.Models;`
+- The next agent should treat this note as the source of truth because it does not have repo access.
+
+What the next agent should do first
+1) Rebuild `ODExplorer.sln -c Release` and capture the current unique CS errors.
+2) Fix the missing `StarSystemViewModel.cs` import.
+3) Expand `src/ODExplorer.Core/Stubs/` for the remaining types:
+   - `ODUtils.Models` (`StarSystem`, `SystemBody`, `DataState`, `DiscoveryStatus`, `PlanetClass`, `StarType`, `PlanetMaterial`, `OrganicVariant`, etc.)
+   - `EliteJournalReader` (`OrganicScanItem`, `OrganicScanStage`, `OrganicScanState`, `PlanetRing`, and related enums)
+   - Minimal `ODExplorer.Stores` facades for the store types still referenced by ViewModels
+4) Rebuild until `ODExplorer.Core` compiles cleanly again.
+
+What you can do now
+- If you want to keep pushing locally, run `dotnet build ODExplorer.sln -c Release` and paste the current errors back here.
+- If you want to hand this off cleanly, leave the branch as-is and let the next agent start from this updated note.
+- If you resume later, the most useful thing to capture is the exact build output after the next stub pass.
+
+Latest handoff update (2026-08-03, build fixed)
+- Installed .NET SDK locally at ~/.dotnet (dotnet was not on PATH in this environment):
+  - SDK 8.0.423 (channel 8.0) and SDK 10.0.302 (channel 10.0) via /tmp/dotnet-install.sh.
+  - IMPORTANT: The solution must be built with the .NET 10 SDK. Avalonia 12.1.0 analyzers require Roslyn >= 4.14; the .NET 8 SDK (Roslyn 4.11) fails to run Avalonia.Generators, so `InitializeComponent` is NOT generated and the UI project fails with CS0103. With .NET 10 SDK the full solution builds with 0 errors.
+- Fixed all 29 compile errors in ODExplorer.Core (Core had been failing to compile since the stub pass):
+  - Stores/SettingsStore.cs: `ActiveViewModel.Cartographic` -> `ActiveViewModel.Carto` (enum member is `Carto`).
+  - Stubs/StoreStubs.cs (SpanshCsvStore): `ParseCSV`/`ForceParseCSV` now return `bool` (match the real Store at Stores/SpanshCsvStore.cs; ViewModel did `if (csv)`).
+  - Stubs/StoreStubs.cs (ExplorationDataStore): `OrganicScanItems` is now `List<SystemBody>` (was `ObservableCollection<OrganicScanItemViewModel>`), matching the real store; fixes `body.OrganicScanItems` in OrganicViewModel.
+  - Stubs/StoreStubs.cs (OrganicCheckListDataStore): `OrganicScanItems` is now `Dictionary<string, List<OrganicChecklistItem>>` (matches real store); removed the mis-typed `OrganicScanItemsCollection` shim.
+  - ViewModels/ModelVMs/StarSystemViewModel.cs: `mats |= material.Name` -> `mats |= material.Name_AsMaterial` (PlanetMaterial |= string invalid; bridge type exposes Name_AsMaterial).
+  - Stubs/ODUtilsMissingStubs.cs (JournalCommander): added 5-arg ctor `(int id, string name, string? journalPath, string? lastFile, bool isHidden)` (matches real usage; also kept parameterless ctor).
+  - Stubs/ODUtilsMissingStubs.cs (OdExplorerDatabaseProvider): added `GetIgnoredSystems(int cmdrId)` -> `List<IgnoredSystem>` and `DeleteCommander(int commanderID)` -> `Task`.
+- Verification:
+  - `dotnet build ODExplorer.sln -c Release` => Build succeeded, 0 errors (36 warnings remain, mostly CS0067 unused events + nullable warnings in stubs/ViewModels).
+  - `dotnet run --project src/TestApp/TestApp.csproj -c Release` => "Settings loaded successfully (no-op provider)."
+- Remaining warnings to clean up (non-blocking): CS0105 duplicate `using ODExplorer.Models` in several ViewModels; CS8622/CS8604 nullability; CS0067 unused stub events.
