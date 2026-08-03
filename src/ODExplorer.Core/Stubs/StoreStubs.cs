@@ -21,7 +21,8 @@ namespace ODExplorer.Stores
         public event EventHandler<bool>? OnParserStoreLive;
         public event EventHandler? OnCommandersUpdated;
 
-        public bool IsLive { get; } = false;
+        // IsLive=true so the shell's UiEnabled gate is unlocked for UI porting/testing.
+        public bool IsLive { get; } = true;
         public List<JournalCommander> JournalCommanders { get; } = new();
 
         public Task ReadNewCommander(int id) => Task.CompletedTask;

@@ -303,7 +303,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             }
         }
 
-        internal void OnSetNewDir(string path)
+        public void OnSetNewDir(string path)
         {
             if (SelectedCommander != null)
             {

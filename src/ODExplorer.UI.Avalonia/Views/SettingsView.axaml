@@ -1,0 +1,165 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="ODExplorer.UI.Avalonia.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+    <UserControl.Resources>
+        <conv:VisibilityConverter x:Key="VisibilityConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+        <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="700" Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left column: commanders + options + links -->
+            <StackPanel Spacing="10">
+                <GroupBox Header="Commanders">
+                    <Grid Margin="10" RowDefinitions="*,20,Auto">
+                        <ListBox ItemsSource="{Binding JournalCommanderViews}"
+                                 SelectedItem="{Binding SelectedCommander}"
+                                 SelectionMode="Single"
+                                 MaxHeight="260"
+                                 VerticalAlignment="Top">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="modelvms:JournalCommaderViewModel">
+                                    <Grid ColumnDefinitions="Auto,*,*,90" Margin="4">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" MinWidth="150" />
+                                        <TextBlock Text="{Binding JournalPath}" Grid.Column="1" Margin="10,0"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding LastFile}" Grid.Column="2" Margin="10,0"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <CheckBox Content="Hidden" Grid.Column="3"
+                                                  IsChecked="{Binding IsHidden, Mode=TwoWay}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <Grid Grid.Row="2" RowDefinitions="50,50,50,50" ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding SelectedCommander.Name}"
+                                       FontSize="20"
+                                       VerticalAlignment="Center" />
+
+                            <TextBox Text="{Binding SelectedCommander.JournalPath}"
+                                     IsReadOnly="True"
+                                     Height="40"
+                                     VerticalAlignment="Center"
+                                     Grid.Row="1"
+                                     Grid.ColumnSpan="2" />
+
+                            <TextBox Text="{Binding SelectedCommander.LastFile}"
+                                     IsReadOnly="True"
+                                     Height="40"
+                                     VerticalAlignment="Center"
+                                     Grid.Row="2"
+                                     Grid.ColumnSpan="2" />
+
+                            <Button Content="Delete Commander"
+                                    Command="{Binding DeleteCommander}"
+                                    Width="180" Height="40"
+                                    Grid.Column="1" />
+
+                            <Button Content="Change Logs Folder"
+                                    Width="180" Height="40"
+                                    Grid.Row="1" Grid.Column="1"
+                                    Click="ChangeLogsFolder_Click" />
+
+                            <Button Content="Reset Last File"
+                                    Command="{Binding ResetLastReadFile}"
+                                    Width="180" Height="40"
+                                    Grid.Row="2" Grid.Column="1" />
+
+                            <Button Content="Scan Directory"
+                                    Width="180" Height="40"
+                                    Grid.Row="3"
+                                    HorizontalAlignment="Left"
+                                    Click="ScanDirectory_Click" />
+
+                            <Button Content="Save Changes"
+                                    Command="{Binding SaveCommanderChanges}"
+                                    Width="180" Height="40"
+                                    Grid.Row="3" Grid.Column="1" />
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="Application Options">
+                    <CheckBox Content="Minimise to tray"
+                              IsChecked="{Binding MinimiseToTray}"
+                              Margin="10"
+                              HorizontalAlignment="Left" />
+                </GroupBox>
+
+                <GroupBox Header="Links">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="10">
+                        <Button Content="GitHub" Command="{Binding OpenGitHub}" />
+                        <Button Content="PayPal" Command="{Binding OpenPayPal}" />
+                        <Button Content="EDSM" Command="{Binding OpenEdsm}" />
+                        <Button Content="Spansh" Command="{Binding OpenSpansh}" />
+                        <Button Content="EdAstro" Command="{Binding OpenEdAstro}" />
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+
+            <!-- Right column: database -->
+            <Grid Grid.Column="2"
+                  ColumnDefinitions="Auto,*"
+                  RowDefinitions="Auto,*"
+                  Margin="0,2">
+                <GroupBox Header="Database">
+                    <StackPanel Spacing="8" Margin="10">
+                        <Button Content="Reset Database"
+                                Command="{Binding ResetDataBaseCommand}"
+                                Width="220" Height="40" />
+                        <TextBlock Text="Resets all Commander data and scans the default directory"
+                                   TextWrapping="Wrap"
+                                   Width="220" />
+                    </StackPanel>
+                </GroupBox>
+
+                <Button Content="Donate via PayPal"
+                        Command="{Binding OpenPayPal}"
+                        Width="250" Height="60"
+                        Grid.Row="1"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+            </Grid>
+
+            <!-- Scanning overlay -->
+            <Border Background="#80000000"
+                    IsVisible="{Binding ScanningWindowVisibility, Converter={StaticResource VisibilityConverter}}"
+                    Grid.ColumnSpan="3"
+                    Grid.RowSpan="3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
+                <Border Background="#202020"
+                        MinWidth="600"
+                        CornerRadius="5"
+                        BorderThickness="2"
+                        BorderBrush="#3A3A3A"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <StackPanel Spacing="16" Margin="24">
+                        <TextBlock Text="{Binding DirectoryScanText}"
+                                   HorizontalAlignment="Center" />
+                        <ProgressBar IsIndeterminate="True"
+                                     Height="8"
+                                     Margin="0,8" />
+                        <TextBlock Text="{Binding FileReadingText}"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

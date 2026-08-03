@@ -341,7 +341,10 @@ namespace ODExplorer.Database
     {
         public void AddCommander(ODUtils.Journal.JournalCommander commander) { }
         public System.Threading.Tasks.Task<System.Collections.Generic.List<ODUtils.Journal.JournalCommander>> GetAllJournalCommanders(bool includeHidden)
-            => System.Threading.Tasks.Task.FromResult(new System.Collections.Generic.List<ODUtils.Journal.JournalCommander>());
+            => System.Threading.Tasks.Task.FromResult(new System.Collections.Generic.List<ODUtils.Journal.JournalCommander>
+            {
+                new(1, "Test Commander", "/home/user/Journal", "Journal.2026-08-01T000000.01.log", false)
+            });
         public void AddEdAstroPois(System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi> pois) { }
         public void AddIgnoreSystem(long address, string name, int commanderId) { }
         public void RemoveIgnoreSystem(long address, int commanderId) { }
