@@ -5,7 +5,17 @@ namespace ODUtils.Spansh
     public sealed class ExplorationTarget
     {
         public string SystemName { get; set; } = string.Empty;
-        public int Property3 { get; set; }
-        public string Property3Text => Property3.ToString();
+        public string? Property1 { get; set; }
+        public string? Property2 { get; set; }
+        public string? Property3 { get; set; }
+        public string? Property4 { get; set; }
+        public System.Collections.Generic.List<BodiesInfo>? BodiesInfo { get; set; }
+    }
+
+    public sealed class BodiesInfo
+    {
+        public string? Body { get; set; }
+        public string? Distance { get; set; }
+        public string? Property1 { get; set; }
     }
 }

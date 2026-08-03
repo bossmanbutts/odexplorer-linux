@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using ODExplorer.Models;
+using ODUtils.Models;
 
 namespace ODExplorer.Stores
 {
@@ -30,6 +32,24 @@ namespace ODExplorer.Stores
         public ViewModels.ModelVMs.WindowPositionViewModel WindowPosition { get; set; } = new();
         public DateTime JournalAgeDateTime => DateTime.UtcNow;
         public Dictionary<int, List<Models.PopOutParams>> PopOutParams { get; set; } = new();
+
+        // ── Settings properties used by ViewModels ──────────────────────────
+        public SystemGridSettings SystemGridSetting { get; set; } = SystemGridSettings.DefaultValues();
+        public NotificationSettings NotificationSettings { get; set; } = NotificationSettings.GetDefault();
+        public NotificationOptions NotificationOptions { get; set; }
+        public NotableNotificationOptions NotableSettings { get; set; } = new();
+        public SpanshCSVSettings SpanshCSVSettings { get; set; } = new();
+        public ExoBiologyViewState BiologyViewState { get; set; }
+        public CartoDetailsViewState CartoDetailsViewState { get; set; }
+        public CartoViewState CartoViewState { get; set; }
+        public CodexEntryHistory CodexEntryHistory { get; set; }
+        public JournalLogAge JournalAge { get; set; }
+        public GalacticRegions ExoCheckListRegion { get; set; }
+        public double UiScale { get; set; } = 1.0;
+        public GridSize CartoHorizontalGridSize { get; set; } = new();
+        public GridSize CartoDetailedGridSize { get; set; } = new();
+        public GridSize ExtendedBodyInfoGridSize { get; set; } = new();
+        public GridSize CurrentExoGridSize { get; set; } = new();
         public DateTime IgnoredCartoDate { get; set; } = DateTime.MinValue;
         public DateTime IgnoredExoDate { get; set; } = DateTime.MinValue;
         public bool MinimiseToTray { get; set; }
@@ -191,5 +211,7 @@ namespace ODExplorer.Stores
         {
             MinExoValueChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        public ActiveViewModel ActiveView { get; set; } = ActiveViewModel.Carto;
     }
 }

@@ -8,7 +8,7 @@ using ODUtils.Extensions;
 using ODUtils.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {

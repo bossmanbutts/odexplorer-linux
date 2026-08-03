@@ -1,6 +1,6 @@
 ﻿using ODUtils.Dialogs.ViewModels;
 using System.Runtime.Serialization;
-using System.Windows;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {

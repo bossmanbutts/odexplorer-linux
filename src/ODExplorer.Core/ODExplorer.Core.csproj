@@ -28,13 +28,14 @@
     <Compile Remove="Database\**\*.cs" />
     <Compile Remove="Migrations\**\*.cs" />
     <Compile Remove="Stores\**\*.cs" />
-    <Compile Remove="ViewModels\**\*.cs" />
     <Compile Remove="Models\SystemBodyViewModel*" />
   </ItemGroup>
 
   <!-- Include SettingsStore in core API surface (it is adapted to be core-friendly) -->
   <ItemGroup>
     <Compile Include="Stores\SettingsStore.cs" />
+    <Compile Include="Stores\NotificationStore.cs" />
+    <Compile Include="Models\SystemBodyViewModelMainComparer.cs" />
   </ItemGroup>
 
 </Project>

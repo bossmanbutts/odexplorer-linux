@@ -10,8 +10,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ViewVMs
 {
@@ -392,7 +392,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             var vms = commanders.Select(x => new JournalCommaderViewModel(x));
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 JournalCommanderViews.Clear();
 

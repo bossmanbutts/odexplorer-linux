@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "z/0rKyHLEWo=",
+  "dgSpecHash": "+odX84Vf1KM=",
   "success": true,
   "projectFilePath": "/home/milo/Projects/odexplorer-linux/src/TestApp/TestApp.csproj",
   "expectedPackageFiles": [
@@ -58,9 +58,7 @@
     "/home/milo/.nuget/packages/system.io.pipelines/9.0.0/system.io.pipelines.9.0.0.nupkg.sha512",
     "/home/milo/.nuget/packages/system.memory/4.5.4/system.memory.4.5.4.nupkg.sha512",
     "/home/milo/.nuget/packages/system.text.encodings.web/9.0.0/system.text.encodings.web.9.0.0.nupkg.sha512",
-    "/home/milo/.nuget/packages/system.text.json/9.0.0/system.text.json.9.0.0.nupkg.sha512",
-    "/home/milo/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.29/microsoft.aspnetcore.app.ref.8.0.29.nupkg.sha512",
-    "/home/milo/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.29/microsoft.netcore.app.host.linux-x64.8.0.29.nupkg.sha512"
+    "/home/milo/.nuget/packages/system.text.json/9.0.0/system.text.json.9.0.0.nupkg.sha512"
   ],
   "logs": []
 }

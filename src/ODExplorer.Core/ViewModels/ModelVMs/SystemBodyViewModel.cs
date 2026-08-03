@@ -13,10 +13,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
+using ODExplorer.Models;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {
@@ -26,9 +24,6 @@ namespace ODExplorer.ViewModels.ModelVMs
         {
             SettingsStore = settingsStore;
             _body = systemBody;
-
-            OrganicItems = CollectionViewSource.GetDefaultView(OrganicScanItems);
-            OrganicItems.Filter = CollectionViewSource_Filter;
             ToggleHidden = new RelayCommand(OnToggleHidden);
         }
 
@@ -175,42 +170,29 @@ namespace ODExplorer.ViewModels.ModelVMs
                 _ => $"{_body.Radius:N0} km"
             };
         }
-        public ToolTip ToolTip
+        // Tooltip text for UI to display; complex tooltip controls moved to UI layer
+        public string ToolTipText
         {
             get
             {
                 if (_body.PlanetClass == PlanetClass.EdsmValuableBody)
                 {
-                    return new()
-                    {
-                        Content = "Scan for more info"
-                    };
+                    return "Scan for more info";
                 }
 
                 if (IsNonBody)
                 {
-                    return new()
-                    {
-                        Content = "Non Body"
-                    };
+                    return "Non Body";
                 }
                 if (IsPlanet)
                 {
-                    return new()
-                    {
-                        SnapsToDevicePixels = true,
-                        Content = new PlanetToolTipControl(this)
-                    };
+                    return "Planet details";
                 }
                 if (IsStar)
                 {
-                    return new()
-                    {
-                        SnapsToDevicePixels = true,
-                        Content = new StarToolTipControl(this)
-                    };
+                    return "Star details";
                 }
-                return new();
+                return string.Empty;
             }
         }
         public PlanetImage PlanetImage
@@ -320,7 +302,29 @@ namespace ODExplorer.ViewModels.ModelVMs
         private ObservableCollection<OrganicScanItemViewModel> _organicScanItems = [];
         public ObservableCollection<OrganicScanItemViewModel> OrganicScanItems { get => _organicScanItems; set { _organicScanItems = value; OnPropertyChanged(nameof(OrganicScanItems)); } }
 
-        public ICollectionView OrganicItems { get; private set; }
+        // Filtered view of OrganicScanItems — replaces WPF ICollectionView/CollectionViewSource
+        private ObservableCollection<OrganicScanItemViewModel> _filteredOrganicItems = [];
+        public ObservableCollection<OrganicScanItemViewModel> OrganicItems
+        {
+            get => _filteredOrganicItems;
+            private set { _filteredOrganicItems = value; OnPropertyChanged(nameof(OrganicItems)); }
+        }
+
+        private void RefreshOrganicItems()
+        {
+            _filteredOrganicItems.Clear();
+            foreach (var item in _organicScanItems.Where(OrganicItemsFilter))
+                _filteredOrganicItems.Add(item);
+            OnPropertyChanged(nameof(OrganicItems));
+            OnPropertyChanged(nameof(HiddenCount));
+        }
+
+        private bool OrganicItemsFilter(OrganicScanItemViewModel item)
+        {
+            if (HideItems == false)
+                return true;
+            return item.IsHidden == false || item.UnConfirmed && SettingsStore.SystemGridSetting.FilterUnconfirmedBios;
+        }
         #endregion
         public bool IsNonBody => _body.IsPlanet == false && _body.IsStar == false;
         public bool HideItems { get; private set; } = true;
@@ -338,19 +342,14 @@ namespace ODExplorer.ViewModels.ModelVMs
         {
             HideItems = !HideItems;
             SetAlternationIndexes();
-            OrganicItems.Refresh();
+            RefreshOrganicItems();
             OnPropertyChanged(nameof(HideItems));
         }
 
         private bool CollectionViewSource_Filter(object obj)
         {
-            if (HideItems == false)
-                return true;
-             
             if (obj is OrganicScanItemViewModel item)
-            {
-                return item.IsHidden == false || item.UnConfirmed && SettingsStore.SystemGridSetting.FilterUnconfirmedBios;
-            }
+                return OrganicItemsFilter(item);
             return false;
         }
 
@@ -389,7 +388,7 @@ namespace ODExplorer.ViewModels.ModelVMs
             OnPropertyChanged(nameof(OrganicValues));
             OnPropertyChanged(nameof(OrganicScanItems));
             OnPropertyChanged(nameof(HiddenCount));
-            OrganicItems.Refresh();
+            RefreshOrganicItems();
             return true;
         }
 
@@ -434,7 +433,7 @@ namespace ODExplorer.ViewModels.ModelVMs
             }
             SetAlternationIndexes();
             OnPropertyChanged(nameof(HiddenCount));
-            Application.Current.Dispatcher.Invoke(OrganicItems.Refresh);
+            RefreshOrganicItems();
         }
 
         internal void UpdateOrganicInfo()

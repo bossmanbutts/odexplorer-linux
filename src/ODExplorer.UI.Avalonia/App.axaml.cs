@@ -34,6 +34,19 @@ public partial class App : Application
             var odUtils = new ODExplorer.UI.Avalonia.Services.OdUtilsAdapter();
             var notifier = new ODExplorer.UI.Avalonia.Services.NotificationAdapter();
             var paths = new ODExplorer.UI.Avalonia.Services.PlatformPaths();
+            // Wire static providers used by core
+            ODExplorer.Adapters.OdUtilsAdapterProvider.Current = odUtils;
+
+            // Wire a simple non-blocking MessageBox handler: show a toast for now. UI should replace with proper dialog.
+            ODExplorer.Models.MessageBoxRequester.Requested += (s, args) =>
+            {
+                try
+                {
+                    notifier.ShowToast(new ODExplorer.Adapters.NotificationModel { Title = args.Title, Message = args.Message });
+                }
+                catch { }
+            };
+
             // If your app has a DI container, register these implementations there.
         }
         catch { }

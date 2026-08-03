@@ -31,7 +31,15 @@ namespace ODExplorer.Stores
 
         internal void CopyToClipBoard(string message)
         {
-            // UI layer should provide clipboard implementation. Core will attempt to use a helper if present.
+            // Attempt to use the host-provided OdUtils adapter to copy to clipboard
+            try
+            {
+                ODExplorer.Adapters.OdUtilsAdapterProvider.Current?.CopyToClipboard(message);
+            }
+            catch
+            {
+                // swallow — UI may not have wired adapter
+            }
         }
 
         internal void FleetCarrierNotification(string message) { /* noop */ }
