@@ -151,11 +151,13 @@
                         VerticalAlignment="Center">
                     <StackPanel Spacing="16" Margin="24">
                         <TextBlock Text="{Binding DirectoryScanText}"
+                                   Foreground="White"
                                    HorizontalAlignment="Center" />
                         <ProgressBar IsIndeterminate="True"
                                      Height="8"
                                      Margin="0,8" />
                         <TextBlock Text="{Binding FileReadingText}"
+                                   Foreground="White"
                                    HorizontalAlignment="Center" />
                     </StackPanel>
                 </Border>

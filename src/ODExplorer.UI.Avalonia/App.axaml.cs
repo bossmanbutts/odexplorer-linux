@@ -95,7 +95,7 @@ public partial class App : Application
             new OrganicViewModel(organicCheckListDataStore, settingsStore, journalParserStore, explorationDataStore, new ExoData(), notificationStore));
 
         var settingsService = new OdNavigationService<SettingsViewModel>(navigationStore, () =>
-            new SettingsViewModel(settingsStore, databaseProvider, navigationViewModel!, journalParserStore));
+            SettingsViewModel.CreateViewModel(settingsStore, databaseProvider, navigationViewModel!, journalParserStore));
 
         var displaySettingsService = new OdNavigationService<DisplaySettingsViewModel>(navigationStore, () =>
             new DisplaySettingsViewModel(settingsStore, notificationStore));

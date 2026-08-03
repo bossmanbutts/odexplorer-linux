@@ -75,7 +75,33 @@ namespace ODExplorer.Stores
 
         public OrganicCheckListDataStore(JournalParserStore parserStore,
                                           ODUtils.Exobiology.ExoData exoData,
-                                          SettingsStore settings) { }
+                                          SettingsStore settings)
+        {
+            // Pre-populate every genus key the OrganicViewModel indexers hit, so
+            // navigation to the Exobiology view doesn't throw KeyNotFoundException.
+            foreach (var key in new[]
+            {
+                "$Codex_Ent_Aleoids_Genus_Name;",
+                "$Codex_Ent_Bacterial_Genus_Name;",
+                "$Codex_Ent_Cactoid_Genus_Name;",
+                "$Codex_Ent_Clypeus_Genus_Name;",
+                "$Codex_Ent_Conchas_Genus_Name;",
+                "$Codex_Ent_Electricae_Genus_Name;",
+                "$Codex_Ent_Fonticulus_Genus_Name;",
+                "$Codex_Ent_Fumerolas_Genus_Name;",
+                "$Codex_Ent_Fungoids_Genus_Name;",
+                "$Codex_Ent_Osseus_Genus_Name;",
+                "$Codex_Ent_Recepta_Genus_Name;",
+                "$Codex_Ent_Shrubs_Genus_Name;",
+                "$Codex_Ent_Stratum_Genus_Name;",
+                "$Codex_Ent_Tubus_Genus_Name;",
+                "$Codex_Ent_Tussocks_Genus_Name;",
+                "Other"
+            })
+            {
+                OrganicScanItems[key] = new List<OrganicChecklistItem>();
+            }
+        }
     }
 
     // ─── SpanshCsvStore ───────────────────────────────────────────────────────
