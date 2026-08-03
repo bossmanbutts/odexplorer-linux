@@ -12,7 +12,11 @@ jobs:
           dotnet-version: '8.0.x'
       - name: Restore
         run: dotnet restore ODExplorer.sln
+      - name: Restore TestApp
+        run: dotnet restore src/TestApp/TestApp.csproj
       - name: Build
         run: dotnet build ODExplorer.sln -c Release --no-restore
       - name: Build TestApp
+        run: dotnet build src/TestApp/TestApp.csproj -c Release --no-restore
+      - name: Run TestApp
         run: dotnet run --project src/TestApp/TestApp.csproj -c Release --no-build
