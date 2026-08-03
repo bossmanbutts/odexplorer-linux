@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="180"
+        x:Class="ODExplorer.UI.Avalonia.Views.MessageBoxWindow"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        CanResize="False">
+    <StackPanel Margin="16" Spacing="14" MinWidth="380">
+        <TextBlock x:Name="MessageText"
+                   TextWrapping="Wrap"
+                   MaxWidth="420"
+                   FontSize="14" />
+        <StackPanel x:Name="ButtonsPanel"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8" />
+    </StackPanel>
+</Window>

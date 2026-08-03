@@ -250,3 +250,13 @@ Latest handoff update (2026-08-03, build fixed)
   - `dotnet build ODExplorer.sln -c Release` => Build succeeded, 0 errors (36 warnings remain, mostly CS0067 unused events + nullable warnings in stubs/ViewModels).
   - `dotnet run --project src/TestApp/TestApp.csproj -c Release` => "Settings loaded successfully (no-op provider)."
 - Remaining warnings to clean up (non-blocking): CS0105 duplicate `using ODExplorer.Models` in several ViewModels; CS8622/CS8604 nullability; CS0067 unused stub events.
+
+Latest handoff update (2026-08-03, gitignore + interactive MessageBox dialog)
+- Added `.gitignore` (root) covering bin/obj, build dirs, IDE files, *.bundle, OS junk. This repo previously tracked ~315 bin/obj build artifacts (no .gitignore existed) causing binary-churn commits like the earlier `merge` commit.
+- Ran `git rm -r --cached` on all tracked `bin/`/`obj/` files (315 files staged for deletion, NOT committed). bin/obj are now ignored; re-add + commit when ready.
+- Implemented interactive Avalonia MessageBox dialog replacing the temporary toast handler:
+  - src/ODExplorer.UI.Avalonia/Views/MessageBoxWindow.axaml + .axaml.cs — window with message TextBlock and a code-built button row. Maps core `MessageBoxButton` (OK / OKCancel / YesNo / YesNoCancel) to buttons; Yes/OK invoke `CallbackYes`, No invokes `CallbackNo`, Cancel closes without callback. Public parameterless ctor added so the XAML resource is runtime-loadable (fixes AVLN3001).
+  - src/ODExplorer.UI.Avalonia/Services/MessageBoxService.cs — static `Show(Window? owner, args)` that posts to `Dispatcher.UIThread` and shows the dialog (modal via owner, or modeless if no owner).
+  - src/ODExplorer.UI.Avalonia/App.axaml.cs — `MessageBoxRequester.Requested` handler now shows the dialog owned by `desktop.MainWindow` instead of the toast; removed now-unused `notifier`/`paths` locals.
+- Build: `dotnet build ODExplorer.sln -c Release` => Build succeeded, 0 errors, no AVLN warnings.
+- NOT runtime-verified: this environment is headless (no X11/Xvfb), app fails at XOpenDisplay. Dialog must be smoke-tested on a real Linux desktop. Next UI steps: Port MainWindow/Views so the app actually navigates to ViewModels (the dialog only fires once ViewModels are reachable); SettingsViewModel routes via `NavigationViewModel.InvokeMessageBox` -> `MainViewModel.OnMessageBoxRequested` (currently unsubscribed in Core) so that path still needs UI wiring.
