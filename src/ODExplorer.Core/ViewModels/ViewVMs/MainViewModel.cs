@@ -110,6 +110,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             {
                 uiEnabled = value;
                 OnPropertyChanged(nameof(UiEnabled));
+                RefreshCommandStates();
             }
         }
         public double UiScale
@@ -325,7 +326,7 @@ namespace ODExplorer.ViewModels.ViewVMs
                     _navigationViewModel.CartographicViewCommand.Execute(null);
                     break;
             }
-            OnPropertyChanged(nameof(GetModelType));
+            RefreshCommandStates();
         }
 
         private bool GetModelType(ActiveViewModel model)
@@ -351,8 +352,17 @@ namespace ODExplorer.ViewModels.ViewVMs
         private void OnNavigationStore_CurrentViewModelChanged()
         {
             OnPropertyChanged(nameof(CurrentViewModel));
+            RefreshCommandStates();
         }
         #endregion
+
+        // Avalonia has no CommandManager.RequerySuggested, so CanExecute must be
+        // re-raised explicitly whenever UiEnabled or the current view changes.
+        private void RefreshCommandStates()
+        {
+            (NavigateToView as RelayCommand<ActiveViewModel>)?.RaiseCanExecuteChanged();
+            (AdjustUiScale as RelayCommand)?.RaiseCanExecuteChanged();
+        }
 
         #region Command Methods
         private void OnResetUiScale(object? obj)
