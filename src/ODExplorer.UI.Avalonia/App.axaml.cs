@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Microsoft.EntityFrameworkCore;
 using ODExplorer.Database;
 using ODExplorer.Stores;
 using ODExplorer.UI.Avalonia.Services;
@@ -9,6 +10,8 @@ using ODUtils.APis;
 using ODUtils.Database.Interfaces;
 using ODUtils.Exobiology;
 using ODUtils.ViewModelNavigation;
+using System;
+using System.IO;
 
 namespace ODExplorer.UI.Avalonia;
 
@@ -95,8 +98,22 @@ public partial class App : Application
 
     private static MainViewModel BuildViewModelGraph()
     {
-        // Stores (functional in-memory journal pipeline; real stores can be swapped in later)
-        IOdToolsDatabaseProvider databaseProvider = new OdExplorerDatabaseProvider();
+        // Real SQLite-backed database layer (in-tree EFCore provider + migrations).
+        string dbDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ODExplorer");
+        Directory.CreateDirectory(dbDir);
+        string connectionString = $"Data Source={Path.Combine(dbDir, "ODExplorer.db")}";
+        var dbContextFactory = new OdExplorerDbContextFactory(connectionString);
+        try
+        {
+            using var db = dbContextFactory.CreateDbContext();
+            db.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            ODExplorer.App.Logger.Error(ex, "Failed to migrate ODExplorer database");
+        }
+
+        IOdToolsDatabaseProvider databaseProvider = new OdExplorerDatabaseProvider(dbContextFactory);
         var settingsStore = new SettingsStore(databaseProvider);
         var notificationStore = new NotificationStore(settingsStore);
         var exoData = new ExoData();

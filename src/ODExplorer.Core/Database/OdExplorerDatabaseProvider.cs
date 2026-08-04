@@ -1,5 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using EliteJournalReader;
+﻿using EliteJournalReader;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ODExplorer.Database.DTOs;
@@ -7,7 +6,6 @@ using ODExplorer.Models;
 using ODUtils.Database.DTOs;
 using ODUtils.Database.Interfaces;
 using ODUtils.Journal;
-using ODUtils.Models.EdAstro;
 using ODUtils.Spansh;
 using System;
 using System.Collections.Generic;
@@ -124,22 +122,36 @@ namespace ODExplorer.Database
                 }
                 ).ToArray();
 
-
             using var context = _contextFactory.CreateDbContext();
 
-            context.BulkInsertOrUpdate(entriesToAdd, new BulkConfig() { PropertiesToIncludeOnCompare = ["TimeStamp", "Offset"] });
-            //context.JournalEntries
-            //    .UpsertRange(entriesToAdd)
-            //    .On(e => new { e.Filename, e.Offset })
-            //    .Run();
-            var connection = context.Database.GetDbConnection();
-            connection.Open();
-            using (var command = connection.CreateCommand())
+            foreach (var batch in entriesToAdd.Chunk(1000))
             {
-                command.CommandText = "pragma optimize;";
-                command.ExecuteNonQuery();
+                var filenames = batch.Select(x => x.Filename).Distinct().ToArray();
+                var existingKeys = context.JournalEntries
+                    .Where(x => filenames.Contains(x.Filename))
+                    .Select(x => new { x.Filename, x.Offset })
+                    .AsEnumerable()
+                    .Select(x => (x.Filename, x.Offset))
+                    .ToHashSet();
+
+                foreach (var entry in batch)
+                {
+                    var current = context.JournalEntries.Find(entry.Filename, entry.Offset);
+                    if (current is null)
+                    {
+                        context.JournalEntries.Add(entry);
+                    }
+                    else
+                    {
+                        current.TimeStamp = entry.TimeStamp;
+                        current.CommanderID = entry.CommanderID;
+                        current.EventTypeId = entry.EventTypeId;
+                        current.EventData = entry.EventData;
+                    }
+                }
+
+                context.SaveChanges();
             }
-            //context.SaveChanges();
         }
 
         public virtual async Task<List<JournalEntry>> GetAllJournalEntries(int cmdrId)
@@ -350,34 +362,53 @@ namespace ODExplorer.Database
         #endregion
 
         #region EdAstro
-        public void AddEdAstroPois(List<EdAstroData> data)
+        public void AddEdAstroPois(List<EdAstroPoi> data)
         {
             var entriesToAdd = data
                 .Select(x => new EdAstroPoiDTO()
                 {
                     Id = x.Id,
                     Name = x.Name ?? string.Empty,
-                    GalMapName = x.GalMapSearch ?? string.Empty,
-                    SystemAddress = x.Id64,
-                    X = x.Coordinates[0],
-                    Y = x.Coordinates[1],
-                    Z = x.Coordinates[2],
+                    GalMapName = x.GalMapName ?? string.Empty,
+                    SystemAddress = x.SystemAddress,
+                    X = x.SystemPosition.X,
+                    Y = x.SystemPosition.Y,
+                    Z = x.SystemPosition.Z,
                     Type = (int)x.Type,
                     Type2 = (int)x.Type2,
                     Summary = x.Summary ?? string.Empty,
-                    DistanceFromSol = x.SolDistance,
+                    DistanceFromSol = x.DistanceFromSol,
                     PoiUrl = x.PoiUrl?.OriginalString ?? string.Empty,
-                    MarkDown = x.DescriptionMardown ?? string.Empty
+                    MarkDown = x.MarkDown ?? string.Empty
                 }
                 );
 
 
             using var context = _contextFactory.CreateDbContext();
 
-            context.EdAstroPois
-                .UpsertRange(entriesToAdd)
-                .On(e => new { e.Id })
-                .Run();
+            foreach (var entry in entriesToAdd)
+            {
+                var current = context.EdAstroPois.Find(entry.Id);
+                if (current is null)
+                {
+                    context.EdAstroPois.Add(entry);
+                }
+                else
+                {
+                    current.Name = entry.Name;
+                    current.GalMapName = entry.GalMapName;
+                    current.SystemAddress = entry.SystemAddress;
+                    current.X = entry.X;
+                    current.Y = entry.Y;
+                    current.Z = entry.Z;
+                    current.Type = entry.Type;
+                    current.Type2 = entry.Type2;
+                    current.Summary = entry.Summary;
+                    current.DistanceFromSol = entry.DistanceFromSol;
+                    current.PoiUrl = entry.PoiUrl;
+                    current.MarkDown = entry.MarkDown;
+                }
+            }
 
             context.SaveChanges();
         }
@@ -413,10 +444,10 @@ namespace ODExplorer.Database
         {
             using var context = _contextFactory.CreateDbContext();
 
-            context.Settings.
-                UpsertRange(settings)
-                .On(x => x.Id)
-                .Run();
+            foreach (var setting in settings)
+            {
+                UpsertSetting(context, setting);
+            }
 
             context.SaveChanges();
 
@@ -427,12 +458,24 @@ namespace ODExplorer.Database
         {
             using var context = _contextFactory.CreateDbContext();
 
-            context.Settings.
-                Upsert(settings)
-                .On(x => x.Id)
-                .Run();
+            UpsertSetting(context, settings);
 
             context.SaveChanges();
+        }
+
+        private static void UpsertSetting(DbContext context, SettingsDTO setting)
+        {
+            var current = context.Set<SettingsDTO>().Find(setting.Id);
+            if (current is null)
+            {
+                context.Set<SettingsDTO>().Add(setting);
+            }
+            else
+            {
+                current.IntValue = setting.IntValue;
+                current.DoubleValue = setting.DoubleValue;
+                current.StringValue = setting.StringValue;
+            }
         }
         #endregion
 
@@ -441,18 +484,14 @@ namespace ODExplorer.Database
         {
             using var context = _contextFactory.CreateDbContext();
 
-            context.Database.ExecuteSqlRawAsync(
-                "DELETE FROM JournalCommanders;" +
-                "DELETE FROM JournalEntries;" +
+            context.Database.ExecuteSqlRaw(
                 "DELETE FROM CommanderIgnoredSystems;" +
                 "DELETE FROM CartoIgnoredSystems;" +
-                "DELETE FROM SQLITE_SEQUENCE WHERE name='CommanderIgnoredSystems';" +
-                "DELETE FROM SQLITE_SEQUENCE WHERE name='CartoIgnoredSystems';" +
-                "DELETE FROM SQLITE_SEQUENCE WHERE name='JournalCommanders';" +
-                "DELETE FROM SQLITE_SEQUENCE WHERE name='JournalEntries';");
+                "DELETE FROM JournalEntries;" +
+                "DELETE FROM Settings;" +
+                "DELETE FROM JournalCommanders;" +
+                "DELETE FROM SQLITE_SEQUENCE WHERE name IN ('JournalCommanders','JournalEntries');");
 
-            context.SaveChangesAsync();
-            context.Database.CloseConnection();
             return Task.CompletedTask;
         }
         #endregion
@@ -496,9 +535,18 @@ namespace ODExplorer.Database
 
             using var context = _contextFactory.CreateDbContext();
 
-            context.SpanshCsvs.UpsertRange(csvList)
-                .On(e => new { e.CsvType, e.CommanderID })
-                .Run();
+            foreach (var csv in csvList)
+            {
+                var current = context.SpanshCsvs.Find(csv.CsvType, csv.CommanderID);
+                if (current is null)
+                {
+                    context.SpanshCsvs.Add(csv);
+                }
+                else
+                {
+                    current.Json = csv.Json;
+                }
+            }
 
             context.SaveChanges();
         }

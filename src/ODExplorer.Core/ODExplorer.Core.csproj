@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EFCore.BulkExtensions.Sqlite" Version="8.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
@@ -23,10 +22,8 @@
     <PackageReference Include="NLog" Version="6.1.1" />
   </ItemGroup>
 
-  <!-- Exclude heavy host-specific Database code from core build; the UI/host should provide database provider implementations. -->
+  <!-- The real EFCore database layer (DbContext, provider, DTOs, migrations) is now compiled into core. -->
   <ItemGroup>
-    <Compile Remove="Database\**\*.cs" />
-    <Compile Remove="Migrations\**\*.cs" />
     <Compile Remove="Stores\**\*.cs" />
     <Compile Remove="Models\SystemBodyViewModel*" />
   </ItemGroup>

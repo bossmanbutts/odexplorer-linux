@@ -84,6 +84,17 @@ namespace ODUtils.Journal
         }
     }
 
+    // Reconstructs the typed event-args object for a stored journal JSON line.
+    public static class JournalWatcher
+    {
+        public static object GetEventData(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+                return new object();
+            return ODExplorer.Journal.JournalEventMapper.Map(json, string.Empty, 0)?.EventData ?? new object();
+        }
+    }
+
     public interface IProcessJournalLogs
     {
         void ParseJournalEvent(JournalEntry e);

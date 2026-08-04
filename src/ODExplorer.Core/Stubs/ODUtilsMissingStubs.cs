@@ -199,9 +199,27 @@ namespace ODUtils.Database.Interfaces
 {
     public interface IOdToolsDatabaseProvider
     {
-        void AddCommander(ODUtils.Journal.JournalCommander commander);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<ODUtils.Journal.JournalCommander>> GetAllJournalCommanders(bool includeHidden = false);
+        ODUtils.Journal.JournalCommander AddCommander(ODUtils.Journal.JournalCommander commander);
         ODUtils.Journal.JournalCommander? GetCommander(int id);
-        System.Threading.Tasks.Task<System.Collections.Generic.List<ODUtils.Journal.JournalCommander>> GetAllJournalCommanders(bool includeHidden);
+        System.Collections.Generic.HashSet<string> GetAllReadFilenames();
+        void AddJournalEntries(System.Collections.Generic.List<EliteJournalReader.JournalEntry> journalEntries);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<EliteJournalReader.JournalEntry>> GetAllJournalEntries(int cmdrId);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<EliteJournalReader.JournalEntry>> GetJournalEntriesOfType(int cmdrId, System.Collections.Generic.List<ODUtils.Journal.JournalTypeEnum> types);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<EliteJournalReader.JournalEntry>> GetJournalEntriesOfType(int cmdrId, System.Collections.Generic.List<ODUtils.Journal.JournalTypeEnum> types, System.DateTime age);
+        System.Threading.Tasks.Task GetJournalsStream(int cmdrId, System.Collections.Generic.List<ODUtils.Journal.JournalTypeEnum> types, System.DateTime age, System.Func<EliteJournalReader.JournalEntry, System.Threading.Tasks.Task> callBack);
+        System.Threading.Tasks.Task ParseJournalEventsOfType(int cmdrId, System.Collections.Generic.List<ODUtils.Journal.JournalTypeEnum> types, System.Action<EliteJournalReader.JournalEntry> callback, System.DateTime age);
+        System.Threading.Tasks.Task AddIgnoreSystem(long address, string name, int cmdrId);
+        System.Threading.Tasks.Task RemoveIgnoreSystem(long address, int cmdrId);
+        System.Collections.Generic.Dictionary<long, string> GetIgnoredSystemsDictionary(int cmdrId);
+        System.Collections.Generic.List<ODExplorer.Models.IgnoredSystem> GetIgnoredSystems(int cmdrId);
+        void AddEdAstroPois(System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi> pois);
+        System.Threading.Tasks.Task<System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi>> GetAstroPoisAsync();
+        System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi> GetAstroPois();
+        System.Collections.Generic.List<ODUtils.Database.DTOs.SettingsDTO> GetAllSettings();
+        void AddSettings(System.Collections.Generic.List<ODUtils.Database.DTOs.SettingsDTO> settings);
+        void AddSetting(ODUtils.Database.DTOs.SettingsDTO settings);
+        System.Threading.Tasks.Task ResetDataBaseAsync();
     }
 }
 
@@ -274,17 +292,6 @@ namespace ODUtils.Helpers
 // ToastNotifications.Position — already defined in ToastNotificationsStubs.cs
 // ────────────────────────────────────────────────────────────────────────────
 
-// ────────────────────────────────────────────────────────────────────────────
-// ODExplorer.Database — IOdExplorerDBContextFactory interface stub
-// ────────────────────────────────────────────────────────────────────────────
-namespace ODExplorer.Database
-{
-    public interface IOdExplorerDBContextFactory
-    {
-        Microsoft.EntityFrameworkCore.DbContext CreateDbContext();
-    }
-}
-
 // ─── App class stub ───────────────────────────────────────────────────────────
 namespace ODExplorer
 {
@@ -307,53 +314,5 @@ namespace ODExplorer.Models
     public static class PatchDates
     {
         public static System.DateTime Type11PatchDate { get; } = new System.DateTime(2023, 4, 11);
-    }
-}
-
-// ─── OdExplorerDatabaseProvider stub ─────────────────────────────────────────
-namespace ODExplorer.Database
-{
-    public sealed class OdExplorerDatabaseProvider : ODUtils.Database.Interfaces.IOdToolsDatabaseProvider
-    {
-        private readonly System.Collections.Generic.List<ODUtils.Journal.JournalCommander> commanders = [];
-
-        public void AddCommander(ODUtils.Journal.JournalCommander commander)
-        {
-            var existing = commanders.FirstOrDefault(x => x.Id == commander.Id);
-            if (existing is not null)
-            {
-                commanders[commanders.IndexOf(existing)] = commander;
-            }
-            else
-            {
-                commanders.Add(commander);
-            }
-        }
-
-        public ODUtils.Journal.JournalCommander? GetCommander(int id)
-            => commanders.FirstOrDefault(x => x.Id == id);
-
-        public System.Threading.Tasks.Task<System.Collections.Generic.List<ODUtils.Journal.JournalCommander>> GetAllJournalCommanders(bool includeHidden)
-            => System.Threading.Tasks.Task.FromResult(commanders.ToList());
-
-        public void DeleteCommander(int commanderId)
-        {
-            commanders.RemoveAll(x => x.Id == commanderId);
-        }
-
-        public void ClearCommanders() => commanders.Clear();
-
-        public void AddEdAstroPois(System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi> pois) { }
-        public void AddIgnoreSystem(long address, string name, int commanderId) { }
-        public void RemoveIgnoreSystem(long address, int commanderId) { }
-        public System.Collections.Generic.List<ODExplorer.Models.IgnoredSystem> GetIgnoredSystems(int cmdrId)
-            => new();
-        public System.Threading.Tasks.Task DeleteCommanderAsync(int commanderID)
-            => System.Threading.Tasks.Task.CompletedTask;
-        public System.Threading.Tasks.Task ResetDataBaseAsync()
-        {
-            commanders.Clear();
-            return System.Threading.Tasks.Task.CompletedTask;
-        }
     }
 }

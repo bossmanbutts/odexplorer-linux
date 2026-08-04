@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Microsoft.EntityFrameworkCore;
 using ODExplorer.Database;
 using ODExplorer.Stores;
 using ODUtils.APis;
@@ -15,7 +16,16 @@ class Program
     {
         try
         {
-            var db = new OdExplorerDatabaseProvider();
+            var dbFile = Path.Combine(Path.GetTempPath(), "odex_pipeline_smoke.db");
+            if (File.Exists(dbFile)) File.Delete(dbFile);
+
+            var dbContextFactory = new OdExplorerDbContextFactory($"Data Source={dbFile}");
+            using (var migrationContext = dbContextFactory.CreateDbContext())
+            {
+                migrationContext.Database.Migrate();
+            }
+
+            var db = new OdExplorerDatabaseProvider(dbContextFactory);
             var settings = new SettingsStore(db);
             var notifications = new NotificationStore(settings);
             var exo = new ExoData();
@@ -81,6 +91,34 @@ class Program
 
             Check("live tail picks up appended lines", exploration.CurrentSystem?.Name is "LiveSys" or "RolledSys");
             Check("live tail fired current-system events", currentSystemEvents > liveEventsBefore);
+
+            // Persistence: a fresh provider over the same SQLite file must see the
+            // commander and journal entries written during the parse.
+            var persistedProvider = new OdExplorerDatabaseProvider(dbContextFactory);
+            var savedCommanders = persistedProvider.GetAllJournalCommanders(true).GetAwaiter().GetResult();
+            Check("commander persisted", savedCommanders.Any(x => x.Name == "TestCMDR"));
+
+            var savedId = savedCommanders.FirstOrDefault(x => x.Name == "TestCMDR")?.Id ?? 0;
+            var savedEntries = savedId == 0 ? [] : persistedProvider.GetAllJournalEntries(savedId).GetAwaiter().GetResult();
+            Check("journal entries persisted", savedEntries.Count >= 13);
+            Check("FSDJump entries persisted", savedEntries.Count(x => x.EventType == ODUtils.Journal.JournalTypeEnum.FSDJump) >= 2);
+
+            // Journal entries can be reconstructed back into typed event data.
+            var scanEntries = savedEntries.Where(x => x.EventType == ODUtils.Journal.JournalTypeEnum.Scan).ToList();
+            Check("reconstructed Scan events have data", scanEntries.Count >= 2 && scanEntries.All(x => x.EventData is not null));
+
+            // Restart simulation: re-parsing the same journal dir against the same
+            // DB must update (not duplicate) the commander and journal entries.
+            var restartParser = new JournalParserStore(persistedProvider, settings);
+            _ = new ExplorationDataStore(restartParser, new EdsmApiService(), persistedProvider, notifications, settings, exo, organicChecklist);
+            restartParser.ReadNewDirectory(journalDir);
+            deadline = DateTime.UtcNow.AddSeconds(30);
+            while (!restartParser.IsLive && DateTime.UtcNow < deadline) Thread.Sleep(50);
+
+            var finalCommanders = persistedProvider.GetAllJournalCommanders(true).GetAwaiter().GetResult();
+            var finalEntries = persistedProvider.GetAllJournalEntries(savedId).GetAwaiter().GetResult();
+            Check("restart keeps commander count at 1", finalCommanders.Count(x => x.Name == "TestCMDR") == 1);
+            Check("restart does not duplicate journal entries", finalEntries.Count == 15);
 
             Console.WriteLine();
             Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");

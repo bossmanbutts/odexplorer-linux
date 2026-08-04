@@ -2,6 +2,13 @@ namespace ODUtils.Spansh
 {
     public enum CsvType { RoadToRiches = 0, NeutronRoute, WorldTypeRoute, TouristRoute, FleetCarrier, GalaxyPlotter, Exobiology }
 
+    public sealed class SpanshCsvDTO
+    {
+        public int CsvType { get; set; }
+        public int CommanderID { get; set; }
+        public string Json { get; set; } = string.Empty;
+    }
+
     public sealed class ExplorationTarget
     {
         public string SystemName { get; set; } = string.Empty;

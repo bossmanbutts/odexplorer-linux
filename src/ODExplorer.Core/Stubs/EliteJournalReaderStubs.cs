@@ -10,8 +10,23 @@ namespace EliteJournalReader
 {
     public sealed class JournalEntry
     {
+        public JournalEntry() { }
+
+        public JournalEntry(string filename, long offset, int commanderID,
+            ODUtils.Journal.JournalTypeEnum type, object eventData,
+            Newtonsoft.Json.Linq.JToken? originalEvent)
+        {
+            Filename = filename;
+            Offset = offset;
+            CommanderID = commanderID;
+            EventType = type;
+            EventData = eventData;
+            OriginalEvent = originalEvent;
+        }
+
         public string Event { get; set; } = string.Empty;
         public object EventData { get; set; } = new object();
+        public Newtonsoft.Json.Linq.JToken? OriginalEvent { get; set; }
         public ODUtils.Journal.JournalTypeEnum EventType { get; set; }
         public int CommanderID { get; set; }
         public DateTime TimeStamp { get; set; }

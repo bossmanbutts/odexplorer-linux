@@ -113,19 +113,18 @@ namespace ODExplorer.Stores
             return Task.CompletedTask;
         }
 
-        public Task ResetDataBase(IOdToolsDatabaseProvider provider)
+        public async Task ResetDataBase(IOdToolsDatabaseProvider provider)
         {
             StopWatching();
             IsLive = false;
 
             if (provider is OdExplorerDatabaseProvider dbProvider)
             {
-                dbProvider.ClearCommanders();
+                await dbProvider.ResetDataBaseAsync();
             }
 
             _journalCommanders.Clear();
             Raise(() => OnCommandersUpdated?.Invoke(this, EventArgs.Empty));
-            return Task.CompletedTask;
         }
 
         private async Task LoadCommanderAsync(int commanderID)
@@ -213,16 +212,39 @@ namespace ODExplorer.Stores
                     lastFile = Path.GetFileName(file);
                     await Task.Yield();
 
-                    foreach (var line in File.ReadLines(file))
-                    {
-                        var entry = JournalEventMapper.Map(line, Path.GetFileName(file), commanderId);
-                        if (entry is null)
-                            continue;
+                    List<JournalEntry> entriesToSave = [];
 
-                        foreach (var parser in journalLogParserList)
+                    // Read with per-line byte offsets so journal entries get unique,
+                    // deterministic (Filename, Offset) keys for DB persistence.
+                    long offset = 0;
+                    foreach (var raw in File.ReadAllText(file).Split('\n'))
+                    {
+                        var line = raw.TrimEnd('\r');
+                        if (raw.Length == 0)
                         {
-                            parser.ParseJournalEvent(entry);
+                            offset += 1;
+                            continue;
                         }
+
+                        var entry = JournalEventMapper.Map(line, lastFile, commanderId);
+
+                        if (entry is not null)
+                        {
+                            entry.Offset = offset;
+                            entriesToSave.Add(entry);
+
+                            foreach (var parser in journalLogParserList)
+                            {
+                                parser.ParseJournalEvent(entry);
+                            }
+                        }
+
+                        offset += Encoding.UTF8.GetByteCount(raw) + 1;
+                    }
+
+                    if (databaseProvider is not null && entriesToSave.Count != 0)
+                    {
+                        databaseProvider.AddJournalEntries(entriesToSave);
                     }
 
                     UpdateCommanderLastFile(commanderId, lastFile);

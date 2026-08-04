@@ -1,12 +1,19 @@
 Migration Handoff Note — ODExplorer core extraction + UI adapter implementation
 
-Status (2026-07-31T21:47:00-04:00):
-- Branch: migration/extract-core-from-windows-app (MERGED into main). Extracted core, removed WPF deps, added adapter interfaces + NoOp defaults.
-- Branch: migration/implement-ui-adapters (MERGED into main). Implemented UI adapter services (Dispatcher, Audio, Notifications, OdUtils, PlatformPaths); wired in App startup.
-- Core (ODExplorer.Core) builds successfully (net8.0).
-- UI (ODExplorer.UI.Avalonia) builds successfully (net8.0), references ODExplorer.Core.
-- TestApp runs: SettingsStore.LoadSettings() with NoOp/shell adapters.
-- CI workflow at .github/workflows/ci.yml builds both projects and runs TestApp on ubuntu-latest. All checks passing.
+Status (2026-08-03, REAL SQLITE DATABASE LAYER WIRED):
+- The in-tree EFCore database layer is now compiled into ODExplorer.Core and used at runtime:
+  - `Database/**` (real `OdExplorerDbContext`, `OdExplorerDbContextFactory`, `IOdExplorerDBContextFactory`, `ODDesignTimeDbContextFactory`, `OdExplorerDatabaseProvider`, DTOs) + `Migrations/**` (8 tables, generated under EF 9.0.0) are now included in the csproj.
+  - The stub in-memory `OdExplorerDatabaseProvider` and tiny `IOdToolsDatabaseProvider` were deleted; the interface now mirrors the real ODUtils surface (commanders, journal entries, journal streams/history, ignored systems, EdAstro POIs, settings, spansh CSVs, reset).
+  - Added functional `ODUtils.Database.Base.ODDbContextBase` (DbSets JournalCommanders/JournalEntries/Settings + OnEfCoreModelCreating hook mirroring the migrations), `ODUtils.Database.DTOs.{JournalCommanderDTO, JournalEntryDTO, SettingsDTO}`, `ODUtils.Spansh.SpanshCsvDTO`, `EliteJournalReader.JournalEntry` 6-arg ctor + `OriginalEvent`, `ODUtils.Journal.JournalWatcher.GetEventData`, and `EventTypeCompare` query extension.
+  - Real provider reconciled to compile without `EFCore.BulkExtensions`/FlexLabs upsert packages: `AddJournalEntries`, `AddEdAstroPois`, `AddSettings`/`AddSetting`, and `SaveCVSs` now use plain EF upserts (Find + Add/update, chunked); `ResetDataBaseAsync` executes for real; `AddEdAstroPois` takes `List<ODExplorer.Models.EdAstroPoi>` (matching `LoaderViewModel`). `EFCore.BulkExtensions.Sqlite` package reference removed.
+  - `JournalParserStore` now persists every parsed journal line to the DB with per-line byte offsets (deterministic, unique `(Filename, Offset)` composite keys; `OriginalEvent` raw JSON stored as EventData). `ResetDataBase` calls the provider's `ResetDataBaseAsync`.
+  - `App.axaml.cs` builds a real `OdExplorerDatabaseProvider` over `%LOCALAPPDATA%/ODExplorer/ODExplorer.db` and runs `Migrate()` at startup (try/catch).
+  - TestApp smoke test now 22 checks incl. persistence: commander saved, 13 journal entries saved with correct offsets, FSDJumps reconstructed, Scan events reconstruct typed EventData, and a full RESTART simulation (re-parse same dir + same DB) keeps commander count at 1 and journal entry count at 15 (no duplicates). ALL CHECKS PASSED.
+  - Build: `dotnet build ODExplorer.sln -c Release` => 0 errors.
+- Verified on-disk: sqlite3 /tmp/odex_pipeline_smoke.db shows all 8 tables; JournalCommanders row for TestCMDR; 13 JournalEntries with offsets 0/88/223/... and raw event JSON.
+- What persistence now covers: commanders (+journal dir + last file), full journal entry history, ignored systems, EdAstro POIs, settings, spansh CSVs. The journal pipeline still rebuilds in-memory carto/organic data by re-reading the journal FILES on startup; wiring the real `Stores/ExplorationDataStore` to rebuild from the DB is the next step for full parity.
+
+Prior status (2026-07-31): core extracted, UI adapters implemented, core + UI build, TestApp smoke test, CI passing.
 
 Files changed (complete list):
 

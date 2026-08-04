@@ -44,7 +44,8 @@ namespace ODExplorer.Journal
                 CommanderID = commanderId,
                 TimeStamp = GetTimestamp(obj),
                 Filename = filename,
-                Offset = 0
+                Offset = 0,
+                OriginalEvent = obj
             };
 
             entry.EventData = MapEvent(obj, type);
