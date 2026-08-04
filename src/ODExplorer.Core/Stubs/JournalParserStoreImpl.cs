@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using EliteJournalReader;
 using EliteJournalReader.Events;
@@ -32,6 +34,15 @@ namespace ODExplorer.Stores
         private readonly List<IProcessJournalLogs> journalLogParserList = [];
         private readonly List<JournalCommander> _journalCommanders = [];
         private string? currentDirectory;
+        private int currentCommanderId;
+
+        // Live tailing: watches the journal directory so new lines written while
+        // playing are parsed as they arrive (IsLive is already true at that point,
+        // so the parsed events fire to the ViewModels immediately).
+        private readonly Dictionary<string, long> filePositions = [];
+        private FileSystemWatcher? fileWatcher;
+        private Timer? watchDebounceTimer;
+        private readonly object watchLock = new();
 
         public JournalParserStore(IOdToolsDatabaseProvider? databaseProvider = null,
                                   SettingsStore? settingsStore = null)
@@ -104,6 +115,7 @@ namespace ODExplorer.Stores
 
         public Task ResetDataBase(IOdToolsDatabaseProvider provider)
         {
+            StopWatching();
             IsLive = false;
 
             if (provider is OdExplorerDatabaseProvider dbProvider)
@@ -176,7 +188,9 @@ namespace ODExplorer.Stores
 
         private async Task ParseDirectoryAsync(string directory, int commanderId, string commanderName)
         {
+            StopWatching();
             IsLive = false;
+            currentCommanderId = commanderId;
 
             foreach (var parser in journalLogParserList)
             {
@@ -234,6 +248,8 @@ namespace ODExplorer.Stores
             Raise(() => OnJournalStoreStatusChange?.Invoke(this, "Completed"));
 
             IsLive = true;
+
+            StartWatching(directory);
         }
 
         private void UpdateCommanderLastFile(int commanderId, string lastFile)
@@ -283,5 +299,126 @@ namespace ODExplorer.Stores
         {
             DispatcherHelper.Invoke(action);
         }
+
+        #region Live Tail
+
+        private void StartWatching(string directory)
+        {
+            if (string.IsNullOrEmpty(directory) || Directory.Exists(directory) == false)
+                return;
+
+            lock (watchLock)
+            {
+                filePositions.Clear();
+                foreach (var file in Directory.EnumerateFiles(directory, "*.log", SearchOption.TopDirectoryOnly))
+                {
+                    filePositions[file] = new FileInfo(file).Length;
+                }
+            }
+
+            StopWatching();
+
+            fileWatcher = new FileSystemWatcher(directory, "*.log")
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName
+            };
+            fileWatcher.Created += OnJournalFileChanged;
+            fileWatcher.Changed += OnJournalFileChanged;
+            fileWatcher.Error += OnWatchError;
+            fileWatcher.EnableRaisingEvents = true;
+
+            watchDebounceTimer = new Timer(_ => ProcessNewLogLines(), null, Timeout.Infinite, Timeout.Infinite);
+        }
+
+        private void StopWatching()
+        {
+            if (fileWatcher is not null)
+            {
+                fileWatcher.EnableRaisingEvents = false;
+                fileWatcher.Created -= OnJournalFileChanged;
+                fileWatcher.Changed -= OnJournalFileChanged;
+                fileWatcher.Error -= OnWatchError;
+                fileWatcher.Dispose();
+                fileWatcher = null;
+            }
+
+            watchDebounceTimer?.Dispose();
+            watchDebounceTimer = null;
+        }
+
+        private void OnJournalFileChanged(object sender, FileSystemEventArgs e)
+        {
+            watchDebounceTimer?.Change(300, Timeout.Infinite);
+        }
+
+        private void OnWatchError(object sender, ErrorEventArgs e)
+        {
+            Raise(() => OnJournalStoreStatusChange?.Invoke(this, "Journal watch error"));
+        }
+
+        private void ProcessNewLogLines()
+        {
+            if (IsLive == false || string.IsNullOrEmpty(currentDirectory) || Directory.Exists(currentDirectory) == false)
+                return;
+
+            List<(string file, string line)> lines = [];
+
+            lock (watchLock)
+            {
+                foreach (var file in Directory.EnumerateFiles(currentDirectory, "*.log", SearchOption.TopDirectoryOnly))
+                {
+                    long length = new FileInfo(file).Length;
+                    if (!filePositions.TryGetValue(file, out var position))
+                    {
+                        position = 0;
+                    }
+
+                    if (length < position)
+                    {
+                        position = 0;
+                    }
+
+                    if (length <= position)
+                        continue;
+
+                    using var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    fs.Seek(position, SeekOrigin.Begin);
+
+                    var buffer = new byte[fs.Length - fs.Position];
+                    if (buffer.Length == 0)
+                        continue;
+                    fs.ReadExactly(buffer);
+
+                    var text = Encoding.UTF8.GetString(buffer);
+                    var lastNl = text.LastIndexOf('\n');
+                    if (lastNl < 0)
+                        continue;
+
+                    var complete = text.Substring(0, lastNl);
+                    filePositions[file] = position + Encoding.UTF8.GetByteCount(complete) + 1;
+
+                    foreach (var rawLine in complete.Split('\n'))
+                    {
+                        var line = rawLine.Trim();
+                        if (line.Length == 0)
+                            continue;
+                        lines.Add((Path.GetFileName(file), line));
+                    }
+                }
+            }
+
+            foreach (var (file, line) in lines)
+            {
+                var entry = JournalEventMapper.Map(line, file, currentCommanderId);
+                if (entry is null)
+                    continue;
+
+                foreach (var parser in journalLogParserList)
+                {
+                    parser.ParseJournalEvent(entry);
+                }
+            }
+        }
+        #endregion
     }
 }

@@ -66,6 +66,22 @@ class Program
             Check("carto sold event not raised during history (live false)", cartoSold == 0);
             Check("bio sold event not raised during history (live false)", bioSold == 0);
 
+            // Live tailing: append a new FSDJump to the current journal file and a
+            // brand-new .log file; both should be picked up while IsLive is true
+            // and fire current-system events.
+            int liveEventsBefore = currentSystemEvents;
+            var journalFile = Path.Combine(journalDir, "Journal.240101000000.01.log");
+            File.AppendAllText(journalFile,
+                "{\"timestamp\":\"2024-01-01T00:00:13Z\",\"event\":\"FSDJump\",\"StarSystem\":\"LiveSys\",\"SystemAddress\":3103895106050,\"StarPos\":[10.0,20.0,30.0],\"StarType\":\"G\",\"Body\":7,\"Bodies\":1,\"JumpDist\":40.0}\n");
+            File.AppendAllText(Path.Combine(journalDir, "Journal.240101010000.02.log"),
+                "{\"timestamp\":\"2024-01-01T01:00:00Z\",\"event\":\"FSDJump\",\"StarSystem\":\"RolledSys\",\"SystemAddress\":3103895106051,\"StarPos\":[50.0,60.0,70.0],\"StarType\":\"K\",\"Body\":7,\"Bodies\":1,\"JumpDist\":80.0}\n");
+
+            deadline = DateTime.UtcNow.AddSeconds(15);
+            while (exploration.CurrentSystem?.Name is "NextSys" or null && DateTime.UtcNow < deadline) Thread.Sleep(100);
+
+            Check("live tail picks up appended lines", exploration.CurrentSystem?.Name is "LiveSys" or "RolledSys");
+            Check("live tail fired current-system events", currentSystemEvents > liveEventsBefore);
+
             Console.WriteLine();
             Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");
             return failures == 0 ? 0 : 1;
