@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:models="using:ODExplorer.Models"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="ODExplorer.UI.Avalonia.Views.CartographicView"
+             x:DataType="vm:CartographicViewModel">
+    <Grid RowDefinitions="*,40">
+        <!-- Body: current system bodies grid (stand-in while full carto layouts are ported) -->
+        <DataGrid Grid.Row="0"
+                  ItemsSource="{Binding CurrentSystemBodies}"
+                  IsReadOnly="True"
+                  AutoGenerateColumns="False"
+                  GridLinesVisibility="All"
+                  HeadersVisibility="Column"
+                  Margin="5">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Width="60" Binding="{Binding BodyID}" />
+                <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Class" Width="*" Binding="{Binding BodyDescription}" />
+                <DataGridTextColumn Header="Scan Stage" Width="120" Binding="{Binding ScanStage}" />
+                <DataGridTextColumn Header="Arrival ls" Width="130" Binding="{Binding DistanceFromArrivalLs}" />
+                <DataGridTextColumn Header="Value" Width="130" Binding="{Binding DataValue, StringFormat=N0}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Footer -->
+        <Border Grid.Row="1" Background="#323232">
+            <Grid ColumnDefinitions="*,*,*,Auto,Auto">
+                <StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center">
+                    <TextBlock Text="Systems In Route : " VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Route.Count, StringFormat=N0}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center">
+                    <TextBlock Text="Estimated Carto Value : " VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding CartoValue}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center">
+                    <TextBlock Text="Estimated Exo Value : " VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ExoValue}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="5,0,30,0" VerticalAlignment="Center">
+                    <Button Content="VB" Width="30" Height="30" Margin="2"
+                            ToolTip.Tip="Valuable Bodies Overlay"
+                            Command="{Binding OpenValuableBodiesPopOut}" />
+                    <Button Content="EX" Width="30" Height="30" Margin="2"
+                            ToolTip.Tip="Exobiology Overlay"
+                            Command="{Binding OpenExobiologyPopOut}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center">
+                    <Button Content="EXO" Width="34" Height="30" Margin="2"
+                            ToolTip.Tip="Current System/Exo Layout"
+                            Command="{Binding SwitchView}"
+                            CommandParameter="{x:Static models:CartoViewState.DetailedExo}" />
+                    <Button Content="DET" Width="34" Height="30" Margin="2"
+                            ToolTip.Tip="Detailed Layout"
+                            Command="{Binding SwitchView}"
+                            CommandParameter="{x:Static models:CartoViewState.DetailedView}" />
+                    <Button Content="CLS" Width="34" Height="30" Margin="2"
+                            ToolTip.Tip="Classic Layout"
+                            Command="{Binding SwitchView}"
+                            CommandParameter="{x:Static models:CartoViewState.ClassicView}" />
+                    <Button Content="HOR" Width="34" Height="30" Margin="2"
+                            ToolTip.Tip="Horizontal Layout"
+                            Command="{Binding SwitchView}"
+                            CommandParameter="{x:Static models:CartoViewState.HorizontalView}" />
+                    <Button Content="EXT" Width="34" Height="30" Margin="2"
+                            ToolTip.Tip="Extended Body Info Layout"
+                            Command="{Binding SwitchView}"
+                            CommandParameter="{x:Static models:CartoViewState.ExtendedBodyInfo}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

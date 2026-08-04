@@ -1,0 +1,247 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:models="using:ODExplorer.Models"
+             xmlns:odu="using:ODUtils.Models"
+             xmlns:controls="using:ODExplorer.UI.Avalonia.Controls"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="ODExplorer.UI.Avalonia.Views.DisplaySettingsView"
+             x:DataType="vm:DisplaySettingsViewModel">
+    <UserControl.Resources>
+        <conv:EnumFlagConverter x:Key="EnumFlagConverter" />
+    </UserControl.Resources>
+
+    <Grid ColumnDefinitions="*,10,*" Margin="10">
+        <!-- Left: Notification Options -->
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <GroupBox Header="Notification Options">
+                <StackPanel Spacing="8" Margin="10">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Size :" VerticalAlignment="Center" />
+                        <Button Content="Small" Command="{Binding SetSmallNotifications}" Width="80" />
+                        <Button Content="Medium" Command="{Binding SetMediumNotifications}" Width="80" />
+                        <Button Content="Large" Command="{Binding SetLargeNotifications}" Width="80" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="Position :" VerticalAlignment="Center" />
+                        <Button Content="Bottom Right" Command="{Binding SetNotifyPositionBottomRight}" />
+                        <Button Content="Bottom Left" Command="{Binding SetNotifyPositionBottomLeft}" />
+                        <Button Content="Top Right" Command="{Binding SetNotifyPositionTopRight}" />
+                        <Button Content="Top Left" Command="{Binding SetNotifyPositionTopLeft}" />
+                    </StackPanel>
+
+                    <controls:SliderWithValue Header="Duration (Seconds)"
+                                              Minimum="1" Maximum="60"
+                                              Value="{Binding NotificationDuration}" />
+                    <controls:SliderWithValue Header="Max Notifications"
+                                              Minimum="1" Maximum="30"
+                                              Value="{Binding MaxNotificationCount}" />
+                    <controls:SliderWithValue Header="X Offset (Pixels)"
+                                              Minimum="0" Maximum="500"
+                                              Value="{Binding XOffset}" />
+                    <controls:SliderWithValue Header="Y Offset (Pixels)"
+                                              Minimum="0" Maximum="500"
+                                              Value="{Binding YOffset}" />
+
+                    <CheckBox Content="Enable Notifications"
+                              IsChecked="{Binding EnableNotifications}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                        <Button Content="Test" Command="{Binding TestNotificationCommand}" />
+                        <Button Content="Set Defaults" Command="{Binding SetNotificationDefaults}" />
+                        <Button Content="Save Settings" Command="{Binding SaveNotificationSettings}" />
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+        </ScrollViewer>
+
+        <!-- Right: Body / Exo / Misc notifications -->
+        <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="10" IsEnabled="{Binding EnableNotifications}">
+                <GroupBox Header="Body Notifications">
+                    <StackPanel Spacing="6" Margin="10">
+                        <CheckBox Content="Worth Mapping"
+                                  IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.WorthMapping}}"
+                                  Tag="{x:Static models:NotificationOptions.WorthMapping}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Minimum Mapped Value (cr)"
+                                                  Minimum="0" Maximum="2000000"
+                                                  Value="{Binding WorthMappingValue}" />
+                        <controls:SliderWithValue Header="Maximum Distance From Arrival (ls)"
+                                                  Minimum="0" Maximum="2000000"
+                                                  Value="{Binding WorthMappingDistance}" />
+
+                        <CheckBox Content="EDSM Valuable Bodies In System"
+                                  IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.EDSMValuableBody}}"
+                                  Tag="{x:Static models:NotificationOptions.EDSMValuableBody}"
+                                  Click="FlagCheckBox_Click" />
+
+                        <CheckBox Content="Landable Terraformable"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.LandableTerraformable}}"
+                                  Tag="{x:Static models:BodyNotification.LandableTerraformable}"
+                                  Click="FlagCheckBox_Click" />
+                        <CheckBox Content="Landable With Rings"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.LandableWithRings}}"
+                                  Tag="{x:Static models:BodyNotification.LandableWithRings}"
+                                  Click="FlagCheckBox_Click" />
+                        <CheckBox Content="Landable High Gravity"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.LandableHighGravity}}"
+                                  Tag="{x:Static models:BodyNotification.LandableHighGravity}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="High Surface Gravity (g)"
+                                                  Minimum="1" Maximum="50"
+                                                  Value="{Binding NotableSettings.HighSurfaceGravity}"
+                                                  ValueStringFormat="N1" />
+                        <CheckBox Content="Landable Large Radius"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.LandableLargeRadius}}"
+                                  Tag="{x:Static models:BodyNotification.LandableLargeRadius}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Large Radius (km)"
+                                                  Minimum="12000" Maximum="28000"
+                                                  Value="{Binding LargeRadius}" />
+                        <CheckBox Content="Small Planet"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.SmallPlanet}}"
+                                  Tag="{x:Static models:BodyNotification.SmallPlanet}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Small Radius (km)"
+                                                  Minimum="100" Maximum="1000"
+                                                  Value="{Binding SmallRadius}" />
+                        <CheckBox Content="High Eccentricity"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.HighEccentricity}}"
+                                  Tag="{x:Static models:BodyNotification.HighEccentricity}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Eccentricity Min"
+                                                  Minimum="0" Maximum="1"
+                                                  Value="{Binding NotableSettings.EccentricityMin}"
+                                                  ValueStringFormat="N2" />
+                        <CheckBox Content="Fast Rotation"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.FastRotation}}"
+                                  Tag="{x:Static models:BodyNotification.FastRotation}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Fast Rotation Min (hours)"
+                                                  Minimum="1" Maximum="15"
+                                                  Value="{Binding NotableSettings.FastRotationMin}"
+                                                  ValueStringFormat="N1" />
+                        <CheckBox Content="Fast Orbit"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.FastOrbit}}"
+                                  Tag="{x:Static models:BodyNotification.FastOrbit}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Fast Orbit (hours)"
+                                                  Minimum="1" Maximum="15"
+                                                  Value="{Binding NotableSettings.FastOrbit}"
+                                                  ValueStringFormat="N1" />
+                        <CheckBox Content="Wide Rings"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.WideRings}}"
+                                  Tag="{x:Static models:BodyNotification.WideRings}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Ring Width Radius Multiplier"
+                                                  Minimum="1" Maximum="15"
+                                                  Value="{Binding NotableSettings.RingWidthRadiusMultiplier}"
+                                                  ValueStringFormat="N1" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox Content="Nested Moon"
+                                      IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.NestedMoon}}"
+                                      Tag="{x:Static models:BodyNotification.NestedMoon}"
+                                      Click="FlagCheckBox_Click" />
+                            <CheckBox Content="Shepherd Moon"
+                                      IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.ShepherdMoon}}"
+                                      Tag="{x:Static models:BodyNotification.ShepherdMoon}"
+                                      Click="FlagCheckBox_Click" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox Content="Geo Signals"
+                                      IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.GeoSignals}}"
+                                      Tag="{x:Static models:BodyNotification.GeoSignals}"
+                                      Click="FlagCheckBox_Click" />
+                            <CheckBox Content="Bio Signals"
+                                      IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.BioSignals}}"
+                                      Tag="{x:Static models:BodyNotification.BioSignals}"
+                                      Click="FlagCheckBox_Click" />
+                        </StackPanel>
+
+                        <Button Content="Set Defaults"
+                                Command="{Binding ResetBodyNotificationsSettingsCommand}"
+                                HorizontalAlignment="Left" />
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Exobiology Notifications">
+                    <StackPanel Spacing="6" Margin="10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox Content="Bio Scanned"
+                                      IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.NewBioScanned}}"
+                                      Tag="{x:Static models:NotificationOptions.NewBioScanned}"
+                                      Click="FlagCheckBox_Click" />
+                            <CheckBox Content="Distance From Bio"
+                                      IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.DistanceFromBio}}"
+                                      Tag="{x:Static models:NotificationOptions.DistanceFromBio}"
+                                      Click="FlagCheckBox_Click" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox Content="New Bio Codex Entry"
+                                      IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.NewBioCodexEntry}}"
+                                      Tag="{x:Static models:NotificationOptions.NewBioCodexEntry}"
+                                      Click="FlagCheckBox_Click" />
+                            <CheckBox Content="New Bio Species"
+                                      IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.NewBioSpecies}}"
+                                      Tag="{x:Static models:NotificationOptions.NewBioSpecies}"
+                                      Click="FlagCheckBox_Click" />
+                        </StackPanel>
+
+                        <CheckBox Content="Valuable Exo Body"
+                                  IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.ValuableBioPlanet}}"
+                                  Tag="{x:Static models:NotificationOptions.ValuableBioPlanet}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Minimum Exo Value (cr)"
+                                                  Minimum="5000000" Maximum="30000000"
+                                                  Value="{Binding ExoValuableBodyValue}"
+                                                  TickFrequency="100000" />
+                        <Button Content="Reset Exo Value"
+                                Command="{Binding ResetBioBodyValueCommand}"
+                                HorizontalAlignment="Left" />
+
+                        <CheckBox Content="Biological Count"
+                                  IsChecked="{Binding NotableSettings.BodyNotifications, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:BodyNotification.DiverseLife}}"
+                                  Tag="{x:Static models:BodyNotification.DiverseLife}"
+                                  Click="FlagCheckBox_Click" />
+                        <controls:SliderWithValue Header="Diverse Life Limit"
+                                                  Minimum="2" Maximum="15"
+                                                  Value="{Binding NotableSettings.DiverseLifeLimit}" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="New Codex Notifications :" VerticalAlignment="Center" />
+                            <ComboBox x:Name="CodexComboBox"
+                                      SelectedItem="{Binding CodexEntryHistory, Mode=TwoWay}"
+                                      Width="160"
+                                      MinWidth="160">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="odu:CodexEntryHistory">
+                                        <TextBlock Text="{Binding}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Other Notifications">
+                    <StackPanel Spacing="6" Margin="10">
+                        <CheckBox Content="String copied to clipboard"
+                                  IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.CopyToClipboard}}"
+                                  Tag="{x:Static models:NotificationOptions.CopyToClipboard}"
+                                  Click="FlagCheckBox_Click" />
+                        <CheckBox Content="Spansh CSV Parser"
+                                  IsChecked="{Binding NotifyOptions, Mode=OneWay, Converter={StaticResource EnumFlagConverter}, ConverterParameter={x:Static models:NotificationOptions.SpanshCSV}}"
+                                  Tag="{x:Static models:NotificationOptions.SpanshCSV}"
+                                  Click="FlagCheckBox_Click" />
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

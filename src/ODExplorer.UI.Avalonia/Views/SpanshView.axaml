@@ -1,0 +1,157 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:spansh="using:ODUtils.Spansh"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="ODExplorer.UI.Avalonia.Views.SpanshView"
+             x:DataType="vm:SpanshViewModel">
+    <UserControl.Resources>
+        <conv:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Background="#202020" Padding="8,6">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Content="Import CSV"
+                        Width="100"
+                        Click="ImportCsv_Click" />
+
+                <Button Content="Road to Riches"
+                        Width="150" FontSize="14"
+                        Command="{Binding SetCurrentCSVType}"
+                        CommandParameter="{x:Static spansh:CsvType.RoadToRiches}" />
+                <Button Content="Neutron Route"
+                        Width="150" FontSize="14"
+                        Command="{Binding SetCurrentCSVType}"
+                        CommandParameter="{x:Static spansh:CsvType.NeutronRoute}" />
+                <Button Content="World Type Route"
+                        Width="150" FontSize="14"
+                        Command="{Binding SetCurrentCSVType}"
+                        CommandParameter="{x:Static spansh:CsvType.WorldTypeRoute}" />
+                <Button Content="Tourist Route"
+                        Width="150" FontSize="14"
+                        Command="{Binding SetCurrentCSVType}"
+                        CommandParameter="{x:Static spansh:CsvType.TouristRoute}" />
+                <Button Content="Fleet Carrier"
+                        Width="150" FontSize="14"
+                        Command="{Binding SetCurrentCSVType}"
+                        CommandParameter="{x:Static spansh:CsvType.FleetCarrier}" />
+                <Button Content="Galaxy Plotter"
+                        Width="150" FontSize="14"
+                        Command="{Binding SetCurrentCSVType}"
+                        CommandParameter="{x:Static spansh:CsvType.GalaxyPlotter}" />
+                <Button Content="Exobiology"
+                        Width="150" FontSize="14"
+                        Command="{Binding SetCurrentCSVType}"
+                        CommandParameter="{x:Static spansh:CsvType.Exobiology}" />
+
+                <CheckBox Content="Auto Copy Next System To Clipboard"
+                          IsChecked="{Binding AutoCopyNextSystem}"
+                          VerticalAlignment="Center"
+                          Margin="8,0,0,0" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,20,*" Margin="10">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <GroupBox Header="CSV Details" Grid.RowSpan="3">
+                    <StackPanel Spacing="8" Margin="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Copy"
+                                    Command="{Binding CopyToClipboard}"
+                                    CommandParameter="{Binding CurrentTarget}" />
+                            <TextBlock Text="Current System :" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CurrentTarget.SystemName}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Copy"
+                                    Command="{Binding CopyToClipboard}"
+                                    CommandParameter="{Binding NextTarget}" />
+                            <TextBlock Text="Next System :" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding NextTarget.SystemName}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Remaining Systems :" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding RemainingCount, StringFormat='{}{0:N0}'}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Previous" Width="90" Height="34"
+                                    Command="{Binding PreviousTargetCommand}" />
+                            <Button Content="Next" Width="90" Height="34"
+                                    Command="{Binding NextTargetCommand}" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                            <TextBlock Text="Route Details :" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CurrentTarget.SystemName}" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <ListBox ItemsSource="{Binding Targets}"
+                                 SelectedItem="{Binding CurrentTarget, Mode=OneWay}"
+                                 MinHeight="200"
+                                 MaxHeight="340"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="modelvms:ExplorationTargetViewModel">
+                                    <TextBlock Text="{Binding SystemName}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <ItemsControl ItemsSource="{Binding CurrentTarget.BodiesInfo}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="spansh:BodiesInfo">
+                                    <Grid ColumnDefinitions="*,120,100" Margin="0,1">
+                                        <TextBlock Text="{Binding Body}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Distance}" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Property1}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+
+            <Grid Grid.Column="2">
+                <GroupBox Header="Fleet Carrier Jump Timer" VerticalAlignment="Top">
+                    <StackPanel Spacing="8" Margin="8">
+                        <CheckBox Content="Auto Start Timer"
+                                  IsChecked="{Binding AutoStartFcTimer}" />
+                        <CheckBox Content="Notification On Timer Completion"
+                                  IsChecked="{Binding FcTimerNotification}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Time Remaining :" FontSize="18" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CarrierTimerString}"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Start Timer"
+                                    Width="120" Height="34"
+                                    Command="{Binding StartStopFleetCarrierTimer}"
+                                    CommandParameter="True" />
+                            <Button Content="Stop Timer"
+                                    Width="120" Height="34"
+                                    Command="{Binding StartStopFleetCarrierTimer}"
+                                    CommandParameter="False" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Select Custom Alarm Sound"
+                                    Width="200" Height="34"
+                                    Click="SelectSound_Click" />
+                            <TextBlock Text="{Binding CustomAudioFile}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

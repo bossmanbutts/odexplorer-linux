@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="ODExplorer.UI.Avalonia.Views.EdAstroView"
+             x:DataType="vm:EdAstroViewModel">
+    <Grid RowDefinitions="40,*">
+        <Border Background="#202020">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Elite Dangerous Astrometrics Points of Interest"
+                           FontSize="20" FontWeight="Medium" Foreground="White"
+                           VerticalAlignment="Center" Margin="10,0" />
+                <Button Grid.Column="1"
+                        Content="Ed Astro Home Page"
+                        Foreground="#77AADD"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        VerticalAlignment="Center"
+                        Margin="0,0,10,0"
+                        Click="OpenHome_Click" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" Margin="10">
+            <ListBox ItemsSource="{Binding PointsOfInterest}"
+                     SelectedItem="{Binding SelectedPoi, Mode=TwoWay}"
+                     SelectionMode="Single"
+                     MinWidth="420"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="modelvms:EdAstroPoiViewModel">
+                        <Grid ColumnDefinitions="Auto,170,*,90" Margin="4">
+                            <Button Content="Copy"
+                                    FontSize="11"
+                                    Padding="6,2"
+                                    VerticalAlignment="Center"
+                                    Click="CopyPoi_Click" />
+                            <TextBlock Text="{Binding Name}"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0,0,0" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding GalMapName}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding DistanceFromCommander, StringFormat='{}{0:N0} ly'}"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Right" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Grid Grid.Column="1" RowDefinitions="*,Auto" Margin="10,0,0,0">
+                <TextBlock Text="{Binding SelectedPoi.Summary}"
+                           FontSize="24"
+                           TextWrapping="Wrap" />
+                <Button Grid.Row="1"
+                        Content="Open on edastro.com"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Foreground="#77AADD"
+                        Margin="0,10,0,0"
+                        Click="OpenPoi_Click" />
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -220,6 +220,21 @@ namespace ODExplorer.ViewModels.ViewVMs
         public ICommand ResetBodyNotificationsSettingsCommand { get; }
         public ICommand ResetBioBodyValueCommand { get; }
 
+        /// <summary>Sets or clears a single bit of the NotificationOptions flags.</summary>
+        public void SetNotifyOptionsFlag(NotificationOptions flag, bool enabled)
+        {
+            var current = NotifyOptions;
+            NotifyOptions = enabled ? current | flag : current & ~flag;
+        }
+
+        /// <summary>Sets or clears a single bit of the NotableSettings.BodyNotifications flags.</summary>
+        public void SetBodyNotificationFlag(BodyNotification flag, bool enabled)
+        {
+            var current = NotableSettings.BodyNotifications;
+            NotableSettings.BodyNotifications = enabled ? current | flag : current & ~flag;
+            OnPropertyChanged(nameof(NotableSettings));
+        }
+
         private void SetNotificationSmall(object? obj)
         {
             NotificationSize = NotificationSize.Small;

@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:controls="using:ODExplorer.UI.Avalonia.Controls"
+             x:Class="ODExplorer.UI.Avalonia.Controls.CartoDataSystemListControl"
+             x:DataType="controls:CartoDataSystemListControl"
+             x:Name="Root">
+    <Grid RowDefinitions="*,Auto" ColumnDefinitions="*,20,*">
+        <GroupBox Grid.Row="0" Grid.Column="0" Header="Systems" Margin="5" Padding="5">
+            <Grid x:Name="Grid" RowDefinitions="*,50">
+                <DataGrid x:Name="SystemGrid"
+                          Grid.Row="0"
+                          x:DataType="modelvms:StarSystemViewModel"
+                          ItemsSource="{Binding #Root.Systems}"
+                          SelectedItem="{Binding #Root.SelectedSystem, Mode=TwoWay}"
+                          SelectionMode="Single"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          GridLinesVisibility="All"
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="System Name" Width="*" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Count" Width="50" Binding="{Binding DataCount}" />
+                        <DataGridTextColumn Header="Value" Width="180" Binding="{Binding DataValue, StringFormat=N0}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="0,5,0,0">
+                    <TextBlock Grid.Column="0" Text="Total Systems" Width="140" FontSize="18" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding #Root.Systems.Count}" FontSize="18" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="Total Value" Width="140" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <TextBlock Grid.Column="4" Text="{Binding #Root.TotalValue}" FontSize="18" VerticalAlignment="Center" Margin="0,0,25,0" />
+                </Grid>
+            </Grid>
+        </GroupBox>
+
+        <Grid Grid.Row="1" Grid.Column="0" ColumnDefinitions="Auto,*" Margin="0,5,0,5">
+            <GroupBox Header="Links" Margin="5" Padding="5">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="EDSM" Width="80" Height="30" Margin="5"
+                            Command="{ReflectionBinding #Root.DataContext.OpenEDSM}"
+                            CommandParameter="{Binding #Root.SelectedSystem}" />
+                    <Button Content="Spansh" Width="80" Height="30" Margin="5"
+                            Command="{ReflectionBinding #Root.DataContext.OpenSpansh}"
+                            CommandParameter="{Binding #Root.SelectedSystem}" />
+                    <Button Content="Copy" Width="60" Height="30" Margin="5"
+                            Command="{ReflectionBinding #Root.DataContext.CopyToClipboard}"
+                            CommandParameter="{Binding #Root.SelectedSystem.Name}" />
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Grid.Column="1" Header="DataBase" Margin="5" Padding="5"
+                      IsVisible="{Binding #Root.ShowIgnoreButton}">
+                <StackPanel Orientation="Horizontal">
+                    <Button Height="30" Margin="10,5" HorizontalAlignment="Center"
+                            ToolTip.Tip="ED will sometimes fire a scan event without giving you carto data which will generate erroneous systems in the above list&#x0a;&#x0a;You can add the selected system to the ignore list so they aren't included"
+                            Command="{ReflectionBinding #Root.DataContext.AddToIgnoreList}"
+                            CommandParameter="{Binding #Root.SelectedSystem}">
+                        <TextBlock Text="{Binding #Root.IgnoreSystemText}" Margin="10,0" />
+                    </Button>
+                    <Button Content="Reset Carto Value" Height="30" Margin="10,5"
+                            Command="{ReflectionBinding #Root.DataContext.ResetCartoValue}" />
+                    <Button Content="Reset Exo Value" Height="30" Margin="10,5"
+                            Command="{ReflectionBinding #Root.DataContext.ResetExoValue}" />
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+
+        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" HorizontalAlignment="Stretch"
+              RowDefinitions="*,Auto" Margin="5">
+            <GroupBox Header="Bodies" Padding="5">
+                <DataGrid x:Name="BodiesGrid"
+                          x:DataType="modelvms:SystemBodyViewModel"
+                          ItemsSource="{Binding #Root.SelectedSystemBodies}"
+                          SelectedItem="{Binding #Root.SelectedBody, Mode=TwoWay}"
+                          SelectionMode="Single"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          GridLinesVisibility="All"
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Id" Width="50" Binding="{Binding BodyID}" />
+                        <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Class" Width="*" Binding="{Binding BodyDescription}" />
+                        <DataGridTextColumn Header="Scan Stage" Width="90" Binding="{Binding ScanStage}" />
+                        <DataGridTextColumn Header="Arrival ls" Width="150" Binding="{Binding DistanceFromArrivalLs}" />
+                        <DataGridTextColumn Header="Value" Width="150" Binding="{Binding DataValue, StringFormat=N0}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </GroupBox>
+            <GroupBox Grid.Row="1" Header="Body Info" Height="150" Margin="0,5,0,0" Padding="5">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding #Root.SelectedBody.FullName}" FontWeight="Bold" />
+                    <TextBlock Text="{Binding #Root.SelectedBody.BodyDescription}" />
+                    <TextBlock Text="{Binding #Root.SelectedBody.ScanStage}" />
+                    <TextBlock Text="{Binding #Root.SelectedBody.DistanceFromArrivalLs}" />
+                    <TextBlock Text="{Binding #Root.SelectedBody.DataValue, StringFormat=N0}" />
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</UserControl>

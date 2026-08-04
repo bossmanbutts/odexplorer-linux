@@ -320,3 +320,32 @@ Latest handoff update (2026-08-03, window sizing fix)
   - `MainWindow.axaml`: `ContentControl` now has `HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"` (view fills the content area so inner ScrollViewers work); default window size bumped 1100x700 -> 1200x800.
   - `Views/SettingsView.axaml`: compacted commander section so it fits at default size without clipping — ListBox `MaxHeight` 260->170, detail button grid rows 50->42, buttons/TextBoxes 40/34->34 high.
 - Build: `dotnet build ODExplorer.sln -c Release` => Build succeeded, 0 errors, 0 warnings.
+
+Latest handoff update (2026-08-03, remaining views ported)
+- Ported all 6 remaining WPF views to Avalonia (all bindings against the existing core ViewModels). Every ViewModel now resolves through ViewLocator (`XViewModel` -> `XView`).
+- Added `Avalonia.Controls.DataGrid` 12.1.0 package reference (was missing; DataGrid ships in a separate package in Avalonia 11+).
+- `Stubs/ODUtilsSpanshStubs.cs`: extended `CsvType` enum to all 7 members (RoadToRiches=0, NeutronRoute, WorldTypeRoute, TouristRoute, FleetCarrier, GalaxyPlotter, Exobiology) for the Spansh x:Static buttons.
+- New converters (`Converters/EnumConverters.cs`, `Converters/OrganicStateConverters.cs`):
+  - `EnumToBoolConverter` (enum == parameter -> IsVisible), `EnumFlagConverter` (single-bit [Flags] check), `EnumToDescriptionConverter` ([Description] -> text), `OrganicStateToBrushConverter` (OrganicScanState -> row background/foreground using the original hex colors: Analysed #5DA6E0, Sold #1FA41F).
+- New reusable controls (`Controls/`):
+  - `SliderWithValue` (Header + Slider + formatted value label; used by DisplaySettingsView).
+  - `OrganicChecklistTable` (Title/Species/SelectedItem DPs, 5-column DataGrid, state-colored rows).
+  - `OrganicScanItemControl` (OrganicDetails DP; builds `OrganicTotalsViewModel` totals + footer row in code-behind; per-row copy button bound to the root DataContext CopyToClipboard).
+  - `CartoDataSystemListControl` (Systems/SelectedSystem/ShowIgnoreButton DPs; bodies grid + BaryCentre filter + TotalValue recompute + EDSM/Spansh/Copy/Ignore/Reset buttons in code-behind).
+- New views:
+  - `Views/EdAstroView.axaml/.cs` — POI list + detail pane; copy + open-on-edastro via `ODUtils.Helpers.OperatingSystem.OpenUrl`.
+  - `Views/SpanshView.axaml/.cs` — CSV import (OpenFilePicker *.csv -> `vm.ParseCSV`), 7 CsvType buttons, current/next target copy + navigation, Targets list, BodiesInfo grid, Fleet Carrier timer (Start/Stop -> `StartStopFleetCarrierTimer` "True"/"False"), sound picker (*.wav/*.mp3 -> `vm.SetCustomFile`).
+  - `Views/DisplaySettingsView.axaml/.cs` — Notification Options (size/position/duration/count/offsets), Body/Exo/Other notification flag checkboxes. Flag CheckBoxes bind OneWay via `EnumFlagConverter` and toggle via a Click handler -> new `DisplaySettingsViewModel.SetNotifyOptionsFlag`/`SetBodyNotificationFlag` helpers (added to the VM). Codex Entry History ComboBox populated from `Enum.GetValues<CodexEntryHistory>`.
+  - `Views/OrganicView.axaml/.cs` — Exobiology header + 4 state tabs (CheckList/Unsold/Sold/Lost) driven by `EnumToBoolConverter` on `CurrentState`; checklist = region ComboBox + counts + WrapPanel of 16 OrganicChecklistTable + variants pane; lists = OrganicScanItemControl bound to Unsold/Sold/Lost.
+  - `Views/CartographicView.axaml/.cs` — footer stats (Route.Count, CartoValue, ExoValue), VB/EX overlay popouts, 5 view-switch buttons (`SwitchView` + `CartoViewState`). Body shows a CurrentSystemBodies DataGrid as a functional stand-in (the full Detailed/Classic/Horizontal/Extended layouts are the biggest remaining port task).
+  - `Views/CartoDetailsView.axaml/.cs` — "Cartographic" header + Unsold/Sold/Lost/Ignored tabs (`CartoDetailsViewState`); first three use CartoDataSystemListControl (Unsold gets ShowIgnoreButton=True + SelectedSystem two-way), Ignored shows the ignored-systems grid with per-row Restore checkbox + Save Changes.
+- ViewLocator naming: renamed `CartographicDataView` -> `CartographicView` and `CartoDetialsView` -> `CartoDetailsView` so the convention `CartographicViewModel`/`CartoDetailsViewModel` resolve (the original WPF filenames were misspelled/non-conventional).
+- Avalonia 12.1.0 gotchas hit this round:
+  - DataGrid has NO `CanUserAddRows`/`CanUserResizeRows` (AVLN2000) — omit them.
+  - Compiled `#Root.X` element-name bindings inside a UserControl require `x:DataType` = the control type on the root; DataGrid column bindings require `x:DataType` = the item type on the DataGrid.
+  - `{Binding #Root.DataContext.SomeCommand}` cannot be compiled (DataContext is `object`) — use `{ReflectionBinding ...}` for those.
+  - Fully-qualified `Avalonia.Interactivity.RoutedEventArgs` fails to resolve inside the `ODExplorer.UI.Avalonia.Controls` namespace (namespace-shadowing) — add `using Avalonia.Interactivity;` and use the short name.
+  - Declaring a `PropertyChanged` event on a control hides `AvaloniaObject.PropertyChanged` — declare it `new` (still works as INPC source for element bindings).
+- Build: `dotnet build ODExplorer.sln -c Release` => Build succeeded, 0 errors (36 pre-existing core warnings; no new warnings from ported code).
+- NOT runtime-verified (headless env): all 6 new views. Expected desktop smoke test: Carto/ExoBiology/DisplaySettings/Spansh/EdAstro/CartoDetails nav tabs all render; Cartographic shows the current-system bodies grid; Spansh import button opens a file picker; CartoDetails Unsold tab shows systems (empty with stub stores).
+- Next steps (unchanged scope): port the full cartographic layouts (Detailed/Classic/Horizontal/ExtendedBodyInfo/DetailedExo) to replace the CartographicView stand-in; wire real JournalParserStore/DB stores; polish nav visuals + scaling per original MainWindow.xaml.

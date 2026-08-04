@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ODExplorer.UI.Avalonia.Controls.SliderWithValue"
+             x:Name="Root">
+    <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+        <TextBlock Text="{Binding #Root.Header}"
+                   VerticalAlignment="Center"
+                   Margin="0,0,8,0" />
+        <Slider Grid.Column="1"
+                Minimum="{Binding #Root.Minimum}"
+                Maximum="{Binding #Root.Maximum}"
+                TickFrequency="{Binding #Root.TickFrequency}"
+                Value="{Binding #Root.Value, Mode=TwoWay}"
+                VerticalAlignment="Center" />
+        <TextBlock Grid.Column="2"
+                   x:Name="ValueLabel"
+                   Text="{Binding #Root.Value}"
+                   VerticalAlignment="Center"
+                   Margin="8,0,0,0"
+                   MinWidth="70"
+                   TextAlignment="Right" />
+    </Grid>
+</UserControl>

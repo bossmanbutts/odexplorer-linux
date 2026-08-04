@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:controls="using:ODExplorer.UI.Avalonia.Controls"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
+             x:Class="ODExplorer.UI.Avalonia.Controls.OrganicChecklistTable"
+             x:DataType="controls:OrganicChecklistTable"
+             x:Name="Root"
+             Margin="10,10" Width="310">
+    <UserControl.Resources>
+        <conv:OrganicStateToBrushConverter x:Key="StateBg" />
+        <conv:OrganicStateToBrushConverter x:Key="StateFg" />
+    </UserControl.Resources>
+
+    <Grid x:Name="Grid" ColumnDefinitions="*,Auto" RowDefinitions="35,*">
+        <TextBlock x:Name="Genus"
+                   Grid.Column="0" Grid.Row="0"
+                   FontSize="22" FontWeight="Bold"
+                   VerticalAlignment="Center"
+                   Text="{Binding #Root.Title}" />
+        <TextBlock Grid.Column="1" Grid.Row="0"
+                   Text="Variants"
+                   FontSize="16" FontWeight="Bold"
+                   VerticalAlignment="Center" HorizontalAlignment="Right"
+                   ToolTip.Tip="Distinct Variant Count" />
+
+        <DataGrid x:Name="OrganicScanGrid"
+                  Grid.ColumnSpan="2" Grid.Row="1"
+                  x:DataType="modelvms:OrganicCheckListItemViewModel"
+                  ItemsSource="{Binding #Root.Species}"
+                  SelectedItem="{Binding #Root.SelectedItem, Mode=TwoWay}"
+                  SelectionMode="Single"
+                  AutoGenerateColumns="False"
+                  HeadersVisibility="None"
+                  IsReadOnly="True"
+                  GridLinesVisibility="None"
+                  BorderThickness="1">
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="Background" Value="{Binding State, Converter={StaticResource StateBg}}" />
+                    <Setter Property="Foreground" Value="{Binding State, Converter={StaticResource StateFg}}" />
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="State" Width="80" Binding="{Binding StateString}" />
+                <DataGridTextColumn Header="" Width="15" Binding="{Binding VariantCount}" />
+                <DataGridTemplateColumn Width="10">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="modelvms:OrganicCheckListItemViewModel">
+                            <TextBlock Text="/" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="" Width="15" Binding="{Binding TotalVariants}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

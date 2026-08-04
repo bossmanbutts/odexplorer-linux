@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:controls="using:ODExplorer.UI.Avalonia.Controls"
+             x:Class="ODExplorer.UI.Avalonia.Controls.OrganicScanItemControl"
+             x:DataType="controls:OrganicScanItemControl"
+             x:Name="Root"
+             Margin="10">
+    <Grid x:Name="Grid" ColumnDefinitions="*,40,Auto">
+        <DataGrid x:DataType="modelvms:OrganicScanItemViewModel"
+                  ItemsSource="{Binding #Root.OrganicDetails}"
+                  IsReadOnly="True"
+                  AutoGenerateColumns="False"
+                  GridLinesVisibility="All"
+                  HeadersVisibility="Column"
+                  BorderThickness="0"
+                  Background="Transparent">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Genus" MinWidth="120" Binding="{Binding GenusEnglish}" />
+                <DataGridTextColumn Header="Species" MinWidth="120" Binding="{Binding SpeciesEnglish}" />
+                <DataGridTextColumn Header="Colour" MinWidth="120" Binding="{Binding Colour}" />
+                <DataGridTextColumn Header="Body" Width="*" Binding="{Binding BodyName}" />
+                <DataGridTemplateColumn Header="" Width="32">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="modelvms:OrganicScanItemViewModel">
+                            <Button Content="Copy"
+                                    FontSize="11"
+                                    Padding="4,1"
+                                    HorizontalAlignment="Center"
+                                    HorizontalContentAlignment="Center"
+                                    Command="{ReflectionBinding #Root.DataContext.CopyToClipboard}"
+                                    CommandParameter="{Binding SystemName}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Value" MinWidth="120" Binding="{Binding ValueString}" />
+                <DataGridTextColumn Header="Bonus" MinWidth="120" Binding="{Binding BonusString}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Column="2" RowDefinitions="*,40">
+            <DataGrid x:Name="TotalsGrid"
+                      x:DataType="modelvms:OrganicTotalsViewModel"
+                      ItemsSource="{Binding #Root.Totals}"
+                      IsReadOnly="True"
+                      AutoGenerateColumns="False"
+                      GridLinesVisibility="All"
+                      HeadersVisibility="Column"
+                      HorizontalAlignment="Left"
+                      BorderThickness="0"
+                      Background="Transparent">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Species" MinWidth="300" Binding="{Binding EnglishName}" />
+                    <DataGridTextColumn Header="Count" Width="80" Binding="{Binding CountString}" />
+                    <DataGridTextColumn Header="Value" MinWidth="170" Binding="{Binding ValueString}" />
+                    <DataGridTextColumn Header="Bonus" MinWidth="170" Binding="{Binding BonusString}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
+                <Border BorderThickness="1,1,0,1" BorderBrush="Black">
+                    <TextBlock Text="Totals" Margin="2,0,0,0" VerticalAlignment="Center" />
+                </Border>
+                <Border BorderThickness="1,1,0,1" BorderBrush="Black">
+                    <TextBlock Text="{Binding #Root.TotalCount}" HorizontalAlignment="Right" Margin="0,0,3,0" VerticalAlignment="Center" />
+                </Border>
+                <Border BorderThickness="1,1,0,1" BorderBrush="Black">
+                    <TextBlock Text="{Binding #Root.TotalValue}" HorizontalAlignment="Right" Margin="0,0,3,0" VerticalAlignment="Center" />
+                </Border>
+                <Border BorderThickness="1,1,1,1" BorderBrush="Black">
+                    <TextBlock Text="{Binding #Root.TotalBonus}" HorizontalAlignment="Right" Margin="0,0,3,0" VerticalAlignment="Center" />
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,97 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:odu="using:ODUtils.Models"
+             xmlns:controls="using:ODExplorer.UI.Avalonia.Controls"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="ODExplorer.UI.Avalonia.Views.OrganicView"
+             x:DataType="vm:OrganicViewModel">
+    <UserControl.Resources>
+        <conv:EnumToBoolConverter x:Key="StateVisible" />
+        <conv:EnumToDescriptionConverter x:Key="EnumDesc" />
+        <conv:VisibilityConverter x:Key="VisibilityConv" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="40,*">
+        <Border Background="#323232">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Exobiology"
+                           FontSize="24" FontWeight="Medium" Foreground="White"
+                           VerticalAlignment="Center" Margin="10,0,30,0" />
+                <Button Content="Unsold" FontSize="18" Command="{Binding SwitchToUnSoldList}" Width="120" Margin="0,5" />
+                <Button Content="Sold" FontSize="18" Command="{Binding SwitchToSoldList}" Width="120" Margin="0,5" />
+                <Button Content="Lost" FontSize="18" Command="{Binding SwitchToLostList}" Width="120" Margin="0,5" />
+                <Button Content="CheckList" FontSize="18" Command="{Binding SwitchToCheckList}" Width="120" Margin="0,5" />
+            </StackPanel>
+        </Border>
+
+        <!-- CheckList -->
+        <Grid Grid.Row="1" RowDefinitions="40,*" ColumnDefinitions="*,20,500"
+              IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static odu:ExoBiologyViewState.CheckList}}">
+            <StackPanel Orientation="Horizontal" Margin="5,0">
+                <TextBlock Text="Region :" FontSize="18" VerticalAlignment="Center" Margin="5,0" />
+                <ComboBox x:Name="RegionComboBox"
+                          Height="25" Width="280" Margin="5" FontSize="16"
+                          SelectedItem="{Binding SelectedRegion}" />
+                <TextBlock Text="Species : " FontSize="18" VerticalAlignment="Center" Margin="20,0,5,0" />
+                <TextBlock Text="{Binding SelectedRegionSpeciesCount}" FontSize="16" VerticalAlignment="Center" />
+                <TextBlock Text="Variants : " FontSize="18" VerticalAlignment="Center" Margin="20,0,5,0" />
+                <TextBlock Text="{Binding SelectedRegionVariantCount}" FontSize="16" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                <WrapPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <controls:OrganicChecklistTable Title="Aleoida" Species="{Binding Aleoida}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Bacterium" Species="{Binding Bacterium}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Cactoida" Species="{Binding Cactoida}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Clypeus" Species="{Binding Clypeus}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Concha" Species="{Binding Concha}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Electricae" Species="{Binding Electricae}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Fonticulua" Species="{Binding Fonticulua}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Frutexa" Species="{Binding Frutexa}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Fumerola" Species="{Binding Fumerola}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Fungoida" Species="{Binding Fungoida}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Osseus" Species="{Binding Osseus}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Recepta" Species="{Binding Recepta}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Stratum" Species="{Binding Stratum}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Tubus" Species="{Binding Tubus}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Tussock" Species="{Binding Tussock}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
+                    <controls:OrganicChecklistTable Title="Other" Species="{Binding Other}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                                                    IsVisible="{Binding OthersVisibility, Converter={StaticResource VisibilityConv}}" />
+                </WrapPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Row="1" Grid.Column="2" RowDefinitions="40,*,50,*,80">
+                <TextBlock Text="Variants" FontWeight="Bold" FontSize="22" Margin="0,0,0,10" />
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding SelectedItem.Variants}"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
+                          VerticalAlignment="Top">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Width="*" Binding="{Binding LocalName}" />
+                        <DataGridTextColumn Header="State" Width="Auto" Binding="{Binding ScanStage}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <TextBlock Grid.Row="2" Text="{Binding SelectedRegionText}"
+                           FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                           TextWrapping="Wrap" />
+                <TextBlock Grid.Row="4"
+                           Text="Some data may be missing as variant information was ommited from the scan logs until a patch in 2023"
+                           FontSize="14" TextWrapping="Wrap" VerticalAlignment="Bottom" />
+            </Grid>
+        </Grid>
+
+        <!-- Unsold / Sold / Lost lists -->
+        <controls:OrganicScanItemControl Grid.Row="1" OrganicDetails="{Binding Unsold}"
+                                         IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static odu:ExoBiologyViewState.UnSoldList}}" />
+        <controls:OrganicScanItemControl Grid.Row="1" OrganicDetails="{Binding Sold}"
+                                         IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static odu:ExoBiologyViewState.Sold}}" />
+        <controls:OrganicScanItemControl Grid.Row="1" OrganicDetails="{Binding Lost}"
+                                         IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static odu:ExoBiologyViewState.Lost}}" />
+    </Grid>
+</UserControl>

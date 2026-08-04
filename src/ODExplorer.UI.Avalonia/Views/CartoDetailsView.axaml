@@ -1,0 +1,85 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:models="using:ODExplorer.Models"
+             xmlns:controls="using:ODExplorer.UI.Avalonia.Controls"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="ODExplorer.UI.Avalonia.Views.CartoDetailsView"
+             x:DataType="vm:CartoDetailsViewModel">
+    <UserControl.Resources>
+        <conv:EnumToBoolConverter x:Key="StateVisible" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="40,*">
+        <Border Background="#323232">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Cartographic"
+                           FontSize="24" FontWeight="Medium" Foreground="White"
+                           VerticalAlignment="Center" Margin="10,0,30,0" />
+                <Button Content="Unsold" FontSize="18" Width="120" Margin="0,5"
+                        ToolTip.Tip="Unsold Carto Data"
+                        Command="{Binding SwitchToUnsold}" />
+                <Button Content="Sold" FontSize="18" Width="120" Margin="0,5"
+                        ToolTip.Tip="Sold Carto Data"
+                        Command="{Binding SwitchToSold}" />
+                <Button Content="Lost" FontSize="18" Width="120" Margin="0,5"
+                        ToolTip.Tip="Unsold Data Potentially Lost On Death"
+                        Command="{Binding SwitchToLost}" />
+                <Button Content="Ignored" FontSize="18" Width="120" Margin="0,5"
+                        ToolTip.Tip="Systems Ignored From Unsold Carto Calculations"
+                        Command="{Binding SwitchToIgnored}" />
+            </StackPanel>
+        </Border>
+
+        <controls:CartoDataSystemListControl Grid.Row="1"
+                                             Systems="{Binding UnsoldSystems}"
+                                             SelectedSystem="{Binding SelectedSystem, Mode=TwoWay}"
+                                             ShowIgnoreButton="True"
+                                             IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoDetailsViewState.Unsold}}" />
+        <controls:CartoDataSystemListControl Grid.Row="1"
+                                             Systems="{Binding SoldSystems}"
+                                             IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoDetailsViewState.Sold}}" />
+        <controls:CartoDataSystemListControl Grid.Row="1"
+                                             Systems="{Binding LostSystems}"
+                                             IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoDetailsViewState.Lost}}" />
+
+        <GroupBox Grid.Row="1" Header="Cartographic Ignored System"
+                  IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoDetailsViewState.Ignored}}">
+            <Grid RowDefinitions="*,20,121" Margin="10">
+                <DataGrid Grid.Row="0"
+                          ItemsSource="{Binding IgnoredSystems}"
+                          SelectionMode="Single"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          GridLinesVisibility="All"
+                          HeadersVisibility="Column"
+                          VerticalAlignment="Stretch">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Width="*" MinWidth="150" Binding="{Binding Name}" />
+                        <DataGridTemplateColumn Header="Restore" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="modelvms:IgnoredSystemsViewModel">
+                                    <CheckBox IsChecked="{Binding Restore, Mode=TwoWay}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="2" ColumnDefinitions="*,50,Auto">
+                    <TextBlock Grid.Column="0" Text="{Binding SelectedCommanderName}" FontSize="24" />
+                    <Button Grid.Column="2" Content="Save Changes"
+                            Height="40" FontSize="18" Width="180"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Command="{Binding SaveRestoreCommand}" />
+                </Grid>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</UserControl>
