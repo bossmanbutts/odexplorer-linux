@@ -312,3 +312,11 @@ Latest handoff update (2026-08-03, milestone: functional in-memory stores + tray
   - Reset Database clears commanders and bounces to LoadingView.
   - Ticking Minimise-to-tray + closing the window hides it to the tray; tray "Show" restores, tray "Quit" exits. NOTE: on Linux the tray icon needs an SNI-capable tray (KDE fine; GNOME requires the AppIndicator extension). If the tray doesn't show, close-to-tray still hides the window (recover via tray or kill process).
 - Next steps (unchanged scope): port remaining views (CartographicView, OrganicView, SpanshView, EdAstroView, DisplaySettingsView, CartoDetailsView); wire real JournalParserStore/DB stores (needs EliteJournalReader/ODUtils reconstruction, not on NuGet); then polish nav visuals + scaling per original MainWindow.xaml.
+
+Latest handoff update (2026-08-03, window sizing fix)
+- User smoke test: journal locate works, minimise-to-tray works. Issue: "when log is pulled up, the window needs to be manually resized to show all menus" (Settings view content clipped below the window's bottom edge).
+- Root cause: the main `ContentControl` did not stretch its content, so the Settings `ScrollViewer` was never height-constrained and never scrolled; also the Settings content (~735px tall) exceeded the 700px window.
+- Fixes:
+  - `MainWindow.axaml`: `ContentControl` now has `HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"` (view fills the content area so inner ScrollViewers work); default window size bumped 1100x700 -> 1200x800.
+  - `Views/SettingsView.axaml`: compacted commander section so it fits at default size without clipping — ListBox `MaxHeight` 260->170, detail button grid rows 50->42, buttons/TextBoxes 40/34->34 high.
+- Build: `dotnet build ODExplorer.sln -c Release` => Build succeeded, 0 errors, 0 warnings.

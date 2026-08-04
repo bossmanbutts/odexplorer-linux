@@ -28,7 +28,7 @@
                         <ListBox ItemsSource="{Binding JournalCommanderViews}"
                                  SelectedItem="{Binding SelectedCommander}"
                                  SelectionMode="Single"
-                                 MaxHeight="260"
+                                 MaxHeight="170"
                                  VerticalAlignment="Top">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="modelvms:JournalCommaderViewModel">
@@ -45,49 +45,49 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
 
-                        <Grid Grid.Row="2" RowDefinitions="50,50,50,50" ColumnDefinitions="*,Auto">
+                        <Grid Grid.Row="2" RowDefinitions="42,42,42,42" ColumnDefinitions="*,Auto">
                             <TextBlock Text="{Binding SelectedCommander.Name}"
                                        FontSize="20"
                                        VerticalAlignment="Center" />
 
                             <TextBox Text="{Binding SelectedCommander.JournalPath}"
                                      IsReadOnly="True"
-                                     Height="40"
+                                     Height="34"
                                      VerticalAlignment="Center"
                                      Grid.Row="1"
                                      Grid.ColumnSpan="2" />
 
                             <TextBox Text="{Binding SelectedCommander.LastFile}"
                                      IsReadOnly="True"
-                                     Height="40"
+                                     Height="34"
                                      VerticalAlignment="Center"
                                      Grid.Row="2"
                                      Grid.ColumnSpan="2" />
 
                             <Button Content="Delete Commander"
                                     Command="{Binding DeleteCommander}"
-                                    Width="180" Height="40"
+                                    Width="180" Height="34"
                                     Grid.Column="1" />
 
                             <Button Content="Change Logs Folder"
-                                    Width="180" Height="40"
+                                    Width="180" Height="34"
                                     Grid.Row="1" Grid.Column="1"
                                     Click="ChangeLogsFolder_Click" />
 
                             <Button Content="Reset Last File"
                                     Command="{Binding ResetLastReadFile}"
-                                    Width="180" Height="40"
+                                    Width="180" Height="34"
                                     Grid.Row="2" Grid.Column="1" />
 
                             <Button Content="Scan Directory"
-                                    Width="180" Height="40"
+                                    Width="180" Height="34"
                                     Grid.Row="3"
                                     HorizontalAlignment="Left"
                                     Click="ScanDirectory_Click" />
 
                             <Button Content="Save Changes"
                                     Command="{Binding SaveCommanderChanges}"
-                                    Width="180" Height="40"
+                                    Width="180" Height="34"
                                     Grid.Row="3" Grid.Column="1" />
                         </Grid>
                     </Grid>
