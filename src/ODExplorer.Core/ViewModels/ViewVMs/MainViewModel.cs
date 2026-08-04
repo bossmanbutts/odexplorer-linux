@@ -502,7 +502,8 @@ namespace ODExplorer.ViewModels.ViewVMs
 
                 if (system.SystemBodies.Count > 0)
                 {
-                    newSys.Bodies.AddRangeToCollection(system.SystemBodies.Select(x => new SystemBodyViewModel(x, _settings)));
+                    var bodies = system.SystemBodies.ToList();
+                    newSys.Bodies.AddRangeToCollection(bodies.Select(x => new SystemBodyViewModel(x, _settings)));
                 }
 
                 Route.AddToCollection(newSys);

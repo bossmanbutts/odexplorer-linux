@@ -252,12 +252,14 @@ namespace ODExplorer.Stores
                             Route.Add(data);
                             _cartoData.TryAdd(data.Address, data);
 
-                            InvokeLive(() => OnRouteUpdated?.Invoke(this, Route));
+                            var routeSnapshot = new List<StarSystem>(Route);
+                            InvokeLive(() => OnRouteUpdated?.Invoke(this, routeSnapshot));
                         }
                         break;
                     case NavRouteClearEvent.NavRoutClearEventArgs:
                         Route.Clear();
-                        InvokeLive(() => OnRouteUpdated?.Invoke(this, Route));
+                        var clearedSnapshot = new List<StarSystem>(Route);
+                        InvokeLive(() => OnRouteUpdated?.Invoke(this, clearedSnapshot));
                         break;
                     case SupercruiseEntryEvent.SupercruiseEntryEventArgs:
                         UpdateCurrentBody(null);
@@ -557,7 +559,7 @@ namespace ODExplorer.Stores
                 InvokeLive(() =>
                 {
                     OnCurrentSystemUpdated?.Invoke(this, CurrentSystem);
-                    OnRouteUpdated?.Invoke(this, Route);
+                    OnRouteUpdated?.Invoke(this, new List<StarSystem>(Route));
                 });
             }
         }
@@ -652,7 +654,10 @@ namespace ODExplorer.Stores
                 CurrentSystem.VisitedByCommander = true;
                 TriggerCurrentSystemEventIfLive();
                 if (parserStore.IsLive)
-                    InvokeLive(() => OnRouteUpdated?.Invoke(this, Route));
+                {
+                    var updatedRouteSnapshot = new List<StarSystem>(Route);
+                    InvokeLive(() => OnRouteUpdated?.Invoke(this, updatedRouteSnapshot));
+                }
                 return CurrentSystem;
             }
 
