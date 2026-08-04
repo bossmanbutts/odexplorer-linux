@@ -200,6 +200,7 @@ namespace ODUtils.Database.Interfaces
     public interface IOdToolsDatabaseProvider
     {
         void AddCommander(ODUtils.Journal.JournalCommander commander);
+        ODUtils.Journal.JournalCommander? GetCommander(int id);
         System.Threading.Tasks.Task<System.Collections.Generic.List<ODUtils.Journal.JournalCommander>> GetAllJournalCommanders(bool includeHidden);
     }
 }
@@ -266,34 +267,8 @@ namespace ODUtils.Helpers
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// ODUtils.Exobiology
+// ODUtils.Exobiology — see Exobiology.cs for the full functional implementation
 // ────────────────────────────────────────────────────────────────────────────
-namespace ODUtils.Exobiology
-{
-    public sealed class OrganicInfo
-    {
-        public string EnglishName { get; set; } = string.Empty;
-        public long Value { get; set; }
-        public int ColonyRange { get; set; }
-    }
-
-    public static class OrganicValues
-    {
-        public static readonly System.DateTime NewPriceDate = new(2023, 4, 25, 0, 0, 0, System.DateTimeKind.Utc);
-    }
-
-    public sealed class ExoData
-    {
-        public static readonly Dictionary<string, List<ODUtils.Models.GalacticRegions>> SpeciesRegions = new();
-        public static ExoNames? GetNamesFromSpecies(string codex) => null;
-    }
-
-    public sealed class ExoNames
-    {
-        public string Genus { get; set; } = string.Empty;
-        public string Species { get; set; } = string.Empty;
-    }
-}
 
 // ────────────────────────────────────────────────────────────────────────────
 // ToastNotifications.Position — already defined in ToastNotificationsStubs.cs

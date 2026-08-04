@@ -69,7 +69,7 @@ namespace ODUtils.Models
     public enum StarLuminosityClass { Unknown = 0, O, Ia, Ib, II, III, IIIa, IIIb, IV, V, Va, Vb, Vz, VI, VII }
 
     // ── OrganicScanState ───────────────────────────────────────────────────────
-    public enum OrganicScanState { None = 0, Unavailable = 1, Discovered = 2, Analysed = 3 }
+    public enum OrganicScanState { None = 0, Unavailable = 1, Discovered = 2, Analysed = 3, Sold = 4 }
 
     // ── OrganicScanStage ───────────────────────────────────────────────────────
     public enum OrganicScanStage { Log = 0, Codex = 1, Prediction = 2, Analyse = 3 }

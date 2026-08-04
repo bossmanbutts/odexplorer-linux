@@ -95,13 +95,15 @@ public partial class App : Application
 
     private static MainViewModel BuildViewModelGraph()
     {
-        // Stores (stub implementations until real stores are wired)
+        // Stores (functional in-memory journal pipeline; real stores can be swapped in later)
         IOdToolsDatabaseProvider databaseProvider = new OdExplorerDatabaseProvider();
         var settingsStore = new SettingsStore(databaseProvider);
         var notificationStore = new NotificationStore(settingsStore);
+        var exoData = new ExoData();
         var journalParserStore = new JournalParserStore(databaseProvider, settingsStore);
-        var explorationDataStore = new ExplorationDataStore();
-        var organicCheckListDataStore = new OrganicCheckListDataStore(journalParserStore, new ExoData(), settingsStore);
+        var organicCheckListDataStore = new OrganicCheckListDataStore(journalParserStore, exoData, settingsStore);
+        var explorationDataStore = new ExplorationDataStore(journalParserStore, new EdsmApiService(), databaseProvider,
+            notificationStore, settingsStore, exoData, organicCheckListDataStore);
         var spanshCsvStore = new SpanshCsvStore();
 
         var navigationStore = new OdNavigationStore();

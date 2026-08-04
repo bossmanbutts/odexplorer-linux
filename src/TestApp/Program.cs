@@ -1,39 +1,96 @@
-using ODExplorer.Adapters;
-using ODExplorer.Audio;
-using ODExplorer.Stores;
 using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using ODExplorer.Database;
+using ODExplorer.Stores;
+using ODUtils.APis;
+using ODUtils.Exobiology;
 
-// Minimal test app that wires NoOp adapters and calls SettingsStore.LoadSettings()
+// Headless pipeline smoke test: replays a sample journal directory through the
+// in-memory stores and verifies the state populates and events fire.
 class Program
 {
-    static int Main(string[] args)
+    static int Main()
     {
-        // Configure NoOp adapters
-        var odUtils = new NoOpOdUtilsAdapter();
-        var notifier = new NoOpNotificationAdapter();
-        var paths = new NoOpPlatformPaths();
-
-        // Create a minimal in-memory "database provider" object that provides GetAllSettings/AddSettings methods via dynamic.
-        var inMemoryDb = new InMemorySettingsProvider();
-
-        var settingsStore = new ODExplorer.Stores.SettingsStore(inMemoryDb);
-
         try
         {
-            settingsStore.LoadSettings();
-            Console.WriteLine("Settings loaded successfully (no-op provider).");
-            return 0;
+            var db = new OdExplorerDatabaseProvider();
+            var settings = new SettingsStore(db);
+            var notifications = new NotificationStore(settings);
+            var exo = new ExoData();
+
+            var parser = new JournalParserStore(db, settings);
+            var organicChecklist = new OrganicCheckListDataStore(parser, exo, settings);
+            var exploration = new ExplorationDataStore(parser, new EdsmApiService(), db, notifications, settings, exo, organicChecklist);
+
+            int liveCount = 0, currentSystemEvents = 0, organicDetailsEvents = 0, cartoSold = 0, bioSold = 0;
+            parser.OnParserStoreLive += (_, live) => { if (live) Interlocked.Increment(ref liveCount); };
+            exploration.OnCurrentSystemUpdated += (_, s) => { if (s is not null) Interlocked.Increment(ref currentSystemEvents); };
+            organicChecklist.OnOrganicScanDetailsUpdated += (_, _) => Interlocked.Increment(ref organicDetailsEvents);
+            exploration.OnCartoDataSold += (_, _) => Interlocked.Increment(ref cartoSold);
+            exploration.OnBioDataSold += (_, _) => Interlocked.Increment(ref bioSold);
+
+            var journalDir = Path.Combine(Path.GetTempPath(), "odex_pipeline_smoke");
+            Directory.CreateDirectory(journalDir);
+            foreach (var f in Directory.GetFiles(journalDir, "*.log")) File.Delete(f);
+            File.WriteAllLines(Path.Combine(journalDir, "Journal.240101000000.01.log"), SampleLines());
+
+            parser.ReadNewDirectory(journalDir);
+
+            var deadline = DateTime.UtcNow.AddSeconds(30);
+            while (!parser.IsLive && DateTime.UtcNow < deadline) Thread.Sleep(50);
+
+            int failures = 0;
+            void Check(string name, bool condition)
+            {
+                Console.WriteLine($"{(condition ? "PASS" : "FAIL")}: {name}");
+                if (!condition) failures++;
+            }
+
+            Check("parser became live", parser.IsLive);
+            Check("parser live raised once", liveCount == 1);
+            Check("current system = NextSys", exploration.CurrentSystem?.Name == "NextSys");
+            Check("current system region name set", string.IsNullOrEmpty(exploration.CurrentSystemRegion) == false);
+            Check("Testes in sold carto", exploration.GetSoldCartoSystems().Any(x => x.Name == "Testes"));
+            Check("NextSys has no unsold", exploration.GetUnsoldCartoSystems().All(x => x.Name != "NextSys"));
+            Check("current system event raised", currentSystemEvents >= 1);
+            Check("organic details event raised", organicDetailsEvents >= 1);
+
+            var bacterial = organicChecklist.OrganicScanItems.TryGetValue("$Codex_Ent_Bacterial_Genus_Name;", out var list) ? list : null;
+            Check("bacterial genus key present", bacterial is { Count: > 0 });
+            var acerosis = bacterial?.FirstOrDefault(x => x.SpeciesCodex == "$Codex_Ent_Bacterial_01_Name;");
+            Check("Bacterial 01 present", acerosis is not null);
+            Check("Bacterial 01 sold after sale", acerosis is not null && acerosis.Region.Any(r => r.Value == ODUtils.Models.OrganicScanState.Sold));
+            Check("Bacterial 01 has variants", acerosis is not null && acerosis.Variants.Count > 0);
+            Check("carto sold event not raised during history (live false)", cartoSold == 0);
+            Check("bio sold event not raised during history (live false)", bioSold == 0);
+
+            Console.WriteLine();
+            Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");
+            return failures == 0 ? 0 : 1;
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"LoadSettings failed: {ex.Message}");
+            Console.Error.WriteLine($"UNEXPECTED: {ex}");
             return 2;
         }
     }
-}
 
-public class InMemorySettingsProvider
-{
-    public System.Collections.Generic.List<object> GetAllSettings() => new();
-    public void AddSettings(System.Collections.Generic.List<object> settings) { }
+    static string[] SampleLines() =>
+    [
+        "{\"timestamp\":\"2024-01-01T00:00:00Z\",\"event\":\"Fileheader\",\"part\":1,\"language\":\"English\"}",
+        "{\"timestamp\":\"2024-01-01T00:00:01Z\",\"event\":\"LoadGame\",\"Commander\":\"TestCMDR\",\"Ship\":\"CobraMkIII\",\"GameMode\":\"Solo\",\"Credits\":1000000}",
+        "{\"timestamp\":\"2024-01-01T00:00:02Z\",\"event\":\"FSDJump\",\"StarSystem\":\"Testes\",\"SystemAddress\":10477373803,\"StarPos\":[30.0,-40.0,5.0],\"StarType\":\"K\",\"Body\":7,\"Bodies\":4,\"JumpDist\":8.5}",
+        "{\"timestamp\":\"2024-01-01T00:00:03Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"Testes\",\"BodyID\":0,\"StarSystem\":\"Testes\",\"SystemAddress\":10477373803,\"DistanceFromArrivalLS\":0.0,\"StarType\":\"K\",\"StarClass\":\"K5 Va\",\"StellarMass\":0.7,\"Radius\":500000000.0,\"AbsoluteMagnitude\":7.5,\"Age_MY\":4000.0,\"WasDiscovered\":true,\"WasMapped\":false}",
+        "{\"timestamp\":\"2024-01-01T00:00:04Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"Testes 1\",\"BodyID\":1,\"StarSystem\":\"Testes\",\"SystemAddress\":10477373803,\"DistanceFromArrivalLS\":1800.0,\"PlanetClass\":\"Rocky body\",\"Landable\":true,\"SurfaceTemperature\":280.0,\"MassEM\":0.05,\"Radius\":800000.0,\"SurfaceGravity\":1.1,\"OrbitalPeriod\":100000.0,\"WasDiscovered\":false,\"WasMapped\":false,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":3}]}",
+        "{\"timestamp\":\"2024-01-01T00:00:05Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":10477373803,\"BodyID\":1,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":3}]}",
+        "{\"timestamp\":\"2024-01-01T00:00:06Z\",\"event\":\"SAAScanComplete\",\"SystemName\":\"Testes\",\"SystemAddress\":10477373803,\"BodyID\":1,\"ProbesUsed\":5,\"EfficiencyTargetMet\":true}",
+        "{\"timestamp\":\"2024-01-01T00:00:07Z\",\"event\":\"ApproachBody\",\"StarSystem\":\"Testes\",\"SystemAddress\":10477373803,\"Body\":\"Testes 1\",\"BodyID\":1}",
+        "{\"timestamp\":\"2024-01-01T00:00:08Z\",\"event\":\"ScanOrganic\",\"ScanType\":\"Analyse\",\"Genus\":\"$Codex_Ent_Bacterial_Genus_Name;\",\"Genus_Localised\":\"Bacterium\",\"Species\":\"$Codex_Ent_Bacterial_01_Name;\",\"Species_Localised\":\"Bacterium Acerosis\",\"Variant\":\"$Codex_Ent_Bacterial_01_A_Name;\",\"Variant_Localised\":\"Bacterium Acerosis Amethyst\",\"SystemAddress\":10477373803,\"Body\":1,\"Latitude\":10.0,\"Longitude\":20.0}",
+        "{\"timestamp\":\"2024-01-01T00:00:09Z\",\"event\":\"CodexEntry\",\"System\":\"Testes\",\"SystemAddress\":10477373803,\"Body\":\"Testes 1\",\"BodyID\":1,\"Name\":\"$Codex_Ent_Bacterial_01_A_Name;\",\"Name_Localised\":\"Bacterium Acerosis Amethyst\",\"Category\":\"$Codex_Category_Biology;\",\"SubCategory\":\"$Codex_SubCategory_Organic_Structures;\",\"Region\":1,\"IsNewEntry\":true}",
+        "{\"timestamp\":\"2024-01-01T00:00:10Z\",\"event\":\"SellOrganicData\",\"MarketID\":3229234944,\"BioData\":[{\"Name\":\"$Codex_Ent_Bacterial_01_A_Name;\",\"Name_Localised\":\"Bacterium Acerosis Amethyst\",\"Genus\":\"$Codex_Ent_Bacterial_Genus_Name;\",\"Species\":\"$Codex_Ent_Bacterial_01_Name;\",\"Variant\":\"$Codex_Ent_Bacterial_01_A_Name;\",\"Value\":50000,\"Bonus\":50000,\"TotalValue\":100000}]}",
+        "{\"timestamp\":\"2024-01-01T00:00:11Z\",\"event\":\"SellExplorationData\",\"Systems\":[\"Testes\"],\"Discovered\":[{\"SystemName\":\"Testes\",\"NumBodies\":4}],\"BaseValue\":50000,\"Bonus\":10000,\"TotalEarnings\":60000}",
+        "{\"timestamp\":\"2024-01-01T00:00:12Z\",\"event\":\"FSDJump\",\"StarSystem\":\"NextSys\",\"SystemAddress\":3103895106049,\"StarPos\":[-100.0,200.0,300.0],\"StarType\":\"G\",\"Body\":7,\"Bodies\":1,\"JumpDist\":350.0}"
+    ];
 }
