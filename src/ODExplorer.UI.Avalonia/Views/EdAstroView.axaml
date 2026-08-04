@@ -33,21 +33,23 @@
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="modelvms:EdAstroPoiViewModel">
-                        <Grid ColumnDefinitions="Auto,170,*,90" Margin="4">
+                        <Grid ColumnDefinitions="Auto,*,*,90" Margin="4">
                             <Button Content="Copy"
                                     FontSize="11"
                                     Padding="6,2"
                                     VerticalAlignment="Center"
                                     Click="CopyPoi_Click" />
-                            <TextBlock Text="{Binding Name}"
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Name}"
                                        FontWeight="Bold"
                                        VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
                                        Margin="8,0,0,0" />
-                            <TextBlock Grid.Column="1"
+                            <TextBlock Grid.Column="2"
                                        Text="{Binding GalMapName}"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis" />
-                            <TextBlock Grid.Column="2"
+                            <TextBlock Grid.Column="3"
                                        Text="{Binding DistanceFromCommander, StringFormat='{}{0:N0} ly'}"
                                        VerticalAlignment="Center"
                                        TextAlignment="Right" />
