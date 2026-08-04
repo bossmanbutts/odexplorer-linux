@@ -1,6 +1,19 @@
 namespace ODUtils.Spansh
 {
-    public enum CsvType { RoadToRiches = 0, NeutronRoute, WorldTypeRoute, TouristRoute, FleetCarrier, GalaxyPlotter, Exobiology }
+    public enum CsvType
+    {
+        None = -1,
+        RoadToRiches = 0,
+        FleetCarrier,
+        NeutronRoute,
+        GalaxyPlotter,
+        WorldTypeRoute,
+        TouristRoute,
+        Exobiology,
+        ExobiologyOld,
+        Colonisation,
+        GalaxyPlotterOld,
+    }
 
     public sealed class SpanshCsvDTO
     {

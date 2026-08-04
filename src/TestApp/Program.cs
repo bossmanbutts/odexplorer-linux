@@ -47,38 +47,37 @@ class Program
 
             var rtrCsv = Path.Combine(Path.GetTempPath(), "odex_rtr.csv");
             File.WriteAllText(rtrCsv,
-                "# Road to Riches\n" +
-                "system_name,system_id64,distance_from_arrival,body,body_id,distance_to_arrival,estimated_scan_value\n" +
-                "Sol,10477373803,0,Sol,0,0,100000\n" +
-                "Sirius,10477373804,4.5,\"Sirius A 1\",1,1200.5,150000\n");
+                "System Name,Body Name,Body Subtype,Is Terraformable,Distance To Arrival,Estimated Scan Value,Estimated Mapping Value,Jumps\n" +
+                "Sol,Sol,Star,No,0,100000,200000,1\n" +
+                "Sirius,\"Sirius A 1\",Planet,Yes,1200.6,150000,300000,2\n");
 
             var parsed = SpanshCSVParser.ParseCsv(rtrCsv);
-            Check("SpanshCSVParser sniffs Road to Riches type", parsed is { CsvType: CsvType.RoadToRiches });
-            Check("SpanshCSVParser maps targets", parsed is { Targets.Count: 2 } && parsed.Targets[0].SystemName == "Sol");
+            Check("SpanshCSVParser detects Road to Riches from header", parsed is { CsvType: CsvType.RoadToRiches });
+            Check("SpanshCSVParser maps targets", parsed is { Targets.Count: 2 } && parsed.Targets[0].SystemName == "SOL");
             Check("SpanshCSVParser maps quoted body field",
-                parsed is not null && parsed.Targets[1].BodiesInfo is { Count: 1 } && parsed.Targets[1].BodiesInfo[0].Body == "Sirius A 1");
+                parsed is not null && parsed.Targets[1].BodiesInfo is { Count: 1 } && parsed.Targets[1].BodiesInfo[0].Body == "A 1");
+            Check("SpanshCSVParser maps body distance", parsed is not null && parsed.Targets[1].BodiesInfo is { Count: 1 } && parsed.Targets[1].BodiesInfo[0].Distance == "1,201 ls");
 
             var noMarker = Path.Combine(Path.GetTempPath(), "odex_no_marker.csv");
             File.WriteAllText(noMarker, "system_name,system_id64\nA,1\nB,2\n");
-            Check("ParseCsv rejects file without type marker", SpanshCSVParser.ParseCsv(noMarker) is null);
+            Check("ParseCsv rejects unmatched header", SpanshCSVParser.ParseCsv(noMarker) is null);
             var forced = SpanshCSVParser.ForceParse(noMarker, CsvType.NeutronRoute);
-            Check("ForceParse overrides missing marker", forced is { CsvType: CsvType.NeutronRoute, Targets.Count: 2 });
+            Check("ForceParse overrides unknown header", forced is { CsvType: CsvType.NeutronRoute, Targets.Count: 2 });
 
             Check("store ParseCSV succeeds", spansh.ParseCSV(rtrCsv));
             Check("store container populated", spansh.CurrentContainer is { Targets.Count: 2, CsvType: CsvType.RoadToRiches });
             Check("store CurrentIndex starts at 0", spansh.CurrentIndex == 0);
             spansh.CurrentIndex = 1;
-            Check("store CurrentIndex navigates targets", spansh.CurrentTarget?.SystemName == "Sirius" && spansh.NextTarget is null);
+            Check("store CurrentIndex navigates targets", spansh.CurrentTarget?.SystemName == "SIRIUS" && spansh.NextTarget is null);
 
             var gpCsv = Path.Combine(Path.GetTempPath(), "odex_gp.csv");
             File.WriteAllText(gpCsv,
-                "# Galaxy Plotter\n" +
-                "system_name,system_id64,distance_from_arrival,class,refuel,scoopable\n" +
-                "Alpha,1,0.1,G,Yes,No\n" +
-                "Beta,2,5.0,K,No,Yes\n");
+                "System Name,Distance,Distance Remaining,Fuel Left,Fuel Used,Refuel,Neutron Star,Inject\n" +
+                "Alpha,0.1,50.0,8,5,Yes,No,No\n" +
+                "Beta,5.0,45.0,8,6,No,Yes,Yes\n");
             Check("store ForceParseCSV succeeds", spansh.ForceParseCSV(gpCsv, CsvType.GalaxyPlotter));
             Check("store refuel property mapped",
-                spansh.CurrentTarget?.SystemName == "Alpha" && spansh.CurrentTarget?.Property3 == "Yes"
+                spansh.CurrentTarget?.SystemName == "ALPHA" && spansh.CurrentTarget?.Property3 == "Yes"
                 && settings.SpanshCSVSettings[settings.SelectedCommanderID] == CsvType.GalaxyPlotter);
 
             int timerTicks = 0;

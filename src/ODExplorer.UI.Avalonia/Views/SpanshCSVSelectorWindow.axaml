@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="340" d:DesignHeight="380"
+        x:Class="ODExplorer.UI.Avalonia.Views.SpanshCSVSelectorWindow"
+        Title="Select CSV Type"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        CanResize="False">
+    <StackPanel Margin="16" Spacing="12" MinWidth="300">
+        <TextBlock Text="Could not determine the type of the selected CSV. Please select the route type:" 
+                   TextWrapping="Wrap"
+                   FontSize="13"
+                   MaxWidth="320" />
+        <StackPanel x:Name="ButtonsPanel"
+                    Spacing="6"
+                    HorizontalAlignment="Left" />
+    </StackPanel>
+</Window>
