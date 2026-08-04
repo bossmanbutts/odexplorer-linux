@@ -276,6 +276,26 @@ namespace ODUtils.Models
 
     namespace EdAstro
     {
-        public enum EDAstroType { Unknown = 0 }
+        public enum EDAstroType
+        {
+            Unknown = 0,
+            Community,
+            DeepSpaceOutpost,
+            Glitches,
+            GreenGasGiants,
+            Historical,
+            InhabitedSystem,
+            Legacy,
+            Memorials,
+            MysteryAndXenology,
+            Nebulae,
+            NotableStellarPhenomena,
+            Organic,
+            PlanetaryCircumnavigation,
+            PlanetaryFeatures,
+            SightsAndScenery,
+            StellarFeatures,
+            TouristBeacons,
+        }
     }
 }

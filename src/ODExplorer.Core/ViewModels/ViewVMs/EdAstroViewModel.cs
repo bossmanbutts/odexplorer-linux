@@ -16,12 +16,14 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.explorationDataStore = explorationDataStore;
             this.notificationStore = notificationStore;
             this.explorationDataStore.OnCurrentSystemUpdated += ExplorationDataStore_OnCurrentSystemUpdated;
+            this.explorationDataStore.OnEdAstroPoisUpdated += ExplorationDataStore_OnEdAstroPoisUpdated;
             PopulatePois();
         }
 
         public override void Dispose()
         {
             this.explorationDataStore.OnCurrentSystemUpdated -= ExplorationDataStore_OnCurrentSystemUpdated;
+            this.explorationDataStore.OnEdAstroPoisUpdated -= ExplorationDataStore_OnEdAstroPoisUpdated;
         }
 
         private List<EdAstroPoiViewModel> pointsOfInterest = [];
@@ -75,6 +77,11 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             pointsOfInterest.Sort((x, y) => x.DistanceFromCommander.CompareTo(y.DistanceFromCommander));
             OnPropertyChanged(nameof(PointsOfInterest));
+        }
+
+        private void ExplorationDataStore_OnEdAstroPoisUpdated(object? sender, System.EventArgs? e)
+        {
+            PopulatePois();
         }
 
         public void CopyToClipboard(EdAstroPoiViewModel poi)

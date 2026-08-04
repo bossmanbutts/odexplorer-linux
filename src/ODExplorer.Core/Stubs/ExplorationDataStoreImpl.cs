@@ -47,6 +47,26 @@ namespace ODExplorer.Stores
         }
         #endregion
 
+        public async Task RefreshEdAstroPois()
+        {
+            try
+            {
+                var pois = await new EdAstroApiService().GetPois();
+                if (pois.Count == 0)
+                    return;
+
+                if (databaseProvider is OdExplorerDatabaseProvider explorerDatabaseProvider)
+                    explorerDatabaseProvider.AddEdAstroPois(pois);
+
+                EdAstroPois = pois;
+                DispatcherHelper.Invoke(() => OnEdAstroPoisUpdated?.Invoke(this, EventArgs.Empty));
+            }
+            catch
+            {
+                // Network or parse failure; keep any data already loaded from the database.
+            }
+        }
+
         #region Private Fields
         private readonly JournalParserStore parserStore;
         private readonly EdsmApiService edsmApi;
@@ -93,6 +113,7 @@ namespace ODExplorer.Stores
         public event EventHandler? OnBioDataSold;
         public event EventHandler? OnBioDataLost;
         public event EventHandler? OnExoMinValueChanged;
+        public event EventHandler? OnEdAstroPoisUpdated;
         #endregion
 
         #region IProcessJournalLogs Implementation

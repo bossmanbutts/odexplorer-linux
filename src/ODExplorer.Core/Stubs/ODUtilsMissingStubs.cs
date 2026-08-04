@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Newtonsoft.Json.Linq;
 
 // ────────────────────────────────────────────────────────────────────────────
 // ODUtils.Dialogs.ViewModels
@@ -161,8 +162,125 @@ namespace ODUtils.APis
 
     public sealed class EdAstroApiService
     {
-        public System.Threading.Tasks.Task<System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi>> GetPois()
-            => System.Threading.Tasks.Task.FromResult(new System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi>());
+        private const string GecUrl = "https://edastro.com/gec/json/all";
+
+        public async Task<List<ODExplorer.Models.EdAstroPoi>> GetPois()
+        {
+            try
+            {
+                using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("ODExplorer");
+                var json = await http.GetStringAsync(GecUrl).ConfigureAwait(false);
+                return ParsePois(json);
+            }
+            catch
+            {
+                return [];
+            }
+        }
+
+        public static List<ODExplorer.Models.EdAstroPoi> ParsePois(string json)
+        {
+            var result = new List<ODExplorer.Models.EdAstroPoi>();
+            if (string.IsNullOrWhiteSpace(json))
+                return result;
+
+            var array = JArray.Parse(json);
+            foreach (var item in array)
+            {
+                var id = ReadInt(item, "id");
+                if (id is null)
+                    continue;
+
+                double x = 0, y = 0, z = 0;
+                if (item["coordinates"] is JArray coordinates && coordinates.Count >= 3)
+                {
+                    x = coordinates[0].ToObject<double>();
+                    y = coordinates[1].ToObject<double>();
+                    z = coordinates[2].ToObject<double>();
+                }
+
+                var poiUrl = item["poiUrl"]?.ToString();
+                if (string.IsNullOrWhiteSpace(poiUrl))
+                    poiUrl = $"https://edastro.com/gec/view/{id}";
+
+                var dto = new ODExplorer.Database.DTOs.EdAstroPoiDTO
+                {
+                    Id = id.Value,
+                    Name = item["name"]?.ToString() ?? string.Empty,
+                    GalMapName = item["galMapSearch"]?.ToString() ?? string.Empty,
+                    SystemAddress = ReadLong(item, "id64") ?? 0,
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Type = (int)ParseType(item["type"]?.ToString()),
+                    Type2 = (int)ParseType(item["type2"]?.ToString()),
+                    Summary = item["summary"]?.ToString() ?? string.Empty,
+                    DistanceFromSol = ReadDouble(item, "solDistance") ?? 0,
+                    PoiUrl = poiUrl,
+                    MarkDown = item["descriptionMardown"]?.ToString() ?? string.Empty,
+                };
+
+                result.Add(new ODExplorer.Models.EdAstroPoi(dto));
+            }
+
+            return result;
+        }
+
+        private static ODUtils.Models.EdAstro.EDAstroType ParseType(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return ODUtils.Models.EdAstro.EDAstroType.Unknown;
+
+            var normalized = Normalize(value);
+            foreach (var member in Enum.GetNames<ODUtils.Models.EdAstro.EDAstroType>())
+            {
+                if (string.Equals(Normalize(member), normalized, StringComparison.Ordinal))
+                    return Enum.Parse<ODUtils.Models.EdAstro.EDAstroType>(member);
+            }
+
+            return ODUtils.Models.EdAstro.EDAstroType.Unknown;
+        }
+
+        private static string Normalize(string value)
+        {
+            var buffer = new System.Text.StringBuilder(value.Length);
+            foreach (var c in value)
+            {
+                if (char.IsLetterOrDigit(c))
+                    buffer.Append(char.ToLowerInvariant(c));
+            }
+            return buffer.ToString();
+        }
+
+        private static int? ReadInt(JToken? token, string name)
+        {
+            var t = token?[name];
+            if (t is null) return null;
+            if (t.Type == JTokenType.Integer) return t.ToObject<int>();
+            if (t.Type == JTokenType.Float) return (int)t.ToObject<double>();
+            if (t.Type == JTokenType.String && long.TryParse(t.ToString(), out var l)) return (int)l;
+            return null;
+        }
+
+        private static long? ReadLong(JToken? token, string name)
+        {
+            var t = token?[name];
+            if (t is null) return null;
+            if (t.Type == JTokenType.Integer) return t.ToObject<long>();
+            if (t.Type == JTokenType.Float) return (long)t.ToObject<double>();
+            if (t.Type == JTokenType.String && long.TryParse(t.ToString(), out var l)) return l;
+            return null;
+        }
+
+        private static double? ReadDouble(JToken? token, string name)
+        {
+            var t = token?[name];
+            if (t is null) return null;
+            if (t.Type == JTokenType.Float || t.Type == JTokenType.Integer) return t.ToObject<double>();
+            if (t.Type == JTokenType.String && double.TryParse(t.ToString(), out var d)) return d;
+            return null;
+        }
     }
 
     public sealed class EdsmApiService

@@ -22,7 +22,7 @@ namespace ODExplorer.ViewModels.ModelVMs
         public long Address => poi.SystemAddress;
         public Position Position => poi.SystemPosition;
         public EDAstroType Type1 => poi.Type;
-        public EDAstroType Type2 => poi.Type;
+        public EDAstroType Type2 => poi.Type2;
         public string Summary => poi.Summary;
         public Uri PioUrl => poi.PoiUrl;
         public string MarkDown => poi.MarkDown.Contains("(/poiphotos") ? 

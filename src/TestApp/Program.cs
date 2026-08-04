@@ -89,6 +89,39 @@ class Program
             spansh.StopFleetCarrierTimer();
             Check("carrier timer stops", spansh.CarrierTimerRunning == false);
 
+            // ── EdAstro: GEC JSON → EdAstroPoi mapping (offline) ──────────────────
+            const string gecJson =
+                "[{\"id\":10,\"type\":\"Sights and Scenery\",\"type2\":\"\",\"name\":\"The Ammonia Lyceum\"," +
+                "\"galMapSearch\":\"Athaip WR-H d11-7577\",\"coordinates\":[334.969,-55.4375,23014.3]," +
+                "\"summary\":\"A nested moon close to its parent.\"," +
+                "\"descriptionMardown\":\"![caption](https://edastro.com/poiimages/2023/11/x.jpg)\r\n\r\nBody *3 b a*.\"," +
+                "\"solDistance\":23016.8,\"id64\":260354282082915,\"poiUrl\":\"https://edastro.com/gec/view/10\"}," +
+                "{\"id\":14,\"type\":\"Green Gas Giants\",\"type2\":\"Historical\",\"name\":\"Dueling Rings\"," +
+                "\"galMapSearch\":\"Qiefaa EB-U d4-20\",\"coordinates\":[8814.06,-85,-5725.47]," +
+                "\"summary\":\"A ringed icy moon.\",\"descriptionMardown\":\"No photos yet.\"," +
+                "\"solDistance\":\"10519.4\",\"id64\":\"2817395361024\"}]";
+
+            var pois = ODUtils.APis.EdAstroApiService.ParsePois(gecJson);
+            Check("GEC maps all POIs", pois.Count == 2);
+            Check("GEC maps name + galMap", pois is { Count: 2 } && pois[0].Name == "The Ammonia Lyceum" && pois[0].GalMapName == "Athaip WR-H d11-7577");
+            Check("GEC maps types", pois[0].Type == ODUtils.Models.EdAstro.EDAstroType.SightsAndScenery
+                && pois[0].Type2 == ODUtils.Models.EdAstro.EDAstroType.Unknown
+                && pois[1].Type == ODUtils.Models.EdAstro.EDAstroType.GreenGasGiants
+                && pois[1].Type2 == ODUtils.Models.EdAstro.EDAstroType.Historical);
+            Check("GEC maps numeric id64", pois[0].SystemAddress == 260354282082915);
+            Check("GEC maps string id64", pois[1].SystemAddress == 2817395361024);
+            Check("GEC maps coordinates", Math.Abs(pois[0].SystemPosition.X - 334.969) < 0.001
+                && Math.Abs(pois[0].SystemPosition.Y - (-55.4375)) < 0.001
+                && Math.Abs(pois[0].SystemPosition.Z - 23014.3) < 0.001);
+            Check("GEC maps solDistance (number + string)", Math.Abs(pois[0].DistanceFromSol - 23016.8) < 0.001
+                && Math.Abs(pois[1].DistanceFromSol - 10519.4) < 0.001);
+            Check("GEC keeps markdown", pois[0].MarkDown.Contains("https://edastro.com/poiimages"));
+            Check("GEC fills missing poiUrl", pois[1].PoiUrl.OriginalString == "https://edastro.com/gec/view/14");
+
+            // EdAstroPoiViewModel: markdown rewrite + distance from commander.
+            var poiVm = new ODExplorer.ViewModels.ModelVMs.EdAstroPoiViewModel(pois[0], new(0, 0, 0));
+            Check("POI VM exposes markdown", poiVm.MarkDown.Contains("poiimages") && poiVm.DistanceFromCommander > 23000);
+
             int liveCount = 0, currentSystemEvents = 0, organicDetailsEvents = 0, cartoSold = 0, bioSold = 0;
             parser.OnParserStoreLive += (_, live) => { if (live) Interlocked.Increment(ref liveCount); };
             exploration.OnCurrentSystemUpdated += (_, s) => { if (s is not null) Interlocked.Increment(ref currentSystemEvents); };

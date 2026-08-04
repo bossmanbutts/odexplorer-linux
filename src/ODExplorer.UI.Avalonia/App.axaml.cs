@@ -121,6 +121,7 @@ public partial class App : Application
         var organicCheckListDataStore = new OrganicCheckListDataStore(journalParserStore, exoData, settingsStore);
         var explorationDataStore = new ExplorationDataStore(journalParserStore, new EdsmApiService(), databaseProvider,
             notificationStore, settingsStore, exoData, organicCheckListDataStore);
+        _ = explorationDataStore.RefreshEdAstroPois();
         var spanshCsvStore = new SpanshCsvStore(journalParserStore, databaseProvider, settingsStore, notificationStore);
 
         var navigationStore = new OdNavigationStore();
