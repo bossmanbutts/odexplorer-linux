@@ -13,4 +13,18 @@
     <Application.Styles>
         <FluentTheme />
     </Application.Styles>
+
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon Icon="/Assets/od-explorer-icon-64.png"
+                      ToolTipText="OD Explorer">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="Show OD Explorer" Click="OnTrayShow" />
+                        <NativeMenuItem Header="Quit" Click="OnTrayQuit" />
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
 </Application>

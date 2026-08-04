@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -339,18 +340,45 @@ namespace ODExplorer.Database
 {
     public sealed class OdExplorerDatabaseProvider : ODUtils.Database.Interfaces.IOdToolsDatabaseProvider
     {
-        public void AddCommander(ODUtils.Journal.JournalCommander commander) { }
-        public System.Threading.Tasks.Task<System.Collections.Generic.List<ODUtils.Journal.JournalCommander>> GetAllJournalCommanders(bool includeHidden)
-            => System.Threading.Tasks.Task.FromResult(new System.Collections.Generic.List<ODUtils.Journal.JournalCommander>
+        private readonly System.Collections.Generic.List<ODUtils.Journal.JournalCommander> commanders = [];
+
+        public void AddCommander(ODUtils.Journal.JournalCommander commander)
+        {
+            var existing = commanders.FirstOrDefault(x => x.Id == commander.Id);
+            if (existing is not null)
             {
-                new(1, "Test Commander", "/home/user/Journal", "Journal.2026-08-01T000000.01.log", false)
-            });
+                commanders[commanders.IndexOf(existing)] = commander;
+            }
+            else
+            {
+                commanders.Add(commander);
+            }
+        }
+
+        public ODUtils.Journal.JournalCommander? GetCommander(int id)
+            => commanders.FirstOrDefault(x => x.Id == id);
+
+        public System.Threading.Tasks.Task<System.Collections.Generic.List<ODUtils.Journal.JournalCommander>> GetAllJournalCommanders(bool includeHidden)
+            => System.Threading.Tasks.Task.FromResult(commanders.ToList());
+
+        public void DeleteCommander(int commanderId)
+        {
+            commanders.RemoveAll(x => x.Id == commanderId);
+        }
+
+        public void ClearCommanders() => commanders.Clear();
+
         public void AddEdAstroPois(System.Collections.Generic.List<ODExplorer.Models.EdAstroPoi> pois) { }
         public void AddIgnoreSystem(long address, string name, int commanderId) { }
         public void RemoveIgnoreSystem(long address, int commanderId) { }
         public System.Collections.Generic.List<ODExplorer.Models.IgnoredSystem> GetIgnoredSystems(int cmdrId)
             => new();
-        public System.Threading.Tasks.Task DeleteCommander(int commanderID)
+        public System.Threading.Tasks.Task DeleteCommanderAsync(int commanderID)
             => System.Threading.Tasks.Task.CompletedTask;
+        public System.Threading.Tasks.Task ResetDataBaseAsync()
+        {
+            commanders.Clear();
+            return System.Threading.Tasks.Task.CompletedTask;
+        }
     }
 }

@@ -63,6 +63,30 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    private void OnTrayShow(object? sender, System.EventArgs e)
+    {
+        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: { } window })
+        {
+            return;
+        }
+
+        window.Show();
+        window.WindowState = global::Avalonia.Controls.WindowState.Normal;
+        window.Activate();
+    }
+
+    private void OnTrayQuit(object? sender, System.EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: MainWindow window })
+        {
+            window.RequestQuit();
+        }
+        else if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+    }
+
     private static MainWindow CreateMainWindow()
     {
         var mainViewModel = BuildViewModelGraph();
@@ -75,7 +99,7 @@ public partial class App : Application
         IOdToolsDatabaseProvider databaseProvider = new OdExplorerDatabaseProvider();
         var settingsStore = new SettingsStore(databaseProvider);
         var notificationStore = new NotificationStore(settingsStore);
-        var journalParserStore = new JournalParserStore();
+        var journalParserStore = new JournalParserStore(databaseProvider, settingsStore);
         var explorationDataStore = new ExplorationDataStore();
         var organicCheckListDataStore = new OrganicCheckListDataStore(journalParserStore, new ExoData(), settingsStore);
         var spanshCsvStore = new SpanshCsvStore();

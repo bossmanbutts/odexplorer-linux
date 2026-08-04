@@ -21,4 +21,8 @@
     <ProjectReference Include="..\ODExplorer.Core\ODExplorer.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
 </Project>
