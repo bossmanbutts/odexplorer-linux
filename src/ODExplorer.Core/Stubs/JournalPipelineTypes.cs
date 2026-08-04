@@ -109,9 +109,9 @@ namespace ODUtils.Journal
 
     public sealed class JournalHistoryArgs
     {
-        public JournalHistoryArgs(List<JournalTypeEnum> types, DateTime age, IProcessJournalLogs owner, Func<JournalEntry, Task> parseStream)
+        public JournalHistoryArgs(IEnumerable<JournalTypeEnum> types, DateTime age, IProcessJournalLogs owner, Func<JournalEntry, Task> parseStream)
         {
-            Types = types;
+            Types = types.ToList();
             Age = age;
             Owner = owner;
             ParseStream = parseStream;

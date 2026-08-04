@@ -1,6 +1,16 @@
 Migration Handoff Note — ODExplorer core extraction + UI adapter implementation
 
-Status (2026-08-03, REAL SQLITE DATABASE LAYER WIRED):
+Status (2026-08-03, REAL SPANSH CSV STORE WIRED):
+- The real `Stores/SpanshCsvStore.cs` now compiles into ODExplorer.Core (added to csproj include list) and is wired in `App.axaml.cs` with the real ctor `new SpanshCsvStore(journalParserStore, databaseProvider, settingsStore, notificationStore)`. The no-op stub was deleted.
+- Windows-only deps were removed from the real store: dropped `NAudio.Wave`/`System.Media`/`System.Printing`; the fleet-carrier timer completion sound now goes through `ODExplorer.Audio.IAudioPlayerProvider.Current` (plays the custom WAV if set, no-op otherwise). Added the `ParseHistoryStream(IEnumerable<JournalEntry>, int)` overload the interface requires.
+- New functional `ODUtils.Spansh.SpanshCSVParser` (`Stubs/SpanshCSVParser.cs`): real spansh.co.uk CSV parsing. Header-name-based column mapping (robust to spansh reordering columns), quoted-field aware CSV line splitter, type sniffing from the `# <name>` first line (`galactic mapping` maps to RoadToRiches). Maps system_name + per-type Property1..4 + BodiesInfo. `ParseCsv` returns null when the type marker is missing/unknown or no rows parse.
+- New `ODUtils.Helpers.CountdownTimer` (`Stubs/CountdownTimer.cs`): the fleet-carrier jump timer (Start/Stop/UpdateRuntime, OnTick -> "hh:mm:ss" string, OnTimerRunning, CountDownFinishedEvent).
+- `ODExplorer.Models.SpanshCsvContainer` gained `CsvType` (needed by the real store). Added `PatchDates.SquadCarrierPatchDate` (2021-04-13) and `ODExplorer.Notifications.SpanshNotificationType` enum. `JournalHistoryArgs` ctor now takes `IEnumerable<JournalTypeEnum>`.
+- TestApp smoke test now 37 checks (14 new spansh ones): parser type sniff, header/quote mapping, ParseCsv null on missing marker, ForceParse override, store ParseCSV/ForceParseCSV, CurrentIndex navigation, GalaxyPlotter refuel Property3 mapping, carrier timer start/tick/stop, plus the existing 23 journal/persistence checks. ALL CHECKS PASSED.
+- Build: `dotnet build ODExplorer.sln -c Release` => 0 errors.
+- Remaining for full parity: wire real `Stores/ExplorationDataStore`/`OrganicCheckListDataStore` (both depend on real `EliteJournalReader` `JournalEventParser`), CartographicView layout work, and the real ODUtils/EliteJournalReader package swap.
+
+Prior status (2026-08-03, REAL SQLITE DATABASE LAYER WIRED):
 - The in-tree EFCore database layer is now compiled into ODExplorer.Core and used at runtime:
   - `Database/**` (real `OdExplorerDbContext`, `OdExplorerDbContextFactory`, `IOdExplorerDBContextFactory`, `ODDesignTimeDbContextFactory`, `OdExplorerDatabaseProvider`, DTOs) + `Migrations/**` (8 tables, generated under EF 9.0.0) are now included in the csproj.
   - The stub in-memory `OdExplorerDatabaseProvider` and tiny `IOdToolsDatabaseProvider` were deleted; the interface now mirrors the real ODUtils surface (commanders, journal entries, journal streams/history, ignored systems, EdAstro POIs, settings, spansh CSVs, reset).

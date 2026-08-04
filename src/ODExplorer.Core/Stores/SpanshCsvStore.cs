@@ -1,6 +1,5 @@
 ﻿using EliteJournalReader;
 using EliteJournalReader.Events;
-using NAudio.Wave;
 using ODExplorer.Database;
 using ODExplorer.Models;
 using ODUtils.Database.Interfaces;
@@ -11,8 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Media;
-using System.Printing;
 using System.Threading.Tasks;
 
 namespace ODExplorer.Stores
@@ -180,6 +177,8 @@ namespace ODExplorer.Stores
             ParseJournalEvent(entry);
             return Task.CompletedTask;
         }
+
+        public Task ParseHistoryStream(IEnumerable<JournalEntry> journalEntries, int currentCmdrId) => Task.CompletedTask;
 
         private bool CheckCarrierType(string type, DateTime date)
         {
@@ -356,27 +355,18 @@ namespace ODExplorer.Stores
             }
             _ = Task.Factory.StartNew(() =>
             {
+                var player = ODExplorer.Audio.IAudioPlayerProvider.Current;
+
+                if (player is null)
+                {
+                    return;
+                }
+
                 if (string.IsNullOrEmpty(settingsStore.SpanshCSVSettings.CustomTimerSound) == false
                     && File.Exists(settingsStore.SpanshCSVSettings.CustomTimerSound))
                 {
-                    try
-                    {
-                        using var audioFile = new AudioFileReader(settingsStore.SpanshCSVSettings.CustomTimerSound);
-                        using var outputDevice = new WaveOutEvent();
-                        outputDevice.Init(audioFile);
-                        outputDevice.Play();
-                        while (outputDevice.PlaybackState == PlaybackState.Playing)
-                        { }
-                        return;
-                    }
-                    catch
-                    {
-                        SystemSounds.Beep.Play();
-                        return;
-                    }
+                    player.Play(settingsStore.SpanshCSVSettings.CustomTimerSound);
                 }
-
-                SystemSounds.Beep.Play();
             });
         }
     }

@@ -121,7 +121,7 @@ public partial class App : Application
         var organicCheckListDataStore = new OrganicCheckListDataStore(journalParserStore, exoData, settingsStore);
         var explorationDataStore = new ExplorationDataStore(journalParserStore, new EdsmApiService(), databaseProvider,
             notificationStore, settingsStore, exoData, organicCheckListDataStore);
-        var spanshCsvStore = new SpanshCsvStore();
+        var spanshCsvStore = new SpanshCsvStore(journalParserStore, databaseProvider, settingsStore, notificationStore);
 
         var navigationStore = new OdNavigationStore();
         MainViewModel? mainViewModel = null;

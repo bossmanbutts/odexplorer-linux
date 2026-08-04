@@ -28,10 +28,11 @@
     <Compile Remove="Models\SystemBodyViewModel*" />
   </ItemGroup>
 
-  <!-- Include SettingsStore in core API surface (it is adapted to be core-friendly) -->
+  <!-- Include Stores that are adapted to be core-friendly (no Windows-only deps) -->
   <ItemGroup>
     <Compile Include="Stores\SettingsStore.cs" />
     <Compile Include="Stores\NotificationStore.cs" />
+    <Compile Include="Stores\SpanshCsvStore.cs" />
     <Compile Include="Models\SystemBodyViewModelMainComparer.cs" />
   </ItemGroup>
 

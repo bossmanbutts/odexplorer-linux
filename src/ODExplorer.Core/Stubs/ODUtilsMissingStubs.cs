@@ -314,5 +314,15 @@ namespace ODExplorer.Models
     public static class PatchDates
     {
         public static System.DateTime Type11PatchDate { get; } = new System.DateTime(2023, 4, 11);
+        public static System.DateTime SquadCarrierPatchDate { get; } = new System.DateTime(2021, 4, 13);
+    }
+}
+
+// ─── Spansh notification types ────────────────────────────────────────────────
+namespace ODExplorer.Notifications
+{
+    public enum SpanshNotificationType
+    {
+        Refuel = 0,
     }
 }

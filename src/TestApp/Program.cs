@@ -7,6 +7,7 @@ using ODExplorer.Database;
 using ODExplorer.Stores;
 using ODUtils.APis;
 using ODUtils.Exobiology;
+using ODUtils.Spansh;
 
 // Headless pipeline smoke test: replays a sample journal directory through the
 // in-memory stores and verifies the state populates and events fire.
@@ -34,6 +35,61 @@ class Program
             var organicChecklist = new OrganicCheckListDataStore(parser, exo, settings);
             var exploration = new ExplorationDataStore(parser, new EdsmApiService(), db, notifications, settings, exo, organicChecklist);
 
+            // ── Spansh CSV: real store + parser ──────────────────────────────────
+            var spansh = new SpanshCsvStore(parser, db, settings, notifications);
+
+            int failures = 0;
+            void Check(string name, bool condition)
+            {
+                Console.WriteLine($"{(condition ? "PASS" : "FAIL")}: {name}");
+                if (!condition) failures++;
+            }
+
+            var rtrCsv = Path.Combine(Path.GetTempPath(), "odex_rtr.csv");
+            File.WriteAllText(rtrCsv,
+                "# Road to Riches\n" +
+                "system_name,system_id64,distance_from_arrival,body,body_id,distance_to_arrival,estimated_scan_value\n" +
+                "Sol,10477373803,0,Sol,0,0,100000\n" +
+                "Sirius,10477373804,4.5,\"Sirius A 1\",1,1200.5,150000\n");
+
+            var parsed = SpanshCSVParser.ParseCsv(rtrCsv);
+            Check("SpanshCSVParser sniffs Road to Riches type", parsed is { CsvType: CsvType.RoadToRiches });
+            Check("SpanshCSVParser maps targets", parsed is { Targets.Count: 2 } && parsed.Targets[0].SystemName == "Sol");
+            Check("SpanshCSVParser maps quoted body field",
+                parsed is not null && parsed.Targets[1].BodiesInfo is { Count: 1 } && parsed.Targets[1].BodiesInfo[0].Body == "Sirius A 1");
+
+            var noMarker = Path.Combine(Path.GetTempPath(), "odex_no_marker.csv");
+            File.WriteAllText(noMarker, "system_name,system_id64\nA,1\nB,2\n");
+            Check("ParseCsv rejects file without type marker", SpanshCSVParser.ParseCsv(noMarker) is null);
+            var forced = SpanshCSVParser.ForceParse(noMarker, CsvType.NeutronRoute);
+            Check("ForceParse overrides missing marker", forced is { CsvType: CsvType.NeutronRoute, Targets.Count: 2 });
+
+            Check("store ParseCSV succeeds", spansh.ParseCSV(rtrCsv));
+            Check("store container populated", spansh.CurrentContainer is { Targets.Count: 2, CsvType: CsvType.RoadToRiches });
+            Check("store CurrentIndex starts at 0", spansh.CurrentIndex == 0);
+            spansh.CurrentIndex = 1;
+            Check("store CurrentIndex navigates targets", spansh.CurrentTarget?.SystemName == "Sirius" && spansh.NextTarget is null);
+
+            var gpCsv = Path.Combine(Path.GetTempPath(), "odex_gp.csv");
+            File.WriteAllText(gpCsv,
+                "# Galaxy Plotter\n" +
+                "system_name,system_id64,distance_from_arrival,class,refuel,scoopable\n" +
+                "Alpha,1,0.1,G,Yes,No\n" +
+                "Beta,2,5.0,K,No,Yes\n");
+            Check("store ForceParseCSV succeeds", spansh.ForceParseCSV(gpCsv, CsvType.GalaxyPlotter));
+            Check("store refuel property mapped",
+                spansh.CurrentTarget?.SystemName == "Alpha" && spansh.CurrentTarget?.Property3 == "Yes"
+                && settings.SpanshCSVSettings[settings.SelectedCommanderID] == CsvType.GalaxyPlotter);
+
+            int timerTicks = 0;
+            spansh.OnCarrierTimeTick += (_, _) => Interlocked.Increment(ref timerTicks);
+            spansh.StartFleetCarrierTimer();
+            Check("carrier timer running after start", spansh.CarrierTimerRunning);
+            Thread.Sleep(600);
+            Check("carrier timer ticks", timerTicks >= 1);
+            spansh.StopFleetCarrierTimer();
+            Check("carrier timer stops", spansh.CarrierTimerRunning == false);
+
             int liveCount = 0, currentSystemEvents = 0, organicDetailsEvents = 0, cartoSold = 0, bioSold = 0;
             parser.OnParserStoreLive += (_, live) => { if (live) Interlocked.Increment(ref liveCount); };
             exploration.OnCurrentSystemUpdated += (_, s) => { if (s is not null) Interlocked.Increment(ref currentSystemEvents); };
@@ -50,13 +106,6 @@ class Program
 
             var deadline = DateTime.UtcNow.AddSeconds(30);
             while (!parser.IsLive && DateTime.UtcNow < deadline) Thread.Sleep(50);
-
-            int failures = 0;
-            void Check(string name, bool condition)
-            {
-                Console.WriteLine($"{(condition ? "PASS" : "FAIL")}: {name}");
-                if (!condition) failures++;
-            }
 
             Check("parser became live", parser.IsLive);
             Check("parser live raised once", liveCount == 1);

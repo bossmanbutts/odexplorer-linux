@@ -15,6 +15,7 @@ namespace ODExplorer.Models
         }
 
         public List<ExplorationTarget> Targets { get; set; }
+        public CsvType CsvType { get; set; }
         [JsonIgnore]
         public ExplorationTarget? CurrentTarget { get; set; }
         public int CurrentIndex { get; set; }
