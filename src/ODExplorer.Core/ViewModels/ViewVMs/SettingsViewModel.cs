@@ -20,18 +20,28 @@ namespace ODExplorer.ViewModels.ViewVMs
         public SettingsViewModel(SettingsStore settingsStore,
                          IOdToolsDatabaseProvider databaseProvider,
                          NavigationViewModel navigationView,
-                         JournalParserStore parserStore)
+                         JournalParserStore parserStore,
+                         NotificationStore? notificationStore = null)
         {
             this.settingsStore = settingsStore;
             this.databaseProvider = databaseProvider;
             this.navigationView = navigationView;
             this.parserStore = parserStore;
+            this.notificationStore = notificationStore;
 
             OpenPayPal = new RelayCommand(OnOpenPayPal);
             OpenEdsm = new RelayCommand(OnOpenEdsm);
             OpenSpansh = new RelayCommand(OnOpenSpansh);
             OpenGitHub = new RelayCommand(OnOpenGitHub);
             OpenEdAstro = new RelayCommand(OnOpenEdAstro);
+
+            TestToast = new RelayCommand(OnTestToast);
+            TestWorthMapping = new RelayCommand(OnTestWorthMapping);
+            TestExoBio = new RelayCommand(OnTestExoBio);
+            TestHighValueExo = new RelayCommand(OnTestHighValueExo);
+            TestNewCodex = new RelayCommand(OnTestNewCodex);
+            TestSpansh = new RelayCommand(OnTestSpansh);
+            TestFleetCarrier = new RelayCommand(OnTestFleetCarrier);
 
             ToggleCommanderHidden = new RelayCommand(OnToggleCommanderHidden, (_) => IsLoaded && SelectedCommander != null);
             ResetLastReadFile = new RelayCommand(OnResetLastFile, (_) => IsLoaded && SelectedCommander != null);
@@ -46,9 +56,10 @@ namespace ODExplorer.ViewModels.ViewVMs
             SettingsStore settingsStore,
             IOdToolsDatabaseProvider databaseProvider,
             NavigationViewModel navigationView,
-            JournalParserStore parserStore)
+            JournalParserStore parserStore,
+            NotificationStore? notificationStore = null)
         {
-            var vm = new SettingsViewModel(settingsStore, databaseProvider, navigationView, parserStore);
+            var vm = new SettingsViewModel(settingsStore, databaseProvider, navigationView, parserStore, notificationStore);
             _ = vm.Initialise();
             return vm;
         }
@@ -57,6 +68,7 @@ namespace ODExplorer.ViewModels.ViewVMs
         private readonly IOdToolsDatabaseProvider databaseProvider;
         private readonly NavigationViewModel navigationView;
         private readonly JournalParserStore parserStore;
+        private readonly NotificationStore? notificationStore;
 
         private readonly SystemGridSettings SystemGridSettingsClone;
 
@@ -247,6 +259,16 @@ namespace ODExplorer.ViewModels.ViewVMs
                 OnPropertyChanged();
             }
         }
+
+        public bool DeveloperMode
+        {
+            get => settingsStore.DeveloperMode;
+            set
+            {
+                settingsStore.DeveloperMode = value;
+                OnPropertyChanged();
+            }
+        }
         #region Commands
         public ICommand OpenPayPal { get; }
         public ICommand ToggleCommanderHidden { get; }
@@ -258,6 +280,39 @@ namespace ODExplorer.ViewModels.ViewVMs
         public ICommand OpenSpansh { get; }
         public ICommand OpenEdAstro { get; }
         public ICommand DeleteCommander { get; }
+        public ICommand TestToast { get; }
+        public ICommand TestWorthMapping { get; }
+        public ICommand TestExoBio { get; }
+        public ICommand TestHighValueExo { get; }
+        public ICommand TestNewCodex { get; }
+        public ICommand TestSpansh { get; }
+        public ICommand TestFleetCarrier { get; }
+
+        #region Developer Toast Triggers
+        private void OnTestToast(object? obj) => notificationStore?.ShowTestNotification();
+
+        private void OnTestWorthMapping(object? obj) =>
+            notificationStore?.ShowWorthMappingNotification(new SystemBody { BodyName = "Test Body A", Status = DiscoveryStatus.WorthMapping });
+
+        private void OnTestExoBio(object? obj) =>
+            notificationStore?.ShowExoBioNotification(new OrganicScanItem
+            {
+                SpeciesLocalised = "Test Species",
+                Body = new SystemBody { BodyName = "Test Body B" }
+            }, "");
+
+        private void OnTestHighValueExo(object? obj) =>
+            notificationStore?.ShowHighValueExoBodyNotification("Test Body C", "10,000,000 - 15,000,000", "3 Signals");
+
+        private void OnTestNewCodex(object? obj) =>
+            notificationStore?.ShowNewCodexEntriesNotification("Test Body D", new Dictionary<string, bool> { ["Test Genus Test Species"] = true }, null);
+
+        private void OnTestSpansh(object? obj) =>
+            notificationStore?.ShowSpanshNotification(ODExplorer.Notifications.SpanshNotificationType.Refuel);
+
+        private void OnTestFleetCarrier(object? obj) =>
+            notificationStore?.FleetCarrierNotification("Test Fleet Carrier");
+        #endregion
 
         private async Task OnSaveCommanderChanges()
         {

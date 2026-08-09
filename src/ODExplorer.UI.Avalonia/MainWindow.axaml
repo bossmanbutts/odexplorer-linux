@@ -44,8 +44,10 @@
                 </StackPanel>
             </DockPanel>
         </Border>
-        <ContentControl Content="{Binding CurrentViewModel}"
-                        HorizontalContentAlignment="Stretch"
-                        VerticalContentAlignment="Stretch" />
+        <Grid x:Name="ContentRoot">
+            <ContentControl Content="{Binding CurrentViewModel}"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch" />
+        </Grid>
     </DockPanel>
 </Window>

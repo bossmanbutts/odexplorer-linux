@@ -53,6 +53,7 @@ namespace ODExplorer.Stores
         public DateTime IgnoredCartoDate { get; set; } = DateTime.MinValue;
         public DateTime IgnoredExoDate { get; set; } = DateTime.MinValue;
         public bool MinimiseToTray { get; set; }
+        public bool DeveloperMode { get; set; }
 
         #region Persistance
         public void LoadSettings()

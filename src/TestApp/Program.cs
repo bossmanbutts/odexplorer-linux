@@ -7,6 +7,7 @@ using ODExplorer.Database;
 using ODExplorer.Stores;
 using ODUtils.APis;
 using ODUtils.Exobiology;
+using ODUtils.Models;
 using ODUtils.Spansh;
 
 // Headless pipeline smoke test: replays a sample journal directory through the
@@ -88,6 +89,38 @@ class Program
             Check("carrier timer ticks", timerTicks >= 1);
             spansh.StopFleetCarrierTimer();
             Check("carrier timer stops", spansh.CarrierTimerRunning == false);
+
+            // ── NotificationStore: toast event emission ──────────────────────────
+            var toasts = new List<ODExplorer.Models.ToastMessage>();
+            notifications.OnToast += toasts.Add;
+
+            notifications.ShowTestNotification();
+            Check("test toast emitted", toasts.Count == 1 && toasts[0].Title == "OD Explorer" && toasts[0].Message == "Test notification");
+
+            notifications.ShowWorthMappingNotification(new SystemBody { BodyName = "HD 1234" });
+            Check("worth mapping toast", toasts.Count == 2 && toasts[1].Title == "Worth Mapping" && toasts[1].Message.Contains("HD 1234"));
+
+            notifications.ShowExoBioNotification(new OrganicScanItem
+            {
+                SpeciesLocalised = "Bacterium Acerosis",
+                Body = new SystemBody { BodyName = "Testes 1" }
+            }, "Minimum Distance Travelled");
+            Check("exo bio toast uses localised species + body",
+                toasts.Count == 3 && toasts[2].Title == "Minimum Distance Travelled" && toasts[2].Message == "Bacterium Acerosis on Testes 1");
+
+            notifications.ShowHighValueExoBodyNotification("Testes 2", "10,000,000", "3 Signals");
+            Check("high value exo toast", toasts.Count == 4 && toasts[3].Title == "Valuable Exobiology Body" && toasts[3].Message.Contains("TESTES 2"));
+
+            notifications.ShowNewCodexEntriesNotification("Testes 3", new Dictionary<string, bool> { ["A"] = true, ["B"] = false }, null);
+            Check("new codex toast filters new-only", toasts.Count == 5 && toasts[4].Message.Contains("A") && !toasts[4].Message.Contains("B"));
+
+            notifications.FleetCarrierNotification("FC-1000");
+            Check("fleet carrier toast", toasts.Count == 6 && toasts[5].Title == "Fleet Carrier" && toasts[5].Message == "FC-1000");
+
+            settings.NotificationSettings.NotificationsEnabled = false;
+            notifications.ShowTestNotification();
+            Check("disabled notifications suppress emission", toasts.Count == 6);
+            settings.NotificationSettings.NotificationsEnabled = true;
 
             // ── EdAstro: GEC JSON → EdAstroPoi mapping (offline) ──────────────────
             const string gecJson =

@@ -100,6 +100,38 @@
                               HorizontalAlignment="Left" />
                 </GroupBox>
 
+                <GroupBox Header="Developer">
+                    <StackPanel Spacing="8" Margin="10">
+                        <CheckBox Content="Developer Mode (show test triggers)"
+                                  IsChecked="{Binding DeveloperMode}" />
+                        <WrapPanel IsVisible="{Binding DeveloperMode}"
+                                   Orientation="Horizontal"
+                                   Width="520">
+                            <Button Content="Test Toast"
+                                    Command="{Binding TestToast}"
+                                    Margin="4" />
+                            <Button Content="Worth Mapping"
+                                    Command="{Binding TestWorthMapping}"
+                                    Margin="4" />
+                            <Button Content="Exo Bio"
+                                    Command="{Binding TestExoBio}"
+                                    Margin="4" />
+                            <Button Content="High Value Exo"
+                                    Command="{Binding TestHighValueExo}"
+                                    Margin="4" />
+                            <Button Content="New Codex"
+                                    Command="{Binding TestNewCodex}"
+                                    Margin="4" />
+                            <Button Content="Spansh Refuel"
+                                    Command="{Binding TestSpansh}"
+                                    Margin="4" />
+                            <Button Content="Fleet Carrier"
+                                    Command="{Binding TestFleetCarrier}"
+                                    Margin="4" />
+                        </WrapPanel>
+                    </StackPanel>
+                </GroupBox>
+
                 <GroupBox Header="Links">
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="10">
                         <Button Content="GitHub" Command="{Binding OpenGitHub}" />

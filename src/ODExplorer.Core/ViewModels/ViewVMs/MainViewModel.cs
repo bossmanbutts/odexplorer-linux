@@ -95,6 +95,8 @@ namespace ODExplorer.ViewModels.ViewVMs
         private readonly SpanshCsvStore spanshCsvStore;
         private readonly IOdToolsDatabaseProvider databaseProvider;
         private int currentCommanderId;
+
+        public NotificationStore NotificationStore => notificationStore;
         private List<ODExplorer.Models.PopOutBase> ActivePopOuts { get; set; } = [];
         #endregion
 

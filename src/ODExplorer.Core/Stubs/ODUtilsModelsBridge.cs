@@ -218,6 +218,8 @@ namespace ODUtils.Models
         public double RotationPeriod { get; set; }
         public double Radius { get; set; }
         public double AxialTilt { get; set; }
+        public double Eccentricity { get; set; }
+        public double SemiMajorAxis { get; set; }
         public bool TidalLock { get; set; }
 
         // Planet
@@ -228,6 +230,7 @@ namespace ODUtils.Models
         public double MassEM { get; set; }
         public bool Landable { get; set; }
         public bool Terraformable { get; set; }
+        public string TerraformState { get; set; } = string.Empty;
         public AtmosphereClass Atmosphere { get; set; }
         public AtmosphereClass AtmosphereType { get; set; }
         public VolcanismType Volcanism { get; set; }

@@ -315,6 +315,8 @@ namespace ODExplorer.Stores
                                     _organicData.Add(body);
                                     TriggerBodyBiosUpdatedIfLive(body);
                                 }
+                                if (parserStore.IsLive && body.IsPlanet)
+                                    notificationStore.CheckForNotableNotifications(body);
                                 TriggerBodyEventIfLive(body);
                                 break;
                             }
@@ -599,7 +601,15 @@ namespace ODExplorer.Stores
         private void TriggerBodyEventIfLive(SystemBody body)
         {
             if (parserStore.IsLive)
+            {
+                if (settingsStore.NotificationOptions.HasFlag(NotificationOptions.WorthMapping)
+                    && body.Status == DiscoveryStatus.WorthMapping)
+                {
+                    notificationStore.ShowWorthMappingNotification(body);
+                }
+
                 InvokeLive(() => OnBodyUpdated?.Invoke(this, body));
+            }
         }
 
         private void TriggerBodyBiosUpdatedIfLive(SystemBody body)
@@ -608,10 +618,19 @@ namespace ODExplorer.Stores
                 InvokeLive(() => OnBodyBiosUpdated?.Invoke(this, body));
         }
 
-        private void TriggerBioUpdatedIfLive(OrganicScanItem bio)
+        private void TriggerBioUpdatedIfLive(OrganicScanItem bio, bool fromCodex = false)
         {
             if (parserStore.IsLive)
+            {
+                if ((!fromCodex || !onFoot)
+                    && bio.Info is not null
+                    && settingsStore.NotificationOptions.HasFlag(NotificationOptions.NewBioScanned))
+                {
+                    notificationStore.ShowExoBioNotification(bio, "");
+                }
+
                 InvokeLive(() => OnBioDataUpdated?.Invoke(this, bio));
+            }
         }
 
         private void TriggerBioSoldIfLive()
@@ -763,11 +782,14 @@ namespace ODExplorer.Stores
             body.OrbitalPeriod = scanEvt.OrbitalPeriod;
             body.RotationPeriod = scanEvt.RotationPeriod;
             body.AxialTilt = scanEvt.AxialTilt;
+            body.Eccentricity = scanEvt.Eccentricity;
+            body.SemiMajorAxis = scanEvt.SemiMajorAxis;
             body.Radius = scanEvt.Radius;
             body.MassEM = scanEvt.MassEM;
             body.SurfaceGravity = scanEvt.SurfaceGravity;
             body.Landable = scanEvt.Landable;
             body.Terraformable = JournalEventMapper.IsTerraformable(scanEvt.TerraformState);
+            body.TerraformState = scanEvt.TerraformState;
             body.Atmosphere = JournalEventMapper.GetAtmosphereClass(scanEvt.Atmosphere);
             body.AtmosphereType = JournalEventMapper.GetAtmosphereType(scanEvt.AtmosphereType);
             body.Volcanism = JournalEventMapper.GetVolcanism(scanEvt.Volcanism);
@@ -1013,7 +1035,7 @@ namespace ODExplorer.Stores
                         if (bio.SpeciesCodex.StartsWith(species, StringComparison.OrdinalIgnoreCase))
                         {
                             UpdateFromCodex(bio, codexEntry, body);
-                            TriggerBioUpdatedIfLive(bio);
+                            TriggerBioUpdatedIfLive(bio, true);
                         }
                         else
                         {
@@ -1032,7 +1054,7 @@ namespace ODExplorer.Stores
                     if (bio.GenusCodex.StartsWith(genus, StringComparison.OrdinalIgnoreCase))
                     {
                         UpdateFromCodex(bio, codexEntry, body);
-                        TriggerBioUpdatedIfLive(bio);
+                        TriggerBioUpdatedIfLive(bio, true);
                         return;
                     }
                 }
@@ -1043,7 +1065,7 @@ namespace ODExplorer.Stores
                 if (fallback is not null)
                 {
                     UpdateFromCodex(fallback, codexEntry, body);
-                    TriggerBioUpdatedIfLive(fallback);
+                    TriggerBioUpdatedIfLive(fallback, true);
                     return;
                 }
 
@@ -1052,7 +1074,7 @@ namespace ODExplorer.Stores
                 if (notPredicted is not null)
                 {
                     UpdateFromCodex(notPredicted, codexEntry, body);
-                    TriggerBioUpdatedIfLive(notPredicted);
+                    TriggerBioUpdatedIfLive(notPredicted, true);
                     return;
                 }
             }
@@ -1061,7 +1083,7 @@ namespace ODExplorer.Stores
             body.OrganicScanItems = [newBio];
             if (_organicData.Contains(body) == false)
                 _organicData.Add(body);
-            TriggerBioUpdatedIfLive(newBio);
+            TriggerBioUpdatedIfLive(newBio, true);
         }
 
         private void UpdateFromScan(OrganicScanItem bio, ScanOrganicEvent.ScanOrganicEventArgs scanOrganic, SystemBody body)
