@@ -174,6 +174,16 @@ namespace ODExplorer.Database
             return ret;
         }
 
+        public virtual long GetMaxJournalOffset(int cmdrId, string filename)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            return context.JournalEntries
+                .Where(x => x.CommanderID == cmdrId && x.Filename == filename)
+                .Select(x => (long?)x.Offset)
+                .Max() ?? 0;
+        }
+
         public virtual async Task<List<JournalEntry>> GetJournalEntriesOfType(int cmdrId, List<JournalTypeEnum> types)
         {
             return await GetJournalEntriesOfType(cmdrId, types, DateTime.MinValue);

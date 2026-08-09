@@ -110,11 +110,12 @@ public sealed class ToastHost : Panel
             MinHeight = 48,
             Opacity = 0,
             RenderTransform = new TranslateTransform(0, -10),
-            Transitions =
-            {
-                new DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromMilliseconds(250) },
-                new DoubleTransition { Property = TranslateTransform.YProperty, Duration = TimeSpan.FromMilliseconds(250) },
-            },
+        };
+
+        border.Transitions = new Transitions
+        {
+            new DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromMilliseconds(250) },
+            new DoubleTransition { Property = TranslateTransform.YProperty, Duration = TimeSpan.FromMilliseconds(250) },
         };
 
         return border;
@@ -125,7 +126,8 @@ public sealed class ToastHost : Panel
         var timer = active.FirstOrDefault(x => x.Card == card).Timer;
         timer?.Stop();
 
-        ((TranslateTransform)card.RenderTransform).Y = -8;
+        if (card.RenderTransform is TranslateTransform translate)
+            translate.Y = -8;
         card.Opacity = 0;
 
         DispatcherTimer.RunOnce(() =>

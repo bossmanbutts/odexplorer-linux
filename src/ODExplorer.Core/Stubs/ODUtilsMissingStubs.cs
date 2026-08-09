@@ -323,6 +323,7 @@ namespace ODUtils.Database.Interfaces
         System.Collections.Generic.HashSet<string> GetAllReadFilenames();
         void AddJournalEntries(System.Collections.Generic.List<EliteJournalReader.JournalEntry> journalEntries);
         System.Threading.Tasks.Task<System.Collections.Generic.List<EliteJournalReader.JournalEntry>> GetAllJournalEntries(int cmdrId);
+        long GetMaxJournalOffset(int cmdrId, string filename);
         System.Threading.Tasks.Task<System.Collections.Generic.List<EliteJournalReader.JournalEntry>> GetJournalEntriesOfType(int cmdrId, System.Collections.Generic.List<ODUtils.Journal.JournalTypeEnum> types);
         System.Threading.Tasks.Task<System.Collections.Generic.List<EliteJournalReader.JournalEntry>> GetJournalEntriesOfType(int cmdrId, System.Collections.Generic.List<ODUtils.Journal.JournalTypeEnum> types, System.DateTime age);
         System.Threading.Tasks.Task GetJournalsStream(int cmdrId, System.Collections.Generic.List<ODUtils.Journal.JournalTypeEnum> types, System.DateTime age, System.Func<EliteJournalReader.JournalEntry, System.Threading.Tasks.Task> callBack);

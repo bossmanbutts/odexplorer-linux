@@ -132,6 +132,22 @@ namespace ODExplorer.Stores
             if (databaseProvider is null || settingsStore is null)
                 return;
 
+            // No commander selected yet (fresh start): default to the first known one.
+            if (commanderID <= 0)
+            {
+                var first = databaseProvider.GetAllJournalCommanders(true)
+                    .GetAwaiter().GetResult()
+                    .FirstOrDefault();
+
+                if (first is null)
+                {
+                    Raise(() => OnJournalStoreStatusChange?.Invoke(this, "No Commanders Found"));
+                    return;
+                }
+
+                commanderID = first.Id;
+            }
+
             settingsStore.SelectedCommanderID = commanderID;
 
             var commander = databaseProvider.GetCommander(commanderID);
@@ -142,7 +158,7 @@ namespace ODExplorer.Stores
             }
 
             currentDirectory = commander.JournalPath;
-            await ParseDirectoryAsync(commander.JournalPath, commanderID, commander.Name);
+            await ParseDirectoryAsync(commander.JournalPath, commanderID, commander.Name, commander.LastFile);
         }
 
         private async Task LoadDirectoryAsync(string path)
@@ -185,7 +201,7 @@ namespace ODExplorer.Stores
             await ParseDirectoryAsync(path, id, commanderName);
         }
 
-        private async Task ParseDirectoryAsync(string directory, int commanderId, string commanderName)
+        private async Task ParseDirectoryAsync(string directory, int commanderId, string commanderName, string? resumeFromFile = null)
         {
             StopWatching();
             IsLive = false;
@@ -209,8 +225,24 @@ namespace ODExplorer.Stores
                 foreach (var file in Directory.EnumerateFiles(directory, "*.log", SearchOption.TopDirectoryOnly)
                              .OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
                 {
-                    lastFile = Path.GetFileName(file);
+                    var fileName = Path.GetFileName(file);
+
+                    // Resume from the commander's last read journal file: everything
+                    // older has already been parsed and persisted.
+                    if (!string.IsNullOrEmpty(resumeFromFile) && string.CompareOrdinal(fileName, resumeFromFile) < 0)
+                        continue;
+
+                    lastFile = fileName;
                     await Task.Yield();
+
+                    // Within the resume file, skip lines already persisted to the DB.
+                    var isResumeFile = !string.IsNullOrEmpty(resumeFromFile)
+                                       && string.Equals(fileName, resumeFromFile, StringComparison.OrdinalIgnoreCase);
+                    long resumeOffset = 0;
+                    if (isResumeFile && databaseProvider is not null)
+                    {
+                        resumeOffset = databaseProvider.GetMaxJournalOffset(commanderId, fileName);
+                    }
 
                     List<JournalEntry> entriesToSave = [];
 
@@ -223,6 +255,12 @@ namespace ODExplorer.Stores
                         if (raw.Length == 0)
                         {
                             offset += 1;
+                            continue;
+                        }
+
+                        if (isResumeFile && offset <= resumeOffset)
+                        {
+                            offset += Encoding.UTF8.GetByteCount(raw) + 1;
                             continue;
                         }
 

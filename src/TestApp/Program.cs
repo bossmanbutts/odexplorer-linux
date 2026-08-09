@@ -234,6 +234,21 @@ class Program
             Check("restart keeps commander count at 1", finalCommanders.Count(x => x.Name == "TestCMDR") == 1);
             Check("restart does not duplicate journal entries", finalEntries.Count == 15);
 
+            // Resume: loading the SAVED commander with a fresh store must skip the
+            // already-parsed history and pick up only lines appended after the last read.
+            File.AppendAllText(Path.Combine(journalDir, "Journal.240101010000.02.log"),
+                "{\"timestamp\":\"2024-01-01T01:00:01Z\",\"event\":\"FSDJump\",\"StarSystem\":\"ResumeSys\",\"SystemAddress\":3103895106052,\"StarPos\":[1.0,2.0,3.0],\"StarType\":\"M\",\"Body\":7,\"Bodies\":1,\"JumpDist\":60.0}\n");
+
+            var resumeParser = new JournalParserStore(persistedProvider, settings);
+            var resumeExploration = new ExplorationDataStore(resumeParser, new EdsmApiService(), persistedProvider, notifications, settings, exo, organicChecklist);
+            resumeParser.ReadNewCommander(savedId);
+            deadline = DateTime.UtcNow.AddSeconds(30);
+            while (!resumeParser.IsLive && DateTime.UtcNow < deadline) Thread.Sleep(50);
+
+            var resumeEntries = persistedProvider.GetAllJournalEntries(savedId).GetAwaiter().GetResult();
+            Check("resume adds only new lines (no history re-parse)", resumeEntries.Count == 16);
+            Check("resume parsed the appended line", resumeExploration.CurrentSystem?.Name == "ResumeSys");
+
             Console.WriteLine();
             Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");
             return failures == 0 ? 0 : 1;
