@@ -26,17 +26,15 @@
     <PackageReference Include="NLog" Version="6.1.1" />
   </ItemGroup>
 
-  <!-- The real EFCore database layer (DbContext, provider, DTOs, migrations) is now compiled into core. -->
+  <!-- All remaining Stores/*.cs compile by default (dead real-store copies were deleted
+       in favour of the Stubs/*Impl.cs implementations). Only the Windows-only
+       DistanceFromArrival comparer stays excluded. -->
   <ItemGroup>
-    <Compile Remove="Stores\**\*.cs" />
     <Compile Remove="Models\SystemBodyViewModel*" />
   </ItemGroup>
 
   <!-- Include Stores that are adapted to be core-friendly (no Windows-only deps) -->
   <ItemGroup>
-    <Compile Include="Stores\SettingsStore.cs" />
-    <Compile Include="Stores\NotificationStore.cs" />
-    <Compile Include="Stores\SpanshCsvStore.cs" />
     <Compile Include="Models\SystemBodyViewModelMainComparer.cs" />
   </ItemGroup>
 
