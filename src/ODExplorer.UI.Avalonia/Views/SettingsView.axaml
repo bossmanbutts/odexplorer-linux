@@ -12,7 +12,7 @@
         <conv:VisibilityConverter x:Key="VisibilityConverter" />
     </UserControl.Resources>
 
-    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                   VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
             <Grid.ColumnDefinitions>

@@ -26,15 +26,15 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" Margin="10">
+        <Grid Grid.Row="1" ColumnDefinitions="2*,3*" Margin="10">
             <ListBox ItemsSource="{Binding PointsOfInterest}"
                      SelectedItem="{Binding SelectedPoi, Mode=TwoWay}"
                      SelectionMode="Single"
-                     MinWidth="420"
+                     MinWidth="360"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="modelvms:EdAstroPoiViewModel">
-                        <Grid ColumnDefinitions="Auto,*,*,90" Margin="4">
+                        <Grid ColumnDefinitions="Auto,*,Auto,90" Margin="4">
                             <Button Content="Copy"
                                     FontSize="11"
                                     Padding="6,2"
