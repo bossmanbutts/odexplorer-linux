@@ -23,6 +23,31 @@ public sealed class EnumToBoolConverter : IValueConverter
 }
 
 /// <summary>
+/// Converts a collection/Count to visibility: returns true when the count is greater
+/// than zero, or — when the parameter is "empty" — true when the count is zero.
+/// </summary>
+public sealed class CountToBoolConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var count = value switch
+        {
+            null => 0,
+            int i => i,
+            global::System.Collections.ICollection c => c.Count,
+            _ => 0,
+        };
+
+        return string.Equals(parameter as string, "empty", StringComparison.OrdinalIgnoreCase)
+            ? count == 0
+            : count > 0;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
+/// <summary>
 /// Two-way converter that binds a CheckBox.IsChecked to a single bit of a [Flags] enum.
 /// ConverterParameter is the flag value to test (e.g. {x:Static models:NotificationOptions.WorthMapping}).
 /// </summary>

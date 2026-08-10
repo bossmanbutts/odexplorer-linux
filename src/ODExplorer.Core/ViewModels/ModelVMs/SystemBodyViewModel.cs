@@ -290,8 +290,10 @@ namespace ODExplorer.ViewModels.ModelVMs
         public bool Terraformable => _body.Terraformable;
         public int GeologicalSignals => _body.GeologicalSignals;
         public string GeologicalSignalsString => _body.GeologicalSignals > 0 ? _body.GeologicalSignals.ToString() : string.Empty;
+        public bool HasGeologicalSignals => _body.GeologicalSignals > 0;
         public int BiologicalSignals => _body.BiologicalSignals;
         public string BiologicalSignalsString => _body.BiologicalSignals > 0 ? _body.BiologicalSignals.ToString() : string.Empty;
+        public bool HasBiologicalSignals => _body.BiologicalSignals > 0;
         public double SurfaceGravity => _body.SurfaceGravity;
         public List<PlanetRing>? Rings => _body.Rings;
         public List<PlanetRingViewModel> RingsView => _body.Rings is null ? [] : _body.Rings.Select(x => new PlanetRingViewModel(x, Body.BodyName)).ToList();

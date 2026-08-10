@@ -5,27 +5,345 @@
              xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
              xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
              xmlns:models="using:ODExplorer.Models"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
              mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
              x:Class="ODExplorer.UI.Avalonia.Views.CartographicView"
              x:DataType="vm:CartographicViewModel">
+    <UserControl.Resources>
+        <conv:EnumToBoolConverter x:Key="StateVisible" />
+        <conv:CountToBoolConverter x:Key="CountToBool" />
+
+        <!-- Shared master-detail pane used by the Horizontal and Extended layouts. -->
+        <DataTemplate x:Key="BodyDetailPane" x:DataType="modelvms:SystemBodyViewModel">
+            <ScrollViewer>
+                <StackPanel Spacing="8" Margin="8">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding FullName}"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding BodyDescription}"
+                                   FontSize="13"
+                                   Foreground="#BBBBBB"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding ScanStage}"
+                                   FontSize="12"
+                                   Foreground="#999999" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Temp" Foreground="#999999" />
+                            <TextBlock Text="{Binding SurfaceTemp}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Pressure" Foreground="#999999" />
+                            <TextBlock Text="{Binding SurfacePressure}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Gravity" Foreground="#999999" />
+                            <TextBlock Text="{Binding Gravity}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Radius" Foreground="#999999" />
+                            <TextBlock Text="{Binding Radius}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Orbital" Foreground="#999999" />
+                            <TextBlock Text="{Binding OrbitalPeriod}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Rotation" Foreground="#999999" />
+                            <TextBlock Text="{Binding RotationPeriod}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Tidal Lock" Foreground="#999999" />
+                            <TextBlock Text="{Binding TidalLock}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Terraform" Foreground="#999999" />
+                            <TextBlock Text="{Binding TerraformStatus}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Landable" Foreground="#999999" />
+                            <TextBlock Text="{Binding Landable}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Arrival" Foreground="#999999" />
+                            <TextBlock Text="{Binding DistanceFromArrivalLs}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Discovered" Foreground="#999999" />
+                            <TextBlock Text="{Binding WasDiscoveredString}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Mapped" Foreground="#999999" />
+                            <TextBlock Text="{Binding WasMappedString}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="6" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Value" Foreground="#999999" />
+                            <TextBlock Text="{Binding DataValue, StringFormat=N0}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Bio / Geo" Foreground="#999999" />
+                            <TextBlock Text="{Binding BiologicalSignalsString}" />
+                            <TextBlock Text="/" />
+                            <TextBlock Text="{Binding GeologicalSignalsString}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="7" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="Mapped / FSS" Foreground="#999999" />
+                            <TextBlock Text="{Binding MappedValue}" />
+                            <TextBlock Text="/" />
+                            <TextBlock Text="{Binding FssValue}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="4" IsVisible="{Binding HasRings}">
+                        <TextBlock Text="Rings" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding RingsView}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding RingClass}" Foreground="#AAAAAA" />
+                                        <TextBlock Grid.Column="2" Text="{Binding MassMT}" Foreground="#AAAAAA" Margin="12,0,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4" IsVisible="{Binding HasMaterials}">
+                        <TextBlock Text="Materials" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding Materials}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{Binding Name_Localised}" TextWrapping="Wrap" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Percent, StringFormat={}{0:0.0}%}" Foreground="#AAAAAA" Margin="12,0,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </DataTemplate>
+    </UserControl.Resources>
+
     <Grid RowDefinitions="*,40">
-        <!-- Body: current system bodies grid (stand-in while full carto layouts are ported) -->
-        <DataGrid Grid.Row="0"
-                  ItemsSource="{Binding CurrentSystemBodies}"
-                  IsReadOnly="True"
-                  AutoGenerateColumns="False"
-                  GridLinesVisibility="All"
-                  HeadersVisibility="Column"
-                  Margin="5">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Id" Width="60" Binding="{Binding BodyID}" />
-                <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="Class" Width="*" Binding="{Binding BodyDescription}" />
-                <DataGridTextColumn Header="Scan Stage" Width="120" Binding="{Binding ScanStage}" />
-                <DataGridTextColumn Header="Arrival ls" Width="130" Binding="{Binding DistanceFromArrivalLs}" />
-                <DataGridTextColumn Header="Value" Width="130" Binding="{Binding DataValue, StringFormat=N0}" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Body area -->
+        <Grid Grid.Row="0" Margin="5">
+
+            <!-- Current System / Exo layout (default). -->
+            <Grid IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.DetailedExo}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0"
+                           Text="Exobiology Signals"
+                           FontWeight="SemiBold"
+                           Margin="4,0,0,4" />
+                <ScrollViewer Grid.Row="1">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding OrganicSignals}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
+                                    <Border Background="#282828"
+                                            BorderBrush="#404040"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Padding="8"
+                                            Margin="0,0,0,6">
+                                        <Grid ColumnDefinitions="60,*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                            <TextBlock Text="{Binding BodyID}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2" Text="{Binding ScanStage}"
+                                                       Foreground="#AAAAAA"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="3" Text="{Binding DataValue, StringFormat=N0}"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right"
+                                                       Margin="8,0,0,0" />
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                                                       Text="{Binding OrganicValues}"
+                                                       FontSize="12"
+                                                       Foreground="#BBBBBB"
+                                                       TextWrapping="Wrap"
+                                                       Margin="60,4,0,0" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="No exobiology signals detected in the current system yet."
+                                   IsVisible="{Binding OrganicSignals, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
+                    </StackPanel>
+                </ScrollViewer>
+                <TextBlock Grid.Row="2"
+                           Text="Use EXO / DET / CLS / HOR / EXT buttons above to switch layout"
+                           FontSize="11"
+                           Foreground="#777777"
+                           Margin="4,6,0,0" />
+            </Grid>
+
+            <!-- Detailed layout: one card per body with key stats. -->
+            <ScrollViewer IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.DetailedView}}">
+                <ItemsControl ItemsSource="{Binding CurrentSystemBodies}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
+                            <Border Background="#282828"
+                                    BorderBrush="#404040"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8"
+                                    Margin="0,0,0,6">
+                                <Grid ColumnDefinitions="60,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto">
+                                    <TextBlock Text="{Binding BodyID}"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                               FontWeight="Bold"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="2" Text="{Binding ScanStage}"
+                                               Foreground="#AAAAAA"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Text="{Binding DataValue, StringFormat=N0}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               Margin="8,0,0,0" />
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="12" Margin="60,4,0,0">
+                                        <TextBlock Text="{Binding BodyDescription}" Foreground="#BBBBBB" />
+                                        <TextBlock Text="{Binding DistanceFromArrivalLs}" Foreground="#999999" />
+                                        <TextBlock Text="{Binding SurfaceTemp}" Foreground="#999999" />
+                                        <TextBlock Text="{Binding Gravity}" Foreground="#999999" />
+                                        <TextBlock Text="{Binding AtmosphereDescription}" Foreground="#999999" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="12" Margin="60,2,0,0">
+                                        <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasBiologicalSignals}">
+                                            <TextBlock Text="Bio" Foreground="#8FBC8F" />
+                                            <TextBlock Text="{Binding BiologicalSignalsString}" Foreground="#8FBC8F" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasGeologicalSignals}">
+                                            <TextBlock Text="Geo" Foreground="#CD9B1D" />
+                                            <TextBlock Text="{Binding GeologicalSignalsString}" Foreground="#CD9B1D" />
+                                        </StackPanel>
+                                        <TextBlock Text="Discovered" Foreground="#999999" IsVisible="{Binding WasDiscovered}" />
+                                        <TextBlock Text="Mapped" Foreground="#999999" IsVisible="{Binding WasMapped}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Classic layout: tabular grid of bodies. -->
+            <DataGrid IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.ClassicView}}"
+                      ItemsSource="{Binding CurrentSystemBodies}"
+                      IsReadOnly="True"
+                      AutoGenerateColumns="False"
+                      GridLinesVisibility="All"
+                      HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Id" Width="60" Binding="{Binding BodyID}" />
+                    <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
+                    <DataGridTextColumn Header="Class" Width="*" Binding="{Binding BodyDescription}" />
+                    <DataGridTextColumn Header="Scan Stage" Width="120" Binding="{Binding ScanStage}" />
+                    <DataGridTextColumn Header="Arrival ls" Width="130" Binding="{Binding DistanceFromArrivalLs}" />
+                    <DataGridTextColumn Header="Value" Width="130" Binding="{Binding DataValue, StringFormat=N0}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Horizontal layout: body cards across the top, detail pane below. -->
+            <Grid IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.HorizontalView}}"
+                  RowDefinitions="Auto,*">
+                <ListBox Grid.Row="0"
+                         ItemsSource="{Binding CurrentSystemBodies}"
+                         SelectedItem="{Binding SelectedBody, Mode=TwoWay}"
+                         SelectionMode="Single"
+                         Height="96"
+                         HorizontalAlignment="Stretch">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
+                            <Border BorderBrush="#404040"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8,4"
+                                    Margin="0,0,6,0"
+                                    Width="140">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontWeight="Bold"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding BodyDescription}"
+                                               FontSize="11"
+                                               Foreground="#AAAAAA"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding DataValue, StringFormat=N0}"
+                                               FontSize="11"
+                                               Foreground="#BBBBBB" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Border Grid.Row="1" BorderBrush="#404040" BorderThickness="1" CornerRadius="4" Margin="0,6,0,0">
+                    <ContentControl Content="{Binding SelectedBody}"
+                                    ContentTemplate="{StaticResource BodyDetailPane}" />
+                </Border>
+            </Grid>
+
+            <!-- Extended layout: body list on the left, full detail pane on the right. -->
+            <Grid IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.ExtendedBodyInfo}}"
+                  ColumnDefinitions="340,*">
+                <ListBox Grid.Column="0"
+                         ItemsSource="{Binding CurrentSystemBodies}"
+                         SelectedItem="{Binding SelectedBody, Mode=TwoWay}"
+                         SelectionMode="Single"
+                         Margin="0,0,6,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
+                            <Grid ColumnDefinitions="36,*,Auto">
+                                <TextBlock Text="{Binding BodyID}" Foreground="#999999" />
+                                <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="2" Text="{Binding DataValue, StringFormat=N0}" Foreground="#BBBBBB" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Border Grid.Column="1" BorderBrush="#404040" BorderThickness="1" CornerRadius="4">
+                    <ContentControl Content="{Binding SelectedBody}"
+                                    ContentTemplate="{StaticResource BodyDetailPane}" />
+                </Border>
+            </Grid>
+
+            <!-- Empty state while the parser store is not live. -->
+            <StackPanel IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.None}}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Spacing="8">
+                <TextBlock Text="No commander loaded"
+                           FontSize="18"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="Select a commander or journal folder from Settings to begin."
+                           FontSize="13"
+                           Foreground="#888888"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
 
         <!-- Footer -->
         <Border Grid.Row="1" Background="#323232">
