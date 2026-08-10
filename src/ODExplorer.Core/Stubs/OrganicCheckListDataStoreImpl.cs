@@ -8,12 +8,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using EliteJournalReader;
 using EliteJournalReader.Events;
+using ODExplorer.Journal;
 using ODExplorer.Models;
 using ODUtils.EliteDangerousHelpers.GalacticRegions;
 using ODUtils.Exobiology;
 using ODUtils.Journal;
 using ODUtils.Models;
-using JournalEntry = EliteJournalReader.JournalEntry;
+using GalacticRegions = ODUtils.Models.GalacticRegions;
+using JournalEntry = ODUtils.Journal.JournalEntry;
+using JournalTypeEnum = ODUtils.Journal.JournalTypeEnum;
+using OrganicScanStage = ODUtils.Models.OrganicScanStage;
 
 namespace ODExplorer.Stores
 {
@@ -102,7 +106,7 @@ namespace ODExplorer.Stores
             if (string.IsNullOrEmpty(scanOrganic.Genus) || string.IsNullOrEmpty(scanOrganic.Species) || string.IsNullOrEmpty(scanOrganic.Variant))
                 return;
 
-            var state = scanOrganic.ScanType == OrganicScanStage.Analyse ? OrganicScanState.Analysed : OrganicScanState.Discovered;
+            var state = JournalEventMapper.GetOrganicScanStage(scanOrganic.ScanType) == OrganicScanStage.Analyse ? OrganicScanState.Analysed : OrganicScanState.Discovered;
 
             if (OrganicScanItems.TryGetValue(scanOrganic.Genus, out var items))
             {
@@ -146,7 +150,7 @@ namespace ODExplorer.Stores
             known.AddRegion(currentRegion, state);
         }
 
-        private void MarkBioSold(SellOrganicDataEvent.OrganicSoldEntry data)
+        private void MarkBioSold(BioData data)
         {
             if (OrganicScanItems.TryGetValue(data.Genus, out var items))
             {
@@ -305,15 +309,15 @@ namespace ODExplorer.Stores
                 {
                     case FSDJumpEvent.FSDJumpEventArgs fsdJump:
                         {
-                            if (fsdJump.StarPos.Length == 3)
+                            if (!fsdJump.StarPos.IsZero())
                             {
-                                currentRegion = (GalacticRegions)RegionMap.FindRegion(fsdJump.StarPos[0], fsdJump.StarPos[1], fsdJump.StarPos[2]).Id;
+                                currentRegion = (GalacticRegions)RegionMap.FindRegion(fsdJump.StarPos.X, fsdJump.StarPos.Y, fsdJump.StarPos.Z).Id;
                             }
                         }
                         break;
                     case CodexEntryEvent.CodexEntryEventArgs codex:
                         {
-                            currentRegion = codex.Region;
+                            currentRegion = JournalEventMapper.GetGalacticRegion(codex.Region);
 
                             if (codex.Category != "$Codex_Category_Biology;")
                                 break;

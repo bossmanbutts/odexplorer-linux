@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using JournalTypeEnum = ODUtils.Journal.JournalTypeEnum;
 
 namespace ODExplorer.Stores
 {
@@ -180,6 +181,8 @@ namespace ODExplorer.Stores
 
         public Task ParseHistoryStream(IEnumerable<JournalEntry> journalEntries, int currentCmdrId) => Task.CompletedTask;
 
+        private static string GetCarrierType(JournalEventArgs evt) => evt.OriginalEvent?["CarrierType"]?.ToString() ?? string.Empty;
+
         private bool CheckCarrierType(string type, DateTime date)
         {
             if (date <= PatchDates.SquadCarrierPatchDate)
@@ -193,7 +196,7 @@ namespace ODExplorer.Stores
             switch (evt.EventData)
             {
                 case CarrierStatsEvent.CarrierStatsEventArgs carrierStats:
-                    if (CheckCarrierType(carrierStats.CarrierType, carrierStats.Timestamp))
+                    if (CheckCarrierType(GetCarrierType(carrierStats), carrierStats.Timestamp))
                         break;
 
                     if (string.IsNullOrEmpty(carrierStats.Name) == false)
@@ -204,7 +207,7 @@ namespace ODExplorer.Stores
                     carrierName = carrierStats.Callsign;
                     break;
                 case CarrierJumpRequestEvent.CarrierJumpRequestEventArgs carrierJumpRequest:
-                    if (CheckCarrierType(carrierJumpRequest.CarrierType, carrierJumpRequest.Timestamp))
+                    if (CheckCarrierType(GetCarrierType(carrierJumpRequest), carrierJumpRequest.Timestamp))
                         break;
                     var timespan = (carrierJumpRequest.DepartureTime - DateTime.UtcNow) + TimeSpan.FromMinutes(5);
 
@@ -214,12 +217,12 @@ namespace ODExplorer.Stores
                     }
                     break;
                 case CarrierJumpCancelledEvent.CarrierJumpCancelledEventArgs carrierJumpCancelled:
-                    if (CheckCarrierType(carrierJumpCancelled.CarrierType, carrierJumpCancelled.Timestamp))
+                    if (CheckCarrierType(GetCarrierType(carrierJumpCancelled), carrierJumpCancelled.Timestamp))
                         break;
                     StopFleetCarrierTimer();
                     break;
                 case CarrierLocationEvent.CarrierLocationEventArgs carrierLocation:
-                    if (CheckCarrierType(carrierLocation.CarrierType, carrierLocation.Timestamp))
+                    if (CheckCarrierType(GetCarrierType(carrierLocation), carrierLocation.Timestamp))
                         break;
                     OnCurrentSystemChanged(carrierLocation.StarSystem);
                     break;

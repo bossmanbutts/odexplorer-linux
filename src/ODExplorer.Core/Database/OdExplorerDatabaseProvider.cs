@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JournalTypeEnum = ODUtils.Journal.JournalTypeEnum;
+using JournalWatcher = ODUtils.Journal.JournalWatcher;
 
 namespace ODExplorer.Database
 {

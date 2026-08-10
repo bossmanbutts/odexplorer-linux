@@ -19,6 +19,8 @@ using ODExplorer.Models;
 using ODUtils.Database.Interfaces;
 using ODUtils.Journal;
 using ODUtils.Models;
+using JournalEntry = ODUtils.Journal.JournalEntry;
+using StatusFileEvent = ODUtils.Journal.StatusFileEvent;
 
 namespace ODExplorer.Stores
 {

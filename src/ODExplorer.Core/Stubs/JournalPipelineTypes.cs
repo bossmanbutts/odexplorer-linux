@@ -4,10 +4,39 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using EliteJournalReader;
+using Newtonsoft.Json.Linq;
 
 namespace ODUtils.Journal
 {
+    // Re-homed from the deleted EliteJournalReader.JournalEntry stub: the real
+    // EliteJournalReader library has no JournalEntry type (it belongs to the
+    // private ODUtils layer), so the pipeline keeps its own representation here.
+    public sealed class JournalEntry
+    {
+        public JournalEntry() { }
+
+        public JournalEntry(string filename, long offset, int commanderID,
+            JournalTypeEnum type, object eventData,
+            JToken? originalEvent)
+        {
+            Filename = filename;
+            Offset = offset;
+            CommanderID = commanderID;
+            EventType = type;
+            EventData = eventData;
+            OriginalEvent = originalEvent;
+        }
+
+        public string Event { get; set; } = string.Empty;
+        public object EventData { get; set; } = new object();
+        public JToken? OriginalEvent { get; set; }
+        public JournalTypeEnum EventType { get; set; }
+        public int CommanderID { get; set; }
+        public DateTime TimeStamp { get; set; }
+        public string Filename { get; set; } = string.Empty;
+        public long Offset { get; set; }
+    }
+
     public enum JournalTypeEnum
     {
         Fileheader = 0,

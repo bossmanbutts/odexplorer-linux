@@ -14,6 +14,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using ODExplorer.Models;
+using GalacticRegions = ODUtils.Models.GalacticRegions;
+using OrganicScanStage = ODUtils.Models.OrganicScanStage;
 
 namespace ODExplorer.ViewModels.ViewVMs
 {

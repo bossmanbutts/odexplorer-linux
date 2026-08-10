@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using EliteJournalReader;
 using EliteJournalReader.Events;
 using ODExplorer.Database;
@@ -18,8 +19,14 @@ using ODUtils.Exobiology;
 using ODUtils.Extensions;
 using ODUtils.Journal;
 using ODUtils.Models;
-using System.Threading.Tasks;
-using JournalEntry = EliteJournalReader.JournalEntry;
+using Composition = ODUtils.Models.Composition;
+using JournalEntry = ODUtils.Journal.JournalEntry;
+using JournalTypeEnum = ODUtils.Journal.JournalTypeEnum;
+using OrganicScanStage = ODUtils.Models.OrganicScanStage;
+using PlanetClass = ODUtils.Models.PlanetClass;
+using ScanItemComponent = ODUtils.Models.ScanItemComponent;
+using ShipMaterials = ODUtils.Models.ShipMaterials;
+using StarType = ODUtils.Models.StarType;
 using SystemBody = ODUtils.Models.SystemBody;
 
 namespace ODExplorer.Stores
@@ -224,10 +231,10 @@ namespace ODExplorer.Stores
                     case LocationEvent.LocationEventArgs locationEvt:
                         {
                             onFoot = locationEvt.OnFoot;
-                            longitude = locationEvt.Longitude;
-                            latitude = locationEvt.Latitude;
+                            longitude = locationEvt.Longitude ?? 0;
+                            latitude = locationEvt.Latitude ?? 0;
 
-                            var currentSys = UpdateCurrentSystem(BuildSystem(locationEvt.StarSystem, locationEvt.SystemAddress, locationEvt.StarPos, StarType.Unknown));
+                            var currentSys = UpdateCurrentSystem(BuildSystem(locationEvt.StarSystem, locationEvt.SystemAddress, locationEvt.StarPos.ToArray(), StarType.Unknown));
 
                             if (locationEvt.BodyType == BodyType.Planet)
                             {
@@ -241,7 +248,7 @@ namespace ODExplorer.Stores
                         break;
                     case CarrierJumpEvent.CarrierJumpEventArgs carrierJump:
                         {
-                            var currentSys = UpdateCurrentSystem(BuildSystem(carrierJump.StarSystem, carrierJump.SystemAddress, carrierJump.StarPos, StarType.Unknown));
+                            var currentSys = UpdateCurrentSystem(BuildSystem(carrierJump.StarSystem, carrierJump.SystemAddress, carrierJump.StarPos.ToArray(), StarType.Unknown));
 
                             if (carrierJump.BodyType == BodyType.Planet)
                             {
@@ -260,8 +267,8 @@ namespace ODExplorer.Stores
                         }
                         break;
                     case FSDJumpEvent.FSDJumpEventArgs fsdJumpEvent:
-                        UpdateCurrentSystem(BuildSystem(fsdJumpEvent.StarSystem, fsdJumpEvent.SystemAddress, fsdJumpEvent.StarPos,
-                            JournalEventMapper.GetStarType(fsdJumpEvent.StarType)));
+                        UpdateCurrentSystem(BuildSystem(fsdJumpEvent.StarSystem, fsdJumpEvent.SystemAddress, fsdJumpEvent.StarPos.ToArray(),
+                            JournalEventMapper.GetStarType(fsdJumpEvent.OriginalEvent?["StarClass"]?.ToString())));
                         break;
                     case FSDTargetEvent.FSDTargetEventArgs fsdTargetEvent:
                         {
@@ -326,7 +333,7 @@ namespace ODExplorer.Stores
                             {
                                 var body = GetOrCreateBody(system, fssBodySignals.BodyID, string.Empty);
 
-                                UpdateSignalsFound(body, fssBodySignals.Signals, false, fssBodySignals.Timestamp);
+                                UpdateSignalsFound(body, fssBodySignals.Signals.Select(s => (s.Type, s.Count)), false, fssBodySignals.Timestamp);
 
                                 if (parserStore.IsLive && body.BiologicalSignals > 0 && _organicData.Contains(body) == false)
                                 {
@@ -347,9 +354,7 @@ namespace ODExplorer.Stores
 
                             if (_cartoData.TryGetValue(scanEvt.SystemAddress, out var system))
                             {
-                                var body = AddOrUpdateBodyFromScan(system, scanEvt);
-
-                                if (body.BiologicalSignals > 0 && _organicData.Contains(body) == false)
+                                var body = AddOrUpdateBodyFromScan(system, scanEvt);                                if (body.BiologicalSignals > 0 && _organicData.Contains(body) == false)
                                 {
                                     _organicData.Add(body);
                                 }
@@ -377,7 +382,7 @@ namespace ODExplorer.Stores
                             {
                                 var body = GetOrCreateBody(system, ssaSignalsFound.BodyID, string.Empty);
 
-                                UpdateSignalsFound(body, ssaSignalsFound.Signals, true, ssaSignalsFound.Timestamp);
+                                UpdateSignalsFound(body, ssaSignalsFound.Signals.Select(s => (s.Type, s.Count)), true, ssaSignalsFound.Timestamp);
 
                                 if (body.BiologicalSignals > 0)
                                 {
@@ -441,8 +446,8 @@ namespace ODExplorer.Stores
                     case DisembarkEvent.DisembarkEventArgs disembark:
                         {
                             onFoot = disembark.OnPlanet;
-                            longitude = disembark.Longitude;
-                            latitude = disembark.Latitude;
+                            longitude = (double?)disembark.OriginalEvent?["Longitude"] ?? 0;
+                            latitude = (double?)disembark.OriginalEvent?["Latitude"] ?? 0;
 
                             if (CurrentBody is not null && CurrentBody.BodyID == disembark.BodyID)
                             {
@@ -868,41 +873,41 @@ namespace ODExplorer.Stores
             var body = GetOrCreateBody(system, scanEvt.BodyID, scanEvt.BodyName);
             SetOwner(body, system);
 
-            var isStar = string.IsNullOrEmpty(scanEvt.PlanetClass);
+            var isStar = scanEvt.PlanetClass == EliteJournalReader.PlanetClass.Unknown;
             body.IsStar = isStar;
             body.IsPlanet = !isStar;
             body.PlanetClass = isStar ? PlanetClass.Unknown : JournalEventMapper.GetPlanetClass(scanEvt.PlanetClass);
             body.StarType = JournalEventMapper.GetStarType(scanEvt.StarType);
-            body.StarLuminosity = JournalEventMapper.GetStarLuminosity(scanEvt.StarClass);
+            body.StarLuminosity = JournalEventMapper.GetStarLuminosity(scanEvt.Luminosity);
             body.StellarMass = scanEvt.StellarMass > 0 ? scanEvt.StellarMass : null;
-            body.Age_MY = scanEvt.Age_MY;
-            body.AbsoluteMagnitude = scanEvt.AbsoluteMagnitude;
-            body.DistanceFromArrivalLs = scanEvt.DistanceFromArrivalLS;
-            body.OrbitalPeriod = scanEvt.OrbitalPeriod;
-            body.RotationPeriod = scanEvt.RotationPeriod;
-            body.AxialTilt = scanEvt.AxialTilt;
-            body.Eccentricity = scanEvt.Eccentricity;
-            body.SemiMajorAxis = scanEvt.SemiMajorAxis;
-            body.Radius = scanEvt.Radius;
-            body.MassEM = scanEvt.MassEM;
-            body.SurfaceGravity = scanEvt.SurfaceGravity;
-            body.Landable = scanEvt.Landable;
+            body.Age_MY = scanEvt.Age_MY ?? 0;
+            body.AbsoluteMagnitude = scanEvt.AbsoluteMagnitude ?? 0;
+            body.DistanceFromArrivalLs = scanEvt.DistanceFromArrivalLs;
+            body.OrbitalPeriod = scanEvt.OrbitalPeriod ?? 0;
+            body.RotationPeriod = scanEvt.RotationPeriod ?? 0;
+            body.AxialTilt = scanEvt.AxialTilt ?? 0;
+            body.Eccentricity = scanEvt.Eccentricity ?? 0;
+            body.SemiMajorAxis = scanEvt.SemiMajorAxis ?? 0;
+            body.Radius = scanEvt.Radius ?? 0;
+            body.MassEM = scanEvt.MassEM ?? 0;
+            body.SurfaceGravity = scanEvt.SurfaceGravity ?? 0;
+            body.Landable = scanEvt.Landable ?? false;
             body.Terraformable = JournalEventMapper.IsTerraformable(scanEvt.TerraformState);
-            body.TerraformState = scanEvt.TerraformState;
+            body.TerraformState = scanEvt.TerraformState.ToString();
             body.Atmosphere = JournalEventMapper.GetAtmosphereClass(scanEvt.Atmosphere);
             body.AtmosphereType = JournalEventMapper.GetAtmosphereType(scanEvt.AtmosphereType);
             body.Volcanism = JournalEventMapper.GetVolcanism(scanEvt.Volcanism);
-            body.SurfaceTemp = scanEvt.SurfaceTemperature;
-            body.SurfacePressure = scanEvt.SurfacePressure;
-            body.WasDiscovered = scanEvt.WasDiscovered;
-            body.WasMapped = scanEvt.WasMapped;
+            body.SurfaceTemp = scanEvt.SurfaceTemperature ?? 0;
+            body.SurfacePressure = scanEvt.SurfacePressure ?? 0;
+            body.WasDiscovered = scanEvt.WasDiscovered ?? false;
+            body.WasMapped = scanEvt.WasMapped ?? false;
             body.ScanDate = scanEvt.Timestamp;
             body.ScanState = BodyScanState.FssScanned;
-            body.Rings = scanEvt.Rings.Count > 0 ? scanEvt.Rings : null;
-            body.Materials = scanEvt.Materials?.Select(m => new ShipMaterials { Name = m.Name, Percent = m.Percent }).ToList();
+            body.Rings = scanEvt.Rings is { Count: > 0 } ? [.. scanEvt.Rings] : null;
+            body.Materials = scanEvt.Materials?.Select(m => new ShipMaterials { Name = m.Name.ToString(), Percent = m.Percent }).ToList();
             body.AtmosphereComposition = scanEvt.AtmosphereComposition?.Select(a => new ScanItemComponent { Name = a.Name, Percent = a.Percent }).ToList();
 
-            if (scanEvt.Composition is not null)
+            if (scanEvt.Composition.HasValue)
             {
                 body.Composition = new Composition
                 {
@@ -928,15 +933,15 @@ namespace ODExplorer.Stores
             return body;
         }
 
-        private StarType GetGoverningStar(StarSystem system, List<JournalParent>? parents)
+        private StarType GetGoverningStar(StarSystem system, IReadOnlyList<BodyParent>? parents)
         {
             if (parents is not null)
             {
                 foreach (var parent in parents)
                 {
-                    if (parent.Star > 0)
+                    if (parent.Type == EliteJournalReader.Events.ParentType.Star)
                     {
-                        var star = system.SystemBodies.FirstOrDefault(x => x.BodyID == parent.Star);
+                        var star = system.SystemBodies.FirstOrDefault(x => x.BodyID == parent.BodyID);
                         if (star is not null && star.StarType != StarType.Unknown)
                             return star.StarType;
                     }
@@ -958,14 +963,14 @@ namespace ODExplorer.Stores
             UpdateBioMinMaxValue(body);
         }
 
-        private void UpdateSignalsFound(SystemBody body, List<SignalFound> signals, bool dssScanned, DateTime timeStamp)
+        private void UpdateSignalsFound(SystemBody body, IEnumerable<(string Type, int Count)> signals, bool dssScanned, DateTime timeStamp)
         {
             var bioCount = 0;
             var geoCount = 0;
 
             foreach (var signal in signals)
             {
-                if (signal.IsBiological)
+                if (signal.Type.StartsWith("$SAA_SignalType_Biological;", StringComparison.Ordinal))
                     bioCount += signal.Count;
                 else
                     geoCount += signal.Count;
@@ -1116,7 +1121,7 @@ namespace ODExplorer.Stores
 
                 body = CurrentSystem.SystemBodies.FirstOrDefault(x => x.BodyID == codexEntry.BodyID);
 
-                body ??= CreateMinimalBody(codexEntry.BodyID, codexEntry.Body, CurrentSystem);
+                body ??= CreateMinimalBody(codexEntry.BodyID, string.Empty, CurrentSystem);
             }
 
             SetOwner(body, CurrentSystem);
@@ -1256,14 +1261,14 @@ namespace ODExplorer.Stores
             bio.SpeciesEnglish = scanOrganic.Species_Localised;
             bio.SpeciesLocalised = scanOrganic.Species_Localised;
             bio.VariantCodex = scanOrganic.Variant;
-            bio.ScanStage = scanOrganic.ScanType;
+            bio.ScanStage = JournalEventMapper.GetOrganicScanStage(scanOrganic.ScanType);
             bio.ScanTime = scanOrganic.Timestamp;
             bio.DataState = DataState.Unsold;
             bio.Info = exoData.GetInfo(scanOrganic.Species);
             bio.IsNewSpecies = organicCheckListData.IsNewSpecies(scanOrganic.Species);
             bio.BodyDssScanned = body.DssScanned;
             bio.WasLogged = true;
-            bio.ScanLocations.Add(new Position(scanOrganic.Longitude, scanOrganic.Latitude, 0));
+            bio.ScanLocations.Add(new Position((double?)scanOrganic.OriginalEvent?["Longitude"] ?? 0, (double?)scanOrganic.OriginalEvent?["Latitude"] ?? 0, 0));
             bio.Variants = BuildVariants(scanOrganic);
             bio.TotalValue = ComputeTotalValue(bio, body);
         }
@@ -1311,6 +1316,9 @@ namespace ODExplorer.Stores
 
         private OrganicScanItem NewBioFromScan(ScanOrganicEvent.ScanOrganicEventArgs scanOrganic, SystemBody body)
         {
+            var scanLon = (double?)scanOrganic.OriginalEvent?["Longitude"] ?? 0;
+            var scanLat = (double?)scanOrganic.OriginalEvent?["Latitude"] ?? 0;
+
             var bio = new OrganicScanItem
             {
                 GenusCodex = scanOrganic.Genus,
@@ -1321,14 +1329,14 @@ namespace ODExplorer.Stores
                 SpeciesLocalised = scanOrganic.Species_Localised,
                 VariantCodex = scanOrganic.Variant,
                 Body = body,
-                ScanStage = scanOrganic.ScanType,
+                ScanStage = JournalEventMapper.GetOrganicScanStage(scanOrganic.ScanType),
                 DataState = DataState.Unsold,
                 ScanTime = scanOrganic.Timestamp,
                 IsNewSpecies = organicCheckListData.IsNewSpecies(scanOrganic.Species),
                 BodyDssScanned = body.DssScanned,
                 WasLogged = true,
                 Info = exoData.GetInfo(scanOrganic.Species),
-                ScanLocations = [new Position(scanOrganic.Longitude, scanOrganic.Latitude, 0)],
+                ScanLocations = [new Position(scanLon, scanLat, 0)],
                 Variants = BuildVariants(scanOrganic)
             };
 

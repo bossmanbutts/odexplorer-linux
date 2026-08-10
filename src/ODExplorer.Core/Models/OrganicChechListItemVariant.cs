@@ -1,5 +1,4 @@
-﻿using EliteJournalReader;
-using ODUtils.Models;
+﻿using ODUtils.Models;
 
 namespace ODExplorer.Models
 {

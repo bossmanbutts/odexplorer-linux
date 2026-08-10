@@ -8,6 +8,9 @@ using System.Collections.ObjectModel;
 using ODExplorer.Extensions;
 using ODExplorer.Stores;
 using ODExplorer.Models;
+using PlanetMaterial = ODUtils.Models.PlanetMaterial;
+using PlanetClass = ODUtils.Models.PlanetClass;
+using StarType = ODUtils.Models.StarType;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {

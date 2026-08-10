@@ -9,6 +9,7 @@ using ODUtils.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
 using ODExplorer.Models;
+using OrganicScanStage = ODUtils.Models.OrganicScanStage;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {

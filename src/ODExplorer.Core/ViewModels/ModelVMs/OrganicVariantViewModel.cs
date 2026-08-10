@@ -3,6 +3,8 @@ using ODUtils.Dialogs.ViewModels;
 using ODUtils.Exobiology;
 using ODUtils.Models;
 using System.Linq;
+using PlanetMaterial = ODUtils.Models.PlanetMaterial;
+using StarType = ODUtils.Models.StarType;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {

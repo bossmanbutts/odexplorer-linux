@@ -15,6 +15,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using ODExplorer.Models;
+using Composition = ODUtils.Models.Composition;
+using AtmosphereClass = ODUtils.Models.AtmosphereClass;
+using OrganicScanStage = ODUtils.Models.OrganicScanStage;
+using PlanetClass = ODUtils.Models.PlanetClass;
+using ScanItemComponent = ODUtils.Models.ScanItemComponent;
+using ShipMaterials = ODUtils.Models.ShipMaterials;
 
 namespace ODExplorer.ViewModels.ModelVMs
 {
