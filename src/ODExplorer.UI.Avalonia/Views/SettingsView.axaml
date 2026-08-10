@@ -29,15 +29,19 @@
                                  SelectedItem="{Binding SelectedCommander}"
                                  SelectionMode="Single"
                                  MaxHeight="320"
-                                 VerticalAlignment="Top">
+                                 VerticalAlignment="Top"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="modelvms:JournalCommaderViewModel">
-                                    <Grid ColumnDefinitions="Auto,*,*,90" Margin="4">
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" MinWidth="150" />
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="4">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" MinWidth="150"
+                                                   TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{Binding JournalPath}" Grid.Column="1" Margin="10,0"
-                                                   TextTrimming="CharacterEllipsis" />
+                                                   TextTrimming="CharacterEllipsis"
+                                                   TextWrapping="NoWrap" />
                                         <TextBlock Text="{Binding LastFile}" Grid.Column="2" Margin="10,0"
-                                                   TextTrimming="CharacterEllipsis" />
+                                                   TextTrimming="CharacterEllipsis"
+                                                   TextWrapping="NoWrap" />
                                         <CheckBox Content="Hidden" Grid.Column="3"
                                                   IsChecked="{Binding IsHidden, Mode=TwoWay}" />
                                     </Grid>
@@ -55,14 +59,16 @@
                                      Height="34"
                                      VerticalAlignment="Center"
                                      Grid.Row="1"
-                                     Grid.ColumnSpan="2" />
+                                     Grid.Column="0"
+                                     Margin="0,0,10,0" />
 
                             <TextBox Text="{Binding SelectedCommander.LastFile}"
                                      IsReadOnly="True"
                                      Height="34"
                                      VerticalAlignment="Center"
                                      Grid.Row="2"
-                                     Grid.ColumnSpan="2" />
+                                     Grid.Column="0"
+                                     Margin="0,0,10,0" />
 
                             <Button Content="Delete Commander"
                                     Command="{Binding DeleteCommander}"
