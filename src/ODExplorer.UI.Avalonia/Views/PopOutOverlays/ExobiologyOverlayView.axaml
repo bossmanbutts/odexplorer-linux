@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
+             xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             x:Class="ODExplorer.UI.Avalonia.Views.PopOutOverlays.ExobiologyOverlayView"
+             x:DataType="vm:MainViewModel">
+    <Grid RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0"
+                   Text="Exobiology Signals"
+                   FontWeight="SemiBold"
+                   Margin="4,0,4,6" />
+        <ScrollViewer Grid.Row="1">
+            <StackPanel>
+                <ItemsControl ItemsSource="{Binding OrganicSignals}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
+                            <Border Background="#282828"
+                                    BorderBrush="#404040"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8"
+                                    Margin="0,0,0,6">
+                                <Grid ColumnDefinitions="60,*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                    <TextBlock Text="{Binding BodyID}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                               FontWeight="Bold"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="2" Text="{Binding ScanStage}"
+                                               Foreground="#AAAAAA"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Text="{Binding DataValue, StringFormat=N0}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right"
+                                               Margin="8,0,0,0" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                                               Text="{Binding OrganicValues}"
+                                               FontSize="12"
+                                               Foreground="#BBBBBB"
+                                               TextWrapping="Wrap"
+                                               Margin="60,4,0,0" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

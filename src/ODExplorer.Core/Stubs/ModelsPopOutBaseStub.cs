@@ -16,6 +16,12 @@ namespace ODExplorer.Models
         /// <summary>DataContext set by MainViewModel before raising OpenPopoutRequested.</summary>
         public object? DataContext { get; set; }
 
+        /// <summary>Raised when the journal parser goes offline; the UI should close its window.</summary>
+        public event Action? ForceCloseRequested;
+
+        /// <summary>Raised after position/mode reset by the user; the UI should re-apply saved geometry.</summary>
+        public event Action? ResetRequested;
+
         /// <summary>Called by MainViewModel to apply saved position/mode params before showing.</summary>
         public virtual void ApplyParams(ODExplorer.Models.PopOutParams p)
         {
@@ -37,9 +43,9 @@ namespace ODExplorer.Models
         }
 
         /// <summary>Called by MainViewModel when the journal parser goes offline; UI should close the window.</summary>
-        public virtual void ForceClose() { }
+        public virtual void ForceClose() => ForceCloseRequested?.Invoke();
 
         /// <summary>Called after position/mode reset by the user.</summary>
-        public virtual void InvokeReset() { }
+        public virtual void InvokeReset() => ResetRequested?.Invoke();
     }
 }

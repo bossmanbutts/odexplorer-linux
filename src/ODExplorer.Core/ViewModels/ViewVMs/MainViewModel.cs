@@ -725,7 +725,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             OpenPopoutRequested?.Invoke(this, popOut);
             ActivePopOuts.Add(popOut);
         }
-        internal void OnPopOutClose(ODExplorer.Models.PopOutBase popOutBase)
+        public void OnPopOutClose(ODExplorer.Models.PopOutBase popOutBase)
         {
             SettingsStore.SaveParams(popOutBase, false, currentCommanderId);
             ActivePopOuts.Remove(popOutBase);

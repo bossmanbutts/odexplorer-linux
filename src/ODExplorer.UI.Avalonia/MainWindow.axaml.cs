@@ -36,6 +36,7 @@ public partial class MainWindow : Window
         ContentRoot.Children.Add(toastHost);
 
         viewModel.NotificationStore.OnToast += OnToast;
+        viewModel.OpenPopoutRequested += OnOpenPopoutRequested;
         Closing += OnWindowClosing;
         PositionChanged += OnWindowGeometryChanged;
         Resized += OnWindowGeometryChanged;
@@ -47,6 +48,17 @@ public partial class MainWindow : Window
     private void OnToast(ToastMessage message)
     {
         Dispatcher.UIThread.Post(() => toastHost.Show(message));
+    }
+
+    private void OnOpenPopoutRequested(object? sender, ODExplorer.Models.PopOutBase popOut)
+    {
+        if (sender is not MainViewModel vm)
+        {
+            return;
+        }
+
+        var window = new PopOutWindow(vm, popOut);
+        window.Show(this);
     }
 
     protected override void OnOpened(EventArgs e)
