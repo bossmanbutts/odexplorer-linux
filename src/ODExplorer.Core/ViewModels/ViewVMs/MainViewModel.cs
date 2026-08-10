@@ -267,6 +267,31 @@ namespace ODExplorer.ViewModels.ViewVMs
             OnMessageBoxRequested?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// First-run onboarding finished with a journal folder selected: persist the
+        /// "done" flag, then scan the chosen directory (same path as the Settings
+        /// "Scan Directory" flow). Once the parser store goes live the shell
+        /// navigates to the active view automatically.
+        /// </summary>
+        public void OnboardingFinishedWithDirectory(string path)
+        {
+            _settings.OnBoardingComplete = true;
+            _settings.SaveSettings();
+            _journalParserStore.ReadNewDirectory(path);
+            OnNavigateToLoading(null);
+        }
+
+        /// <summary>
+        /// First-run onboarding skipped: persist the "done" flag and land on the
+        /// Settings panel where the journal directory can be configured manually.
+        /// </summary>
+        public void OnboardingFinishedSkip()
+        {
+            _settings.OnBoardingComplete = true;
+            _settings.SaveSettings();
+            OnNavigateToView(ActiveViewModel.Settings);
+        }
+
         private void OnJournalParserStore_OnParserStoreLive(object? sender, bool e)
         {
             if (e)

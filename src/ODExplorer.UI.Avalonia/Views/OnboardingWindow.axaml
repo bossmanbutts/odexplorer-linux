@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="420"
+        x:Class="ODExplorer.UI.Avalonia.Views.OnboardingWindow"
+        Title="Welcome to OD Explorer"
+        Width="540" Height="460"
+        MinWidth="500" MinHeight="400"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="True"
+        CanResize="False">
+    <ScrollViewer>
+        <StackPanel Margin="24" Spacing="16">
+            <TextBlock Text="Welcome to OD Explorer"
+                       FontSize="22"
+                       FontWeight="Bold" />
+            <TextBlock TextWrapping="Wrap"
+                       FontSize="14"
+                       LineHeight="20"
+                       Text="OD Explorer reads your Elite Dangerous journal files to track your exploration progress, exobiology discoveries and route. It works alongside the live game and updates as you play." />
+
+            <TextBlock Text="Getting started"
+                       FontSize="16"
+                       FontWeight="SemiBold" />
+            <TextBlock TextWrapping="Wrap"
+                       FontSize="14"
+                       LineHeight="20"
+                       Text="The only thing you need to do is point OD Explorer at your journal folder. Elite Dangerous writes journal files to a folder named &quot;Frontier Developments\Elite Dangerous&quot; under your user's &quot;Saved Games&quot; directory." />
+
+            <TextBlock Text="What you can do"
+                       FontSize="16"
+                       FontWeight="SemiBold" />
+            <StackPanel Spacing="6">
+                <TextBlock Text="•  Explorer — current system details, body scans and your plotted route."
+                           TextWrapping="Wrap" />
+                <TextBlock Text="•  Exobiology — organic scan checklist and codex progress."
+                           TextWrapping="Wrap" />
+                <TextBlock Text="•  Spansh — import a route and track progress against it."
+                           TextWrapping="Wrap" />
+                <TextBlock Text="•  Settings — commanders, journal folder, display and notifications."
+                           TextWrapping="Wrap" />
+            </StackPanel>
+
+            <TextBlock x:Name="StatusText"
+                       TextWrapping="Wrap"
+                       FontSize="13"
+                       IsVisible="False" />
+
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8"
+                        HorizontalAlignment="Right">
+                <Button x:Name="SkipButton"
+                        Content="Skip for now"
+                        MinWidth="110"
+                        Click="OnSkipClick" />
+                <Button x:Name="SelectFolderButton"
+                        Content="Select Journal Folder"
+                        MinWidth="170"
+                        Click="OnSelectFolderClick" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

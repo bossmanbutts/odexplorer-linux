@@ -63,6 +63,7 @@ namespace ODExplorer.Stores
         public DateTime IgnoredExoDate { get; set; } = DateTime.MinValue;
         public bool MinimiseToTray { get; set; }
         public bool DeveloperMode { get; set; }
+        public bool OnBoardingComplete { get; set; }
 
         #region Persistance
         private const string SettingsRowId = "SettingsStoreState";

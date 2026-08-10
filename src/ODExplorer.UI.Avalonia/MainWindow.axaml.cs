@@ -5,6 +5,7 @@ using Avalonia.Layout;
 using Avalonia.Threading;
 using ODExplorer.Models;
 using ODExplorer.UI.Avalonia.Controls;
+using ODExplorer.UI.Avalonia.Views;
 using ODExplorer.ViewModels.ModelVMs;
 using ODExplorer.ViewModels.ViewVMs;
 using AvaloniaWindowState = global::Avalonia.Controls.WindowState;
@@ -46,6 +47,20 @@ public partial class MainWindow : Window
     private void OnToast(ToastMessage message)
     {
         Dispatcher.UIThread.Post(() => toastHost.Show(message));
+    }
+
+    protected override void OnOpened(EventArgs e)
+    {
+        base.OnOpened(e);
+
+        if (DataContext is not MainViewModel vm || vm.SettingsStore.OnBoardingComplete)
+        {
+            return;
+        }
+
+        // First-run onboarding: welcome + guided journal folder selection.
+        var onboarding = new OnboardingWindow(vm);
+        _ = onboarding.ShowDialog(this);
     }
 
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)

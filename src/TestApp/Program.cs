@@ -282,6 +282,7 @@ class Program
             settings.UiScale = 1.35;
             settings.NotificationSettings.DisplayTime = 42;
             settings.SystemGridSetting.ExoValuableBodyValue = 9_999_999;
+            settings.OnBoardingComplete = true;
             settings.SaveSettings();
 
             settings.DeveloperMode = false;
@@ -289,6 +290,7 @@ class Program
             settings.UiScale = 1.0;
             settings.NotificationSettings.DisplayTime = 7;
             settings.SystemGridSetting.ExoValuableBodyValue = 20_000_000;
+            settings.OnBoardingComplete = false;
             settings.LoadSettings();
 
             Check("settings round-trip DeveloperMode", settings.DeveloperMode);
@@ -296,6 +298,7 @@ class Program
             Check("settings round-trip UiScale", Math.Abs(settings.UiScale - 1.35) < 0.001);
             Check("settings round-trip NotificationSettings", settings.NotificationSettings.DisplayTime == 42);
             Check("settings round-trip SystemGridSetting", settings.SystemGridSetting.ExoValuableBodyValue == 9_999_999);
+            Check("settings round-trip OnBoardingComplete", settings.OnBoardingComplete);
 
             // ── EDSM system-details flow: a live FSDJump to a system with unknown
             //    star class / value / body count must fetch from the (fake) EDSM
