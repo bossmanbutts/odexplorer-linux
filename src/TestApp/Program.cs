@@ -123,6 +123,172 @@ class Program
             Check("disabled notifications suppress emission", toasts.Count == 6);
             settings.NotificationSettings.NotificationsEnabled = true;
 
+            // ── Notable-body notification thresholds (CheckForNotableNotifications) ─
+            var notableSettings = new SettingsStore(db);
+            var notable = new NotificationStore(notableSettings);
+            var notableToasts = new List<ODExplorer.Models.ToastMessage>();
+            notable.OnToast += notableToasts.Add;
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.DiverseLife;
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Bio Planet", BiologicalSignals = 9 });
+            Check("notable diverse life fires at limit", notableToasts.Count == 1 && notableToasts[0].Title == "Diverse Exobiology Body" && notableToasts[0].Message.Contains("9 Signals"));
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Bio Planet", BiologicalSignals = 8 });
+            Check("notable diverse life stays silent below limit", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.SmallPlanet;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Tiny", Radius = 300 });
+            Check("notable small radius fires at limit", notableToasts.Count == 1 && notableToasts[0].Title == "Small Radius Body" && notableToasts[0].Message.Contains("300 km"));
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Tiny", Radius = 301 });
+            Check("notable small radius stays silent above limit", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.HighEccentricity;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Ecc", Eccentricity = 0.9 });
+            Check("notable high eccentricity fires at limit", notableToasts.Count == 1 && notableToasts[0].Message.Contains("0.9000"));
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Ecc", Eccentricity = 0.8 });
+            Check("notable high eccentricity stays silent below limit", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.NestedMoon;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody
+            {
+                BodyName = "Nested Moon",
+                Parents =
+                {
+                    new Parent { Type = ParentType.Planet, BodyID = 1 },
+                    new Parent { Type = ParentType.Planet, BodyID = 2 }
+                }
+            });
+            Check("notable nested moon fires for planet-planet parents", notableToasts.Count == 1 && notableToasts[0].Title == "Nested Moon");
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody
+            {
+                BodyName = "Plain Moon",
+                Parents = { new Parent { Type = ParentType.Planet, BodyID = 1 } }
+            });
+            Check("notable nested moon stays silent with a single parent", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.FastRotation;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Spinny", RotationPeriod = 0.1, TidalLock = false });
+            Check("notable fast rotation fires below the hours limit", notableToasts.Count == 1 && notableToasts[0].Message.Contains("2.4 hours"));
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Tidally Locked", RotationPeriod = 0.1, TidalLock = true });
+            Check("notable fast rotation stays silent when tidally locked", notableToasts.Count == 0);
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Slow", RotationPeriod = 0.5, TidalLock = false });
+            Check("notable fast rotation stays silent above limit", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.FastOrbit;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Fast Orbiter", OrbitalPeriod = 0.25 });
+            Check("notable fast orbit fires below the hours limit", notableToasts.Count == 1 && notableToasts[0].Message.Contains("6.0 hours"));
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Slow Orbiter", OrbitalPeriod = 0.5 });
+            Check("notable fast orbit stays silent above limit", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.WideRings;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody
+            {
+                BodyName = "Ringed",
+                Radius = 10,
+                Rings = new List<EliteJournalReader.Events.PlanetRing>
+                {
+                    new() { Name = "Ring A", InnerRad = 1000, OuterRad = 60000 },
+                    new() { Name = "Ring B Belt", InnerRad = 1000, OuterRad = 60000 }
+                }
+            });
+            Check("notable wide ring fires past the radius multiplier and skips belts", notableToasts.Count == 1 && notableToasts[0].Title == "Body With Wide Ring");
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody
+            {
+                BodyName = "Ringed",
+                Radius = 10,
+                Rings = new List<EliteJournalReader.Events.PlanetRing>
+                {
+                    new() { Name = "Ring A", InnerRad = 1000, OuterRad = 20000 }
+                }
+            });
+            Check("notable wide ring stays silent when narrow", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.ShepherdMoon;
+            notableToasts.Clear();
+            var shepherdOwner = new Owner();
+            shepherdOwner.SystemBodies.Add(new SystemBody
+            {
+                BodyID = 1,
+                Rings = new List<EliteJournalReader.Events.PlanetRing>
+                {
+                    new() { Name = "Parent Ring", InnerRad = 100, OuterRad = 5000 }
+                }
+            });
+            notable.CheckForNotableNotifications(new SystemBody
+            {
+                BodyName = "Shepherd",
+                SemiMajorAxis = 2000,
+                Parents = { new Parent { Type = ParentType.Planet, BodyID = 1 } },
+                Owner = shepherdOwner
+            });
+            Check("notable shepherd moon fires when orbiting inside the parent ring", notableToasts.Count == 1 && notableToasts[0].Title == "Shepherd Moon");
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody
+            {
+                BodyName = "Not Shepherd",
+                SemiMajorAxis = 9000,
+                Parents = { new Parent { Type = ParentType.Planet, BodyID = 1 } },
+                Owner = shepherdOwner
+            });
+            Check("notable shepherd moon stays silent outside the parent ring", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.LandableTerraformable;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Terra", Landable = true, Terraformable = true, TerraformState = "Candidate for terraforming" });
+            Check("notable landable terraformable fires with terraform state", notableToasts.Count == 1 && notableToasts[0].Message.Contains("Candidate for terraforming"));
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Terra", Landable = false, Terraformable = true });
+            Check("notable landable checks stay silent for non-landable bodies", notableToasts.Count == 0);
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.LandableWithRings;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody
+            {
+                BodyName = "Ringed Land",
+                Landable = true,
+                Rings = new List<EliteJournalReader.Events.PlanetRing> { new() { Name = "R" } }
+            });
+            Check("notable landable with rings fires", notableToasts.Count == 1 && notableToasts[0].Title == "Landable Body With Rings");
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.LandableHighGravity;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Heavy", Landable = true, SurfaceGravity = 30 });
+            Check("notable landable high gravity fires at/above limit", notableToasts.Count == 1 && notableToasts[0].Message.Contains("30.00 g"));
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.LandableLargeRadius;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Big", Landable = true, Radius = 20000 });
+            Check("notable landable large radius fires above limit", notableToasts.Count == 1 && notableToasts[0].Title == "Landable Large Radius Body");
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.BioSignals;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Bio", BiologicalSignals = 1, Landable = true });
+            Check("notable bio signal fires on landable body with singular wording", notableToasts.Count == 1 && notableToasts[0].Message.Contains("1 Biological Signal"));
+
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.GeoSignals;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Geo", GeologicalSignals = 2, Landable = true });
+            Check("notable geo signal fires on landable body", notableToasts.Count == 1 && notableToasts[0].Message.Contains("2 Geological Signals"));
+
+            notableSettings.NotificationSettings.NotificationsEnabled = false;
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.DiverseLife;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Bio", BiologicalSignals = 9 });
+            Check("notable checks suppressed when notifications disabled", notableToasts.Count == 0);
+
             // ── EdAstro: GEC JSON → EdAstroPoi mapping (offline) ──────────────────
             const string gecJson =
                 "[{\"id\":10,\"type\":\"Sights and Scenery\",\"type2\":\"\",\"name\":\"The Ammonia Lyceum\"," +
