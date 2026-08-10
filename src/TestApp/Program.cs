@@ -297,6 +297,46 @@ class Program
             Check("settings round-trip NotificationSettings", settings.NotificationSettings.DisplayTime == 42);
             Check("settings round-trip SystemGridSetting", settings.SystemGridSetting.ExoValuableBodyValue == 9_999_999);
 
+            // ── EDSM system-details flow: a live FSDJump to a system with unknown
+            //    star class / value / body count must fetch from the (fake) EDSM
+            //    service and raise OnSystemUpdatedFromEDSM. ──
+            var edsmJournalDir = Path.Combine(Path.GetTempPath(), "odex_edsm_smoke");
+            Directory.CreateDirectory(edsmJournalDir);
+            foreach (var f in Directory.GetFiles(edsmJournalDir, "*.log")) File.Delete(f);
+            File.WriteAllLines(Path.Combine(edsmJournalDir, "Journal.240201000000.01.log"),
+            [
+                "{\"timestamp\":\"2024-02-01T00:00:00Z\",\"event\":\"Fileheader\",\"part\":1,\"language\":\"English\"}",
+                "{\"timestamp\":\"2024-02-01T00:00:01Z\",\"event\":\"LoadGame\",\"Commander\":\"EdSmCMDR\",\"Ship\":\"CobraMkIII\",\"GameMode\":\"Solo\",\"Credits\":1000000}"
+            ]);
+
+            var edsmParser = new JournalParserStore(persistedProvider, settings);
+            var edsmExploration = new ExplorationDataStore(edsmParser, new FakeEdsmApiService(), persistedProvider,
+                notifications, settings, exo, organicChecklist);
+            int edsmUpdated = 0;
+            edsmExploration.OnSystemUpdatedFromEDSM += (_, _) => Interlocked.Increment(ref edsmUpdated);
+            edsmParser.ReadNewDirectory(edsmJournalDir);
+            deadline = DateTime.UtcNow.AddSeconds(30);
+            while (!edsmParser.IsLive && DateTime.UtcNow < deadline) Thread.Sleep(50);
+
+            File.AppendAllText(Path.Combine(edsmJournalDir, "Journal.240201000000.01.log"),
+                "{\"timestamp\":\"2024-02-01T00:00:02Z\",\"event\":\"FSDJump\",\"StarSystem\":\"EdSmSys\",\"SystemAddress\":4100000000000,\"StarPos\":[10.0,20.0,30.0],\"Body\":7,\"Bodies\":1,\"JumpDist\":40.0}\n");
+
+            deadline = DateTime.UtcNow.AddSeconds(15);
+            while (edsmExploration.CurrentSystem is null || edsmExploration.CurrentSystem.EstimatedValue == 0)
+            {
+                if (DateTime.UtcNow > deadline) break;
+                Thread.Sleep(100);
+            }
+
+            var edsmSystem = edsmExploration.CurrentSystem;
+            Check("EDSM flow fills estimated value", edsmSystem is { EstimatedValue: 123456 });
+            Check("EDSM flow fills star class", edsmSystem is { StarType: StarType.G });
+            Check("EDSM flow fills body count", edsmSystem is { BodyCount: 4, EdsmScannedBodyCount: 2, IsKnownToEDSM: true });
+            Check("EDSM flow fills edsm url", edsmSystem is { EdsmUrl.Length: > 0 });
+            Check("EDSM flow adds valuable bodies",
+                edsmSystem?.SystemBodies.Any(b => b.BodyName == "EdSmSys A 3") == true);
+            Check("EDSM flow raises OnSystemUpdatedFromEDSM", edsmUpdated >= 1);
+
             Console.WriteLine();
             Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");
             return failures == 0 ? 0 : 1;
@@ -324,4 +364,26 @@ class Program
         "{\"timestamp\":\"2024-01-01T00:00:11Z\",\"event\":\"SellExplorationData\",\"Systems\":[\"Testes\"],\"Discovered\":[{\"SystemName\":\"Testes\",\"NumBodies\":4}],\"BaseValue\":50000,\"Bonus\":10000,\"TotalEarnings\":60000}",
         "{\"timestamp\":\"2024-01-01T00:00:12Z\",\"event\":\"FSDJump\",\"StarSystem\":\"NextSys\",\"SystemAddress\":3103895106049,\"StarPos\":[-100.0,200.0,300.0],\"StarType\":\"G\",\"Body\":7,\"Bodies\":1,\"JumpDist\":350.0}"
     ];
+
+    // In-memory EDSM fake: returns canned system details without any network call.
+    sealed class FakeEdsmApiService : EdsmApiService
+    {
+        public override Task<ODUtils.Models.StarType> GetPrimaryStarClassAsync(string systemName)
+            => Task.FromResult(ODUtils.Models.StarType.G);
+
+        public override Task<EdsmSystemValue?> GetSystemValueAsync(string systemName)
+            => Task.FromResult<EdsmSystemValue?>(new EdsmSystemValue
+            {
+                Url = "https://www.edsm.net/en/system/id/4100000000000/name/EdSmSys",
+                EstimatedValueMapped = 123456,
+                ValuableBodies =
+                [
+                    new EdsmBody { BodyId = 3, BodyName = "EdSmSys A 3" },
+                    new EdsmBody { BodyId = 4, BodyName = "EdSmSys A 4" }
+                ]
+            });
+
+        public override Task<(int Count, int Scanned)> GetBodyCountAsync(long systemAddress)
+            => Task.FromResult((4, 2));
+    }
 }

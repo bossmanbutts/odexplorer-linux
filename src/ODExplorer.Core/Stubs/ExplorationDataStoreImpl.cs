@@ -280,6 +280,19 @@ namespace ODExplorer.Stores
 
                             var routeSnapshot = new List<StarSystem>(Route);
                             InvokeLive(() => OnRouteUpdated?.Invoke(this, routeSnapshot));
+
+                            _ = Task.Run(async () =>
+                            {
+                                if (await GetSystemValue(data).ConfigureAwait(true))
+                                {
+                                    if (parserStore.IsLive)
+                                    {
+                                        var updatedRouteSnapshot = new List<StarSystem>(Route);
+                                        InvokeLive(() => OnRouteUpdated?.Invoke(this, updatedRouteSnapshot));
+                                        InvokeLive(() => OnSystemUpdatedFromEDSM?.Invoke(this, data));
+                                    }
+                                }
+                            });
                         }
                         break;
                     case NavRouteClearEvent.NavRoutClearEventArgs:
@@ -702,6 +715,11 @@ namespace ODExplorer.Stores
                 {
                     var updatedRouteSnapshot = new List<StarSystem>(Route);
                     InvokeLive(() => OnRouteUpdated?.Invoke(this, updatedRouteSnapshot));
+                    _ = Task.Run(async () =>
+                    {
+                        if (await UpdateKnownBodyCount(CurrentSystem).ConfigureAwait(true))
+                            InvokeLive(() => OnSystemUpdatedFromEDSM?.Invoke(this, CurrentSystem));
+                    });
                 }
                 return CurrentSystem;
             }
@@ -712,7 +730,83 @@ namespace ODExplorer.Stores
             CurrentSystem.EdsmUrl = string.Empty;
 
             TriggerCurrentSystemEventIfLive();
+
+            if (parserStore.IsLive)
+            {
+                _ = Task.Run(async () =>
+                {
+                    var starUpdate = CurrentSystem.StarType == StarType.Unknown && await UpdateSystemStarClass(CurrentSystem).ConfigureAwait(true);
+                    var valueUpdate = CurrentSystem.EstimatedValue == 0 && await GetSystemValue(CurrentSystem).ConfigureAwait(true);
+                    var countUpdate = CurrentSystem.BodyCount == 0 && await UpdateKnownBodyCount(CurrentSystem).ConfigureAwait(true);
+                    if (starUpdate || valueUpdate || countUpdate)
+                        InvokeLive(() => OnSystemUpdatedFromEDSM?.Invoke(this, CurrentSystem));
+                });
+            }
+
             return CurrentSystem;
+        }
+
+        private async Task<bool> UpdateSystemStarClass(StarSystem system)
+        {
+            if (parserStore.IsLive == false || system is null)
+                return false;
+
+            var starClass = await edsmApi.GetPrimaryStarClassAsync(system.Name).ConfigureAwait(true);
+
+            if (starClass != StarType.Unknown)
+            {
+                var ret = system.StarType != starClass;
+                system.StarType = starClass;
+                return ret;
+            }
+
+            return false;
+        }
+
+        private async Task<bool> UpdateKnownBodyCount(StarSystem system)
+        {
+            var count = await edsmApi.GetBodyCountAsync(system.Address).ConfigureAwait(true);
+
+            var ret = system.BodyCount != count.Count;
+            system.BodyCount = count.Count;
+            system.EdsmScannedBodyCount = count.Scanned;
+            if (count.Count > 0)
+            {
+                system.IsKnownToEDSM = true;
+            }
+            return ret;
+        }
+
+        private async Task<bool> GetSystemValue(StarSystem system)
+        {
+            var value = await edsmApi.GetSystemValueAsync(system.Name).ConfigureAwait(true);
+            bool ret = false;
+
+            if (value is not null)
+            {
+                if (value.ValuableBodies is not null)
+                {
+                    foreach (var body in value.ValuableBodies)
+                    {
+                        bool bodyKnown = system.SystemBodies.FirstOrDefault(x => x.EdsmBodyID == body.BodyId || string.Equals(x.BodyName, body.BodyName, StringComparison.OrdinalIgnoreCase)) != default;
+
+                        if (bodyKnown)
+                        {
+                            continue;
+                        }
+
+                        var planet = CreateMinimalBody(body.BodyId, body.BodyName, system);
+                        planet.EdsmBodyID = (int)body.BodyId;
+                    }
+                }
+
+                system.EdsmUrl = value.Url ?? string.Empty;
+                system.IsKnownToEDSM = true;
+                system.EstimatedValue = value.EstimatedValueMapped;
+                ret = true;
+            }
+
+            return ret;
         }
 
         private void UpdateCurrentBody(SystemBody? body)

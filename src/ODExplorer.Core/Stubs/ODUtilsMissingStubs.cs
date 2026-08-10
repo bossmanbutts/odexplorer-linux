@@ -283,10 +283,155 @@ namespace ODUtils.APis
         }
     }
 
-    public sealed class EdsmApiService
+    public sealed class EdsmSystemValue
     {
-        public System.Threading.Tasks.Task<string?> GetSystemUrlAsync(long address)
+        public System.Collections.Generic.List<EdsmBody> ValuableBodies { get; set; } = new();
+        public string Url { get; set; } = string.Empty;
+        public long EstimatedValueMapped { get; set; }
+    }
+
+    public sealed class EdsmBody
+    {
+        public long BodyId { get; set; }
+        public string BodyName { get; set; } = string.Empty;
+    }
+
+    public class EdsmApiService
+    {
+        private const string SystemUrl = "https://www.edsm.net/api-v1/system";
+        private const string SystemBodiesUrl = "https://www.edsm.net/api-v1/system-bodies";
+
+        public virtual System.Threading.Tasks.Task<string?> GetSystemUrlAsync(long address)
             => System.Threading.Tasks.Task.FromResult<string?>(null);
+
+        public virtual async Task<ODUtils.Models.StarType> GetPrimaryStarClassAsync(string systemName)
+        {
+            if (string.IsNullOrWhiteSpace(systemName))
+                return ODUtils.Models.StarType.Unknown;
+
+            try
+            {
+                var query = $"?systemName={Uri.EscapeDataString(systemName)}&showPrimaryStar=1&showInformation=1";
+                var obj = await GetJsonObject(SystemUrl, query).ConfigureAwait(false);
+                var type = obj?["primaryStar"]?["type"]?.ToString();
+                if (string.IsNullOrWhiteSpace(type))
+                    return ODUtils.Models.StarType.Unknown;
+
+                return ODExplorer.Journal.JournalEventMapper.GetStarType(ReduceToSpectralClass(type));
+            }
+            catch
+            {
+                return ODUtils.Models.StarType.Unknown;
+            }
+        }
+
+        public virtual async Task<EdsmSystemValue?> GetSystemValueAsync(string systemName)
+        {
+            if (string.IsNullOrWhiteSpace(systemName))
+                return null;
+
+            try
+            {
+                var query = $"?systemName={Uri.EscapeDataString(systemName)}&showInformation=1&showEstimatedValue=1&showBodies=1&showId=1";
+                var obj = await GetJsonObject(SystemUrl, query).ConfigureAwait(false);
+                if (obj is null)
+                    return null;
+
+                var value = new EdsmSystemValue
+                {
+                    Url = obj["url"]?.ToString() ?? string.Empty,
+                    EstimatedValueMapped = ReadLong(obj, "estimatedValueMapped") ?? 0
+                };
+
+                if (obj["bodies"] is JArray bodies)
+                {
+                    foreach (var body in bodies)
+                    {
+                        // Bodies worth mapping/exobiology for the carto grid are the landable ones.
+                        if (body["isLandable"]?.ToObject<bool>() != true)
+                            continue;
+
+                        value.ValuableBodies.Add(new EdsmBody
+                        {
+                            BodyId = ReadLong(body, "id") ?? 0,
+                            BodyName = body["name"]?.ToString() ?? string.Empty
+                        });
+                    }
+                }
+
+                return value;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public virtual async Task<(int Count, int Scanned)> GetBodyCountAsync(long systemAddress)
+        {
+            if (systemAddress <= 0)
+                return (0, 0);
+
+            try
+            {
+                var query = $"?systemId64={systemAddress}&showId=1";
+                var obj = await GetJsonObject(SystemBodiesUrl, query).ConfigureAwait(false);
+                if (obj is null)
+                    return (0, 0);
+
+                int count = 0, scanned = 0;
+                if (obj["bodies"] is JArray bodies)
+                {
+                    count = bodies.Count;
+                    foreach (var body in bodies)
+                    {
+                        if (body["discovery"] is not null && body["discovery"]?.Type != JTokenType.Null)
+                            scanned++;
+                    }
+                }
+
+                return (count, scanned);
+            }
+            catch
+            {
+                return (0, 0);
+            }
+        }
+
+        private static string? ReduceToSpectralClass(string type)
+        {
+            // EDSM often returns a bare class letter ("K") but sometimes "K7Va".
+            if (char.IsLetter(type[0]) && type.Length > 1 && char.IsDigit(type[1]))
+                return type[0].ToString();
+
+            return type;
+        }
+
+        private static long? ReadLong(JToken? token, string name)
+        {
+            var t = token?[name];
+            if (t is null) return null;
+            if (t.Type == JTokenType.Integer) return t.ToObject<long>();
+            if (t.Type == JTokenType.Float) return (long)t.ToObject<double>();
+            if (t.Type == JTokenType.String && long.TryParse(t.ToString(), out var l)) return l;
+            return null;
+        }
+
+        private static async Task<JObject?> GetJsonObject(string baseUrl, string query)
+        {
+            using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("ODExplorer");
+            var json = await http.GetStringAsync(baseUrl + query).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(json))
+                return null;
+
+            var obj = JObject.Parse(json);
+            // EDSM returns { "error": true, "message": ... } for unknown systems.
+            if (obj["error"]?.ToObject<bool>() == true)
+                return null;
+
+            return obj;
+        }
     }
 }
 
