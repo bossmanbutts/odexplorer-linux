@@ -113,7 +113,22 @@ namespace ODUtils.Models
         public string Name { get; set; } = string.Empty;
         public string Name_Localised { get; set; } = string.Empty;
         public double Percent { get; set; }
-        public PlanetMaterial Name_AsMaterial => PlanetMaterial.None;
+
+        // Maps the journal material name ("carbon", "vanadium", ...) to its
+        // jumponium-relevant PlanetMaterial flag; non-jumponium materials map to
+        // None so the CheckSystemMaterials bitmask only accumulates the seven
+        // synthesis materials.
+        public PlanetMaterial Name_AsMaterial => Name?.ToLowerInvariant() switch
+        {
+            "carbon" => PlanetMaterial.carbon,
+            "vanadium" => PlanetMaterial.vanadium,
+            "germanium" => PlanetMaterial.germanium,
+            "cadmium" => PlanetMaterial.cadmium,
+            "niobium" => PlanetMaterial.niobium,
+            "yttrium" => PlanetMaterial.yttrium,
+            "polonium" => PlanetMaterial.polonium,
+            _ => PlanetMaterial.None,
+        };
         // Implicit conversion so material |= item.Name works in StarSystemViewModel
         public static implicit operator PlanetMaterial(ShipMaterials m) => m.Name_AsMaterial;
     }

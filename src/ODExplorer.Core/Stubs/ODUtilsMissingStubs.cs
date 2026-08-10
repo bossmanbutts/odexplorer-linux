@@ -535,7 +535,8 @@ namespace ODUtils.Helpers
 {
     public static class EnumUtility
     {
-        public static bool ContainsAllShipMaterials(object mats, object required) => false;
+        public static bool ContainsAllShipMaterials(ODUtils.Models.PlanetMaterial mats, ODUtils.Models.PlanetMaterial required)
+            => (mats & required) == required;
     }
 
     public static class OperatingSystem

@@ -322,6 +322,71 @@ class Program
             var poiVm = new ODExplorer.ViewModels.ModelVMs.EdAstroPoiViewModel(pois[0], new(0, 0, 0));
             Check("POI VM exposes markdown", poiVm.MarkDown.Contains("poiimages") && poiVm.DistanceFromCommander > 23000);
 
+            // ── ODUtils stub layer: jumponium material mapping + species table ──
+            var carbon = new ShipMaterials { Name = "carbon" };
+            var vanadium = new ShipMaterials { Name = "vanadium" };
+            var germanium = new ShipMaterials { Name = "germanium" };
+            var cadmium = new ShipMaterials { Name = "cadmium" };
+            var niobium = new ShipMaterials { Name = "niobium" };
+            var yttrium = new ShipMaterials { Name = "yttrium" };
+            var polonium = new ShipMaterials { Name = "polonium" };
+            Check("material name maps to flag", carbon.Name_AsMaterial == PlanetMaterial.carbon
+                && new ShipMaterials { Name = "CARBON" }.Name_AsMaterial == PlanetMaterial.carbon
+                && polonium.Name_AsMaterial == PlanetMaterial.polonium);
+            Check("non-jumponium material maps to None", new ShipMaterials { Name = "iron" }.Name_AsMaterial == PlanetMaterial.None);
+
+            PlanetMaterial allJumponium = PlanetMaterial.carbon | PlanetMaterial.vanadium | PlanetMaterial.germanium
+                | PlanetMaterial.cadmium | PlanetMaterial.niobium | PlanetMaterial.yttrium | PlanetMaterial.polonium;
+            Check("ContainsAllShipMaterials basic subset", ODUtils.Helpers.EnumUtility.ContainsAllShipMaterials(allJumponium,
+                PlanetMaterial.carbon | PlanetMaterial.vanadium | PlanetMaterial.germanium));
+            Check("ContainsAllShipMaterials standard subset", ODUtils.Helpers.EnumUtility.ContainsAllShipMaterials(allJumponium,
+                PlanetMaterial.carbon | PlanetMaterial.vanadium | PlanetMaterial.germanium | PlanetMaterial.cadmium | PlanetMaterial.niobium));
+            Check("ContainsAllShipMaterials premium requires all seven", ODUtils.Helpers.EnumUtility.ContainsAllShipMaterials(allJumponium, allJumponium));
+            Check("ContainsAllShipMaterials missing material is false", ODUtils.Helpers.EnumUtility.ContainsAllShipMaterials(allJumponium & ~PlanetMaterial.polonium, allJumponium) == false);
+            Check("ContainsAllShipMaterials empty mats is false", ODUtils.Helpers.EnumUtility.ContainsAllShipMaterials(PlanetMaterial.None, PlanetMaterial.carbon) == false);
+
+            var jumponiumBody = new SystemBody { Landable = true, IsPlanet = true, Materials = [carbon, vanadium, germanium, cadmium, niobium, yttrium, polonium] };
+            var jumponiumSysVm = new ODExplorer.ViewModels.ModelVMs.StarSystemViewModel(new StarSystem(), settings, notifications)
+            {
+                Bodies = new System.Collections.ObjectModel.ObservableCollection<ODExplorer.ViewModels.ModelVMs.SystemBodyViewModel>
+                {
+                    new ODExplorer.ViewModels.ModelVMs.SystemBodyViewModel(jumponiumBody, settings)
+                }
+            };
+            Check("system with all jumponium materials reports Premium", jumponiumSysVm.GreenSystem == ODExplorer.Models.Jumponium.Premium);
+
+            var basicBody = new SystemBody { Landable = true, IsPlanet = true, Materials = [carbon, vanadium, germanium] };
+            var basicSysVm = new ODExplorer.ViewModels.ModelVMs.StarSystemViewModel(new StarSystem(), settings, notifications)
+            {
+                Bodies = new System.Collections.ObjectModel.ObservableCollection<ODExplorer.ViewModels.ModelVMs.SystemBodyViewModel>
+                {
+                    new ODExplorer.ViewModels.ModelVMs.SystemBodyViewModel(basicBody, settings)
+                }
+            };
+            Check("system with only basic materials reports Standard", basicSysVm.GreenSystem == ODExplorer.Models.Jumponium.Standard);
+
+            var emptyBody = new SystemBody { Landable = true, IsPlanet = true, Materials = [new ShipMaterials { Name = "iron" }] };
+            var emptySysVm = new ODExplorer.ViewModels.ModelVMs.StarSystemViewModel(new StarSystem(), settings, notifications)
+            {
+                Bodies = new System.Collections.ObjectModel.ObservableCollection<ODExplorer.ViewModels.ModelVMs.SystemBodyViewModel>
+                {
+                    new ODExplorer.ViewModels.ModelVMs.SystemBodyViewModel(emptyBody, settings)
+                }
+            };
+            Check("system without jumponium materials reports None", emptySysVm.GreenSystem == ODExplorer.Models.Jumponium.None);
+
+            Check("exo table has 93 species", exo.AllGenus.Sum(g => g.Species.Count) == 93);
+            Check("exo Stratum Tectonicas value", exo.GetInfo("$Codex_Ent_Stratum_10_Name;") is { Value: 1_600_000 });
+            Check("exo Electricae Radialem value", exo.GetInfo("$Codex_Ent_Electricae_02_Name;") is { Value: 1_200_000 });
+            Check("exo Fungoida Setisis value", exo.GetInfo("$Codex_Ent_Fungoids_01_Name;") is { Value: 1_000_000 });
+            Check("exo Bacterium Acerosis value", exo.GetInfo("$Codex_Ent_Bacterial_01_Name;") is { Value: 100_000 });
+            Check("exo Bacterium colony range", exo.GetInfo("$Codex_Ent_Bacterial_01_Name;") is { ColonyRange: 2 });
+            Check("exo unknown codex returns null", exo.GetInfo("$Codex_Ent_Bogus_01_Name;") is null);
+            Check("exo species name from codex", ExoData.GetNamesFromSpecies("$Codex_Ent_Stratum_10_Name;") is { Species: "Stratum Tectonicas" });
+            Check("exo variant name from codex", ExoData.GetNames("$Codex_Ent_Aleoids_01_A_Name;") is { Genus: "Aleoida", Species: "Aleoida Arcadian", Variant: "Aleoida Arcadian A" });
+            Check("exo species available in all regions", exo.AllGenus.SelectMany(g => g.Species)
+                .First(s => s.SpeciesName == "Stratum Tectonicas").IsAvailableIn(GalacticRegions.Bubble));
+
             int liveCount = 0, currentSystemEvents = 0, organicDetailsEvents = 0, cartoSold = 0, bioSold = 0;
             parser.OnParserStoreLive += (_, live) => { if (live) Interlocked.Increment(ref liveCount); };
             exploration.OnCurrentSystemUpdated += (_, s) => { if (s is not null) Interlocked.Increment(ref currentSystemEvents); };
