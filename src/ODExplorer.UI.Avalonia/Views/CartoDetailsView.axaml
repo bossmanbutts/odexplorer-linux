@@ -14,9 +14,9 @@
         <conv:EnumToBoolConverter x:Key="StateVisible" />
     </UserControl.Resources>
 
-    <Grid RowDefinitions="40,*">
+    <Grid RowDefinitions="Auto,*">
         <Border Background="#323232">
-            <StackPanel Orientation="Horizontal">
+            <WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Cartographic"
                            FontSize="24" FontWeight="Medium" Foreground="White"
                            VerticalAlignment="Center" Margin="10,0,30,0" />
@@ -32,7 +32,7 @@
                 <Button Content="Ignored" FontSize="18" Width="120" Margin="0,5"
                         ToolTip.Tip="Systems Ignored From Unsold Carto Calculations"
                         Command="{Binding SwitchToIgnored}" />
-            </StackPanel>
+            </WrapPanel>
         </Border>
 
         <controls:CartoDataSystemListControl Grid.Row="1"

@@ -8,6 +8,7 @@
         x:Class="ODExplorer.UI.Avalonia.MainWindow"
         x:DataType="vm:MainViewModel"
         Width="1200" Height="800"
+        MinWidth="900" MinHeight="600"
         Title="{Binding Title}">
     <DockPanel>
         <Border DockPanel.Dock="Top"
@@ -20,9 +21,9 @@
                            Foreground="White"
                            VerticalAlignment="Center"
                            DockPanel.Dock="Left" />
-                <StackPanel Orientation="Horizontal"
-                            Spacing="6"
-                            HorizontalAlignment="Right">
+                <WrapPanel Orientation="Horizontal"
+                           ItemSpacing="6"
+                           HorizontalAlignment="Right">
                     <Button Content="Explorer"
                             Command="{Binding NavigateToView}"
                             CommandParameter="{x:Static models:ActiveViewModel.Carto}" />
@@ -41,7 +42,7 @@
                     <Button Content="EdAstro"
                             Command="{Binding NavigateToView}"
                             CommandParameter="{x:Static models:ActiveViewModel.EdAstro}" />
-                </StackPanel>
+                </WrapPanel>
             </DockPanel>
         </Border>
         <Grid x:Name="ContentRoot">

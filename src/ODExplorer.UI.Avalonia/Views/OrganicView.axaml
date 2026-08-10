@@ -15,9 +15,9 @@
         <conv:VisibilityConverter x:Key="VisibilityConv" />
     </UserControl.Resources>
 
-    <Grid RowDefinitions="40,*">
+    <Grid RowDefinitions="Auto,*">
         <Border Background="#323232">
-            <StackPanel Orientation="Horizontal">
+            <WrapPanel Orientation="Horizontal">
                 <TextBlock Text="Exobiology"
                            FontSize="24" FontWeight="Medium" Foreground="White"
                            VerticalAlignment="Center" Margin="10,0,30,0" />
@@ -25,11 +25,11 @@
                 <Button Content="Sold" FontSize="18" Command="{Binding SwitchToSoldList}" Width="120" Margin="0,5" />
                 <Button Content="Lost" FontSize="18" Command="{Binding SwitchToLostList}" Width="120" Margin="0,5" />
                 <Button Content="CheckList" FontSize="18" Command="{Binding SwitchToCheckList}" Width="120" Margin="0,5" />
-            </StackPanel>
+            </WrapPanel>
         </Border>
 
         <!-- CheckList -->
-        <Grid Grid.Row="1" RowDefinitions="40,*" ColumnDefinitions="*,20,500"
+        <Grid Grid.Row="1" RowDefinitions="40,*" ColumnDefinitions="5*,20,3*"
               IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static odu:ExoBiologyViewState.CheckList}}">
             <StackPanel Orientation="Horizontal" Margin="5,0">
                 <TextBlock Text="Region :" FontSize="18" VerticalAlignment="Center" Margin="5,0" />
@@ -42,7 +42,7 @@
                 <TextBlock Text="{Binding SelectedRegionVariantCount}" FontSize="16" VerticalAlignment="Center" />
             </StackPanel>
 
-            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto">
                 <WrapPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                     <controls:OrganicChecklistTable Title="Aleoida" Species="{Binding Aleoida}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />
                     <controls:OrganicChecklistTable Title="Bacterium" Species="{Binding Bacterium}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" />

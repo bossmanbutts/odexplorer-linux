@@ -115,12 +115,14 @@ public partial class App : Application
 
         IOdToolsDatabaseProvider databaseProvider = new OdExplorerDatabaseProvider(dbContextFactory);
         var settingsStore = new SettingsStore(databaseProvider);
+        settingsStore.LoadSettings();
         var notificationStore = new NotificationStore(settingsStore);
         var exoData = new ExoData();
         var journalParserStore = new JournalParserStore(databaseProvider, settingsStore);
-        var organicCheckListDataStore = new OrganicCheckListDataStore(journalParserStore, exoData, settingsStore);
+        var organicCheckListDataStore = new OrganicCheckListDataStore(journalParserStore, exoData, settingsStore, registerWithParser: false);
         var explorationDataStore = new ExplorationDataStore(journalParserStore, new EdsmApiService(), databaseProvider,
             notificationStore, settingsStore, exoData, organicCheckListDataStore);
+        journalParserStore.RegisterParser(organicCheckListDataStore);
         _ = explorationDataStore.RefreshEdAstroPois();
         var spanshCsvStore = new SpanshCsvStore(journalParserStore, databaseProvider, settingsStore, notificationStore);
 

@@ -19,14 +19,15 @@ namespace ODExplorer.Stores
 {
     public sealed class OrganicCheckListDataStore : IProcessJournalLogs
     {
-        public OrganicCheckListDataStore(JournalParserStore parserStore, ExoData exoData, SettingsStore settings)
+        public OrganicCheckListDataStore(JournalParserStore parserStore, ExoData exoData, SettingsStore settings, bool registerWithParser = true)
         {
             this.parserStore = parserStore;
             this.exoData = exoData;
             this.settings = settings;
             this.exoData.Initialise();
             this.parserStore.OnParserStoreLive += ParserStore_OnParserStoreLive;
-            parserStore.RegisterParser(this);
+            if (registerWithParser)
+                parserStore.RegisterParser(this);
 
             Task.Factory.StartNew(BuildDictionary);
         }

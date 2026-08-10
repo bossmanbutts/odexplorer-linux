@@ -1,4 +1,5 @@
-﻿using ODExplorer.Controls;
+﻿using System.Text.Json.Serialization;
+using ODExplorer.Controls;
 using ODExplorer.ViewModels.ModelVMs;
 
 namespace ODExplorer.Models
@@ -13,6 +14,7 @@ namespace ODExplorer.Models
         public bool ShowTitle { get; set; } = true;
         public bool ShowInTaskBar { get; set; } = true;
         public bool Active { get; set; }
+        [JsonIgnore]
         public object? AdditionalSettings { get; set; }
         public double ZoomLevel { get; set; } = 1d;
 

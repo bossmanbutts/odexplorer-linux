@@ -15,7 +15,7 @@
 
     <Grid RowDefinitions="Auto,*">
         <Border Background="#202020" Padding="8,6">
-            <StackPanel Orientation="Horizontal" Spacing="6">
+            <WrapPanel Orientation="Horizontal" ItemSpacing="6">
                 <Button Content="Import CSV"
                         Width="100"
                         Click="ImportCsv_Click" />
@@ -53,7 +53,7 @@
                           IsChecked="{Binding AutoCopyNextSystem}"
                           VerticalAlignment="Center"
                           Margin="8,0,0,0" />
-            </StackPanel>
+            </WrapPanel>
         </Border>
 
         <Grid Grid.Row="1" ColumnDefinitions="*,20,*" Margin="10">

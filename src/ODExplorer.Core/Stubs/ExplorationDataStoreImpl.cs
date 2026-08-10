@@ -15,6 +15,7 @@ using ODUtils.APis;
 using ODUtils.Database.Interfaces;
 using ODUtils.EliteDangerousHelpers.GalacticRegions;
 using ODUtils.Exobiology;
+using ODUtils.Extensions;
 using ODUtils.Journal;
 using ODUtils.Models;
 using System.Threading.Tasks;
@@ -79,6 +80,10 @@ namespace ODExplorer.Stores
         private readonly Dictionary<long, StarSystem> _cartoData = [];
         private readonly List<SystemBody> _organicData = [];
         private readonly Dictionary<long, string> _ignoredSystems = [];
+
+        private readonly HashSet<SystemBody> _highValueExoNotified = [];
+        private readonly HashSet<string> _newSpeciesNotified = [];
+        private readonly HashSet<string> _newCodexNotified = [];
 
         private bool onFoot;
         private double longitude;
@@ -980,6 +985,7 @@ namespace ODExplorer.Stores
                 UpdateFromScan(known, scanOrganic, body);
                 UpdateBioMinMaxValue(body);
                 TriggerBioUpdatedIfLive(known);
+                NotifyBioDiscoveries(body);
                 return;
             }
 
@@ -990,6 +996,7 @@ namespace ODExplorer.Stores
                 UpdateFromScan(notPredicted, scanOrganic, body);
                 UpdateBioMinMaxValue(body);
                 TriggerBioUpdatedIfLive(notPredicted);
+                NotifyBioDiscoveries(body);
                 return;
             }
 
@@ -999,6 +1006,7 @@ namespace ODExplorer.Stores
                 _organicData.Add(body);
             UpdateBioMinMaxValue(body);
             TriggerBioUpdatedIfLive(newBio);
+            NotifyBioDiscoveries(body);
         }
 
         private void ProcessCodex(CodexEntryEvent.CodexEntryEventArgs codexEntry)
@@ -1036,6 +1044,7 @@ namespace ODExplorer.Stores
                         {
                             UpdateFromCodex(bio, codexEntry, body);
                             TriggerBioUpdatedIfLive(bio, true);
+                            NotifyBioDiscoveries(body);
                         }
                         else
                         {
@@ -1055,6 +1064,7 @@ namespace ODExplorer.Stores
                     {
                         UpdateFromCodex(bio, codexEntry, body);
                         TriggerBioUpdatedIfLive(bio, true);
+                        NotifyBioDiscoveries(body);
                         return;
                     }
                 }
@@ -1066,6 +1076,7 @@ namespace ODExplorer.Stores
                 {
                     UpdateFromCodex(fallback, codexEntry, body);
                     TriggerBioUpdatedIfLive(fallback, true);
+                    NotifyBioDiscoveries(body);
                     return;
                 }
 
@@ -1075,6 +1086,7 @@ namespace ODExplorer.Stores
                 {
                     UpdateFromCodex(notPredicted, codexEntry, body);
                     TriggerBioUpdatedIfLive(notPredicted, true);
+                    NotifyBioDiscoveries(body);
                     return;
                 }
             }
@@ -1084,6 +1096,61 @@ namespace ODExplorer.Stores
             if (_organicData.Contains(body) == false)
                 _organicData.Add(body);
             TriggerBioUpdatedIfLive(newBio, true);
+            NotifyBioDiscoveries(body);
+        }
+
+        private void NotifyBioDiscoveries(SystemBody body)
+        {
+            if (parserStore.IsLive == false)
+                return;
+
+            // Valuable exo body: fired once per body once its value crosses the threshold.
+            if (settingsStore.NotificationOptions.HasFlag(NotificationOptions.ValuableBioPlanet)
+                && body.MinExoValue >= settingsStore.SystemGridSetting.ExoValuableBodyValue
+                && _highValueExoNotified.Add(body))
+            {
+                var min = body.MinExoValue;
+                var max = body.MaxExoValue;
+                var valueString = min == max ? $"{max.FormatNumber()}" : $"{min.FormatNumber()} - {max.FormatNumber()}";
+                var countString = body.BiologicalSignals > 1 ? $"{body.BiologicalSignals} Signals" : $"{body.BiologicalSignals} Signal";
+                notificationStore.ShowHighValueExoBodyNotification(body.BodyName, valueString, countString);
+            }
+
+            if (body.OrganicScanItems is null)
+                return;
+
+            if (settingsStore.NotificationOptions.HasFlag(NotificationOptions.NewBioSpecies))
+            {
+                var newSpecies = new Dictionary<string, bool>();
+                foreach (var item in body.OrganicScanItems.Where(x => x.IsNewSpecies && string.IsNullOrEmpty(x.SpeciesCodex) == false))
+                {
+                    if (_newSpeciesNotified.Add(item.SpeciesCodex))
+                    {
+                        var name = string.IsNullOrEmpty(item.SpeciesLocalised) ? item.SpeciesEnglish : item.SpeciesLocalised;
+                        newSpecies.TryAdd(string.IsNullOrEmpty(name) ? item.SpeciesCodex : name, true);
+                    }
+                }
+
+                if (newSpecies.Count > 0)
+                    notificationStore.ShowNewSpeciesEntriesNotification(body.BodyName, newSpecies, CurrentSystemRegion);
+            }
+
+            if (settingsStore.NotificationOptions.HasFlag(NotificationOptions.NewBioCodexEntry))
+            {
+                var newCodex = new Dictionary<string, bool>();
+                foreach (var variant in body.OrganicScanItems.SelectMany(x => x.Variants)
+                             .Where(v => v.NewCodexEntry && string.IsNullOrEmpty(v.VariantCodex) == false))
+                {
+                    if (_newCodexNotified.Add(variant.VariantCodex))
+                    {
+                        var name = string.IsNullOrEmpty(variant.EnglishName) ? variant.VariantCodex : variant.EnglishName;
+                        newCodex.TryAdd(name, true);
+                    }
+                }
+
+                if (newCodex.Count > 0)
+                    notificationStore.ShowNewCodexEntriesNotification(body.BodyName, newCodex, CurrentSystemRegion);
+            }
         }
 
         private void UpdateFromScan(OrganicScanItem bio, ScanOrganicEvent.ScanOrganicEventArgs scanOrganic, SystemBody body)

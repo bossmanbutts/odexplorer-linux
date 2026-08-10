@@ -33,8 +33,9 @@ class Program
             var exo = new ExoData();
 
             var parser = new JournalParserStore(db, settings);
-            var organicChecklist = new OrganicCheckListDataStore(parser, exo, settings);
+            var organicChecklist = new OrganicCheckListDataStore(parser, exo, settings, registerWithParser: false);
             var exploration = new ExplorationDataStore(parser, new EdsmApiService(), db, notifications, settings, exo, organicChecklist);
+            parser.RegisterParser(organicChecklist);
 
             // ── Spansh CSV: real store + parser ──────────────────────────────────
             var spansh = new SpanshCsvStore(parser, db, settings, notifications);
@@ -248,6 +249,53 @@ class Program
             var resumeEntries = persistedProvider.GetAllJournalEntries(savedId).GetAwaiter().GetResult();
             Check("resume adds only new lines (no history re-parse)", resumeEntries.Count == 16);
             Check("resume parsed the appended line", resumeExploration.CurrentSystem?.Name == "ResumeSys");
+
+            // ── Live bio discovery toasts: a new-species ScanOrganic and a CodexEntry
+            //    must raise the valuable-exo / new-species / new-codex notifications. ──
+            settings.NotificationOptions = ODExplorer.Models.NotificationOptions.ValuableBioPlanet
+                | ODExplorer.Models.NotificationOptions.NewBioCodexEntry
+                | ODExplorer.Models.NotificationOptions.NewBioSpecies;
+            settings.SystemGridSetting.ExoValuableBodyValue = 1;
+
+            File.AppendAllText(Path.Combine(journalDir, "Journal.240101010000.02.log"),
+                "{\"timestamp\":\"2024-01-01T01:00:04Z\",\"event\":\"ScanOrganic\",\"ScanType\":\"Analyse\",\"Genus\":\"$Codex_Ent_Cactoid_Genus_Name;\",\"Genus_Localised\":\"Cactoida\",\"Species\":\"$Codex_Ent_Cactoid_01_Name;\",\"Species_Localised\":\"Cactoida Cortexum\",\"Variant\":\"$Codex_Ent_Cactoid_01_A_Name;\",\"Variant_Localised\":\"Cactoida Cortexum Amethyst\",\"SystemAddress\":10477373803,\"Body\":2,\"Latitude\":5.0,\"Longitude\":6.0}\n");
+
+            deadline = DateTime.UtcNow.AddSeconds(15);
+            while (toasts.Any(x => x.Title == "Possible New Species Codex") == false && DateTime.UtcNow < deadline) Thread.Sleep(100);
+
+            Check("valuable exo body toast fired on live scan", toasts.Any(x => x.Title == "Valuable Exobiology Body"));
+            Check("new species toast fired on live scan",
+                toasts.Any(x => x.Title == "Possible New Species Codex" && x.Message.Contains("Cactoida Cortexum")));
+
+            File.AppendAllText(Path.Combine(journalDir, "Journal.240101010000.02.log"),
+                "{\"timestamp\":\"2024-01-01T01:00:05Z\",\"event\":\"CodexEntry\",\"System\":\"Testes\",\"SystemAddress\":10477373803,\"Body\":\"Testes 2\",\"BodyID\":2,\"Name\":\"$Codex_Ent_Cactoid_01_A_Name;\",\"Name_Localised\":\"Cactoida Cortexum Amethyst\",\"Category\":\"$Codex_Category_Biology;\",\"SubCategory\":\"$Codex_SubCategory_Organic_Structures;\",\"Region\":1,\"IsNewEntry\":true}\n");
+
+            deadline = DateTime.UtcNow.AddSeconds(15);
+            while (toasts.Any(x => x.Title == "Possible New Personal Codex") == false && DateTime.UtcNow < deadline) Thread.Sleep(100);
+
+            Check("new codex toast fired on live codex entry",
+                toasts.Any(x => x.Title == "Possible New Personal Codex" && x.Message.Contains("Cactoida Cortexum Amethyst")));
+
+            // ── Settings persistence: SaveSettings/LoadSettings round-trip via the DB. ──
+            settings.DeveloperMode = true;
+            settings.MinimiseToTray = true;
+            settings.UiScale = 1.35;
+            settings.NotificationSettings.DisplayTime = 42;
+            settings.SystemGridSetting.ExoValuableBodyValue = 9_999_999;
+            settings.SaveSettings();
+
+            settings.DeveloperMode = false;
+            settings.MinimiseToTray = false;
+            settings.UiScale = 1.0;
+            settings.NotificationSettings.DisplayTime = 7;
+            settings.SystemGridSetting.ExoValuableBodyValue = 20_000_000;
+            settings.LoadSettings();
+
+            Check("settings round-trip DeveloperMode", settings.DeveloperMode);
+            Check("settings round-trip MinimiseToTray", settings.MinimiseToTray);
+            Check("settings round-trip UiScale", Math.Abs(settings.UiScale - 1.35) < 0.001);
+            Check("settings round-trip NotificationSettings", settings.NotificationSettings.DisplayTime == 42);
+            Check("settings round-trip SystemGridSetting", settings.SystemGridSetting.ExoValuableBodyValue == 9_999_999);
 
             Console.WriteLine();
             Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");

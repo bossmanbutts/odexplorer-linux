@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using ODExplorer.Models;
+using ODUtils.Database.DTOs;
+using ODUtils.Database.Interfaces;
 using ODUtils.Models;
 
 namespace ODExplorer.Stores
@@ -21,6 +25,11 @@ namespace ODExplorer.Stores
             // databaseProvider is intentionally typed as object to avoid hard dependency on ODUtils.
             databaseProvider = odToolsDatabaseProvider;
             Instance ??= this;
+        }
+
+        // Empty ctor used by the JSON persistence layer when restoring a snapshot.
+        public SettingsStore()
+        {
         }
 
         private readonly object databaseProvider;
@@ -56,23 +65,37 @@ namespace ODExplorer.Stores
         public bool DeveloperMode { get; set; }
 
         #region Persistance
+        private const string SettingsRowId = "SettingsStoreState";
+
         public void LoadSettings()
         {
-            // Simplified: consumer (UI) should pass a provider implementing expected methods.
-            // If provider supplies a GetAllSettings method via dynamic, attempt to call it.
             try
             {
-                dynamic? prov = databaseProvider as dynamic;
-                var settings = prov?.GetAllSettings();
-
-                if (settings != null)
+                if (databaseProvider is IOdToolsDatabaseProvider provider)
                 {
-                    // Do minimal mapping if present; otherwise leave defaults.
+                    var saved = provider.GetAllSettings().FirstOrDefault(x => x.Id == SettingsRowId);
+
+                    if (saved?.StringValue is { Length: > 0 } json)
+                    {
+                        var restored = JsonSerializer.Deserialize<SettingsStore>(json);
+
+                        if (restored != null)
+                        {
+                            foreach (var prop in typeof(SettingsStore).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                             .Where(p => p.CanRead && p.CanWrite))
+                            {
+                                prop.SetValue(this, prop.GetValue(restored));
+                            }
+
+                            WindowPosition ??= new ViewModels.ModelVMs.WindowPositionViewModel();
+                            PopOutParams ??= new Dictionary<int, List<Models.PopOutParams>>();
+                        }
+                    }
                 }
             }
             catch
             {
-                // ignore - provider not available or incompatible in this environment
+                // ignore malformed/legacy settings rows; keep defaults
             }
 
             if (WindowPosition.IsZero)
@@ -85,13 +108,23 @@ namespace ODExplorer.Stores
         {
             try
             {
-                dynamic? prov = databaseProvider as dynamic;
-                var settings = new List<object>();
-                prov?.AddSettings(settings);
+                if (databaseProvider is IOdToolsDatabaseProvider provider)
+                {
+                    var json = JsonSerializer.Serialize(this);
+
+                    provider.AddSettings(
+                    [
+                        new SettingsDTO
+                        {
+                            Id = SettingsRowId,
+                            StringValue = json,
+                        }
+                    ]);
+                }
             }
             catch
             {
-                // ignore
+                // ignore — provider not available or serialization failed
             }
         }
         #endregion
