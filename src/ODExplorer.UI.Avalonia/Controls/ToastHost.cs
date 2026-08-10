@@ -41,6 +41,9 @@ public sealed class ToastHost : Panel
         if (settings.NotificationsEnabled == false)
             return;
 
+        if (settings.MaxNotificationCount <= 0)
+            settings.MaxNotificationCount = 1;
+
         while (active.Count >= settings.MaxNotificationCount)
             RemoveOldest();
 
@@ -141,7 +144,11 @@ public sealed class ToastHost : Panel
     {
         var oldest = active.FirstOrDefault();
         if (oldest.Card is not null)
-            FadeOut(oldest.Card);
+        {
+            oldest.Timer?.Stop();
+            canvas.Children.Remove(oldest.Card);
+            active.RemoveAt(0);
+        }
     }
 
     private void Reflow()
