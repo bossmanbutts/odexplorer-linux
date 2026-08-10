@@ -16,9 +16,9 @@
                   VerticalScrollBarVisibility="Auto">
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition MinWidth="700" Width="*" />
+                <ColumnDefinition MinWidth="480" Width="*" />
                 <ColumnDefinition Width="20" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" MinWidth="260" />
             </Grid.ColumnDefinitions>
 
             <!-- Left column: commanders + options + links -->
@@ -28,7 +28,7 @@
                         <ListBox ItemsSource="{Binding JournalCommanderViews}"
                                  SelectedItem="{Binding SelectedCommander}"
                                  SelectionMode="Single"
-                                 MaxHeight="170"
+                                 MaxHeight="320"
                                  VerticalAlignment="Top">
                             <ListBox.ItemTemplate>
                                 <DataTemplate x:DataType="modelvms:JournalCommaderViewModel">
@@ -105,8 +105,7 @@
                         <CheckBox Content="Developer Mode (show test triggers)"
                                   IsChecked="{Binding DeveloperMode}" />
                         <WrapPanel IsVisible="{Binding DeveloperMode}"
-                                   Orientation="Horizontal"
-                                   Width="520">
+                                   Orientation="Horizontal">
                             <Button Content="Test Toast"
                                     Command="{Binding TestToast}"
                                     Margin="4" />
