@@ -7,6 +7,7 @@
 using System;
 using EliteJournalReader;
 using EliteJournalReader.Events;
+using ODUtils.Extensions;
 using ODUtils.Journal;
 using ODUtils.Models;
 using AtmosphereClass = ODUtils.Models.AtmosphereClass;
@@ -240,6 +241,24 @@ namespace ODExplorer.Journal
 
         public static VolcanismType GetVolcanism(EliteJournalReader.Volcanism volcanism)
             => GetVolcanism(volcanism.ToString());
+
+        // BioScan's get_volcanism() returns the journal volcanism string in lowercase
+        // (e.g. "water geysers", "major silicate vapour geysers") so that the rules'
+        // case-sensitive substring matching works. Returns "" for no volcanism.
+        public static string GetVolcanismName(EliteJournalReader.Volcanism volcanism)
+        {
+            var desc = volcanism.GetEnumDescription();
+
+            if (string.IsNullOrWhiteSpace(desc) || desc.Equals("No Volcanism", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+
+            desc = desc.ToLowerInvariant();
+            const string suffix = " volcanism";
+            if (desc.EndsWith(suffix, StringComparison.Ordinal))
+                desc = desc[..^suffix.Length];
+
+            return desc;
+        }
 
         public static bool IsTerraformable(string? terraformState)
         {

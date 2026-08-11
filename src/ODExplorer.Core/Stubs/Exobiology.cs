@@ -1,7 +1,8 @@
 // Functional in-memory ODUtils.Exobiology implementation with an embedded
-// species/genus table. Values, colony ranges and region availability are
-// best-effort approximations for parity v1; the schema matches the real
-// ODUtils.Exobiology surface so the real package can be swapped in later.
+// species/genus table. Species lists, values and colony ranges are generated
+// from the BioScan rulesets (bio_scan/bio_data/rulesets/*.py) and cross-checked
+// against Vista Genomics data; the schema matches the real ODUtils.Exobiology
+// surface so the real package can be swapped in later.
 
 using System;
 using System.Collections.Generic;
@@ -161,97 +162,138 @@ namespace ODUtils.Exobiology
 
             AddGenus("Aleoids", "Aleoida", new[]
             {
-                (1, "Aleoida Arcadian", 300_000, 25), (2, "Aleoida Coronamus", 300_000, 25),
-                (3, "Aleoida Gravis", 300_000, 25), (4, "Aleoida Laminiae", 300_000, 25),
-                (5, "Aleoida Lupus", 300_000, 25), (6, "Aleoida Praecursoris", 300_000, 25),
-                (7, "Aleoida Roseum", 800_000, 25)
+                (01, "Aleoida Arcus", 7252500, 25),
+                (02, "Aleoida Coronamus", 6284600, 25),
+                (03, "Aleoida Spica", 3385200, 25),
+                (04, "Aleoida Laminiae", 3385200, 25),
+                (05, "Aleoida Gravis", 12934900, 25)
             });
             AddGenus("Bacterial", "Bacterium", new[]
             {
-                (1, "Bacterium Acerosis", 100_000, 2), (2, "Bacterium Alcyoneum", 200_000, 2),
-                (3, "Bacterium Cerebrus", 200_000, 2), (4, "Bacterium Informem", 100_000, 2),
-                (5, "Bacterium Nebulus", 100_000, 2), (6, "Bacterium Omentus", 100_000, 2),
-                (7, "Bacterium Scopulum", 100_000, 2), (8, "Bacterium Tela", 100_000, 2),
-                (9, "Bacterium Vesicula", 100_000, 2), (10, "Bacterium Volu", 100_000, 2),
-                (11, "Bacterium Bullaris", 100_000, 2), (12, "Bacterium Punctulum", 100_000, 2)
+                (01, "Bacterium Aurasus", 1000000, 2),
+                (02, "Bacterium Nebulus", 5289900, 2),
+                (03, "Bacterium Scopulum", 4934500, 2),
+                (04, "Bacterium Acies", 1000000, 2),
+                (05, "Bacterium Vesicula", 1000000, 2),
+                (06, "Bacterium Alcyoneum", 1658500, 2),
+                (07, "Bacterium Tela", 1949000, 2),
+                (08, "Bacterium Informem", 8418000, 2),
+                (09, "Bacterium Volu", 7774700, 2),
+                (10, "Bacterium Bullaris", 1152500, 2),
+                (11, "Bacterium Omentum", 4638900, 2),
+                (12, "Bacterium Cerbrus", 1689800, 2),
+                (13, "Bacterium Verrata", 3897000, 2)
             });
             AddGenus("Cactoid", "Cactoida", new[]
             {
-                (1, "Cactoida Cortexum", 200_000, 25), (2, "Cactoida Lapis", 120_000, 25),
-                (3, "Cactoida Peperatus", 200_000, 25), (4, "Cactoida Pullulanta", 120_000, 25),
-                (5, "Cactoida Rimula", 120_000, 25), (6, "Cactoida Vermis", 200_000, 25)
+                (01, "Cactoida Cortexum", 3667600, 30),
+                (02, "Cactoida Lapis", 2483600, 30),
+                (03, "Cactoida Vermis", 16202800, 30),
+                (04, "Cactoida Pullulanta", 3667600, 30),
+                (05, "Cactoida Peperatis", 2483600, 30)
             });
             AddGenus("Clypeus", "Clypeus", new[]
             {
-                (1, "Clypeus Margaritus", 600_000, 25), (2, "Clypeus Speculumi", 600_000, 25)
+                (01, "Clypeus Lacrimam", 8418000, 25),
+                (02, "Clypeus Margaritus", 11873200, 25),
+                (03, "Clypeus Speculumi", 16202800, 25)
             });
             AddGenus("Conchas", "Concha", new[]
             {
-                (1, "Concha Aureolas", 800_000, 25), (2, "Concha Bicoronata", 500_000, 25),
-                (3, "Concha Labiata", 500_000, 25), (4, "Concha Renibus", 500_000, 25),
-                (5, "Concha Bullarum", 500_000, 25)
+                (01, "Concha Renibus", 4572400, 25),
+                (02, "Concha Aureolas", 7774700, 25),
+                (03, "Concha Labiata", 2352400, 25),
+                (04, "Concha Biconcavis", 19010800, 25)
             });
             AddGenus("Electricae", "Electricae", new[]
             {
-                (1, "Electricae Pluma", 400_000, 15), (2, "Electricae Radialem", 1_200_000, 15),
-                (3, "Electricae Alatae", 400_000, 15)
+                (01, "Electricae Pluma", 6284600, 15),
+                (02, "Electricae Radialem", 6284600, 15)
             });
             AddGenus("Fonticulus", "Fonticulua", new[]
             {
-                (1, "Fonticulua Campestris", 200_000, 10), (2, "Fonticulua Digitos", 200_000, 10),
-                (3, "Fonticulua Fluctus", 200_000, 10), (4, "Fonticulua Lapidem", 200_000, 10),
-                (5, "Fonticulua Upupam", 700_000, 10)
-            });
-            AddGenus("Fumerolas", "Fumerola", new[]
-            {
-                (1, "Fumerola Carbosis", 500_000, 25), (2, "Fumerola Extremus", 1_000_000, 25),
-                (3, "Fumerola Nitris", 500_000, 25), (4, "Fumerola Aquatis", 500_000, 25)
-            });
-            AddGenus("Fungoids", "Fungoida", new[]
-            {
-                (1, "Fungoida Setisis", 1_000_000, 30), (2, "Fungoida Albatum", 300_000, 30),
-                (3, "Fungoida Gelata", 300_000, 30), (4, "Fungoida Bullarum", 300_000, 30),
-                (5, "Fungoida Stabitis", 300_000, 30), (6, "Fungoida Tela", 300_000, 30),
-                (7, "Fungoida Flabellum", 300_000, 30), (8, "Fungoida Magellanic", 300_000, 30),
-                (9, "Fungoida Minimus", 300_000, 30), (10, "Fungoida Basilis", 300_000, 30)
-            });
-            AddGenus("Osseus", "Osseus", new[]
-            {
-                (1, "Osseus Discus", 500_000, 25), (2, "Osseus Fractus", 500_000, 25),
-                (3, "Osseus Pellebantus", 500_000, 25), (4, "Osseus Spiralis", 500_000, 25),
-                (5, "Osseus Turner", 500_000, 25), (6, "Osseus Pumice", 800_000, 25)
-            });
-            AddGenus("Recepta", "Recepta", new[]
-            {
-                (1, "Recepta Deltahedronis", 600_000, 25), (2, "Recepta Umbris", 600_000, 25)
+                (01, "Fonticulua Segmentatus", 19010800, 10),
+                (02, "Fonticulua Campestris", 1000000, 10),
+                (03, "Fonticulua Upupam", 5727600, 10),
+                (04, "Fonticulua Lapida", 3111000, 10),
+                (05, "Fonticulua Fluctus", 20000000, 10),
+                (06, "Fonticulua Digitos", 1804100, 10)
             });
             AddGenus("Shrubs", "Frutexa", new[]
             {
-                (1, "Frutexa Acus", 300_000, 25), (2, "Frutexa Collum", 300_000, 25),
-                (3, "Frutexa Fera", 300_000, 25), (4, "Frutexa Flammasis", 300_000, 25),
-                (5, "Frutexa Metallicum", 300_000, 25), (6, "Frutexa Sponsae", 300_000, 25),
-                (7, "Frutexa Tessera", 300_000, 25)
+                (01, "Frutexa Flabellum", 1808900, 25),
+                (02, "Frutexa Acus", 7774700, 25),
+                (03, "Frutexa Metallicum", 1632500, 25),
+                (04, "Frutexa Flammasis", 10326000, 25),
+                (05, "Frutexa Fera", 1632500, 25),
+                (06, "Frutexa Sponsae", 5988000, 25),
+                (07, "Frutexa Collum", 1639800, 25)
+            });
+            AddGenus("Fumerolas", "Fumerola", new[]
+            {
+                (01, "Fumerola Carbosis", 6284600, 25),
+                (02, "Fumerola Extremus", 16202800, 25),
+                (03, "Fumerola Nitris", 7500900, 25),
+                (04, "Fumerola Aquatis", 6284600, 25)
+            });
+            AddGenus("Fungoids", "Fungoida", new[]
+            {
+                (01, "Fungoida Setisis", 1670100, 30),
+                (02, "Fungoida Stabitis", 2680300, 30),
+                (03, "Fungoida Bullarum", 3703200, 30),
+                (04, "Fungoida Gelata", 3330300, 30)
+            });
+            AddGenus("Osseus", "Osseus", new[]
+            {
+                (01, "Osseus Fractus", 4027800, 25),
+                (02, "Osseus Discus", 12934900, 25),
+                (03, "Osseus Spiralis", 2404700, 25),
+                (04, "Osseus Pumice", 3156300, 25),
+                (05, "Osseus Cornibus", 1483000, 25),
+                (06, "Osseus Pellebantus", 9739000, 25)
+            });
+            AddGenus("Recepta", "Recepta", new[]
+            {
+                (01, "Recepta Umbrux", 12934900, 25),
+                (02, "Recepta Deltahedronix", 16202800, 25),
+                (03, "Recepta Conditivus", 14313700, 25)
             });
             AddGenus("Stratum", "Stratum", new[]
             {
-                (1, "Stratum", 500_000, 25), (2, "Stratum Araneamus", 500_000, 25),
-                (3, "Stratum Cucumisis", 700_000, 25), (4, "Stratum Excutitus", 500_000, 25),
-                (5, "Stratum Frigus", 500_000, 25), (6, "Stratum Laminamus", 500_000, 25),
-                (7, "Stratum Limaxus", 500_000, 25), (8, "Stratum Paleas", 500_000, 25),
-                (9, "Stratum Serpentis", 500_000, 25), (10, "Stratum Tectonicas", 1_600_000, 25)
+                (01, "Stratum Excutitus", 2448900, 25),
+                (02, "Stratum Paleas", 1362000, 25),
+                (03, "Stratum Laminamus", 2788300, 25),
+                (04, "Stratum Araneamus", 2448900, 25),
+                (05, "Stratum Limaxus", 1362000, 25),
+                (06, "Stratum Cucumisis", 16202800, 25),
+                (07, "Stratum Tectonicas", 19010800, 25),
+                (08, "Stratum Frigus", 2637500, 25)
             });
             AddGenus("Tubus", "Tubus", new[]
             {
-                (1, "Tubus Compagibus", 200_000, 15), (2, "Tubus Cavas", 200_000, 15),
-                (3, "Tubus Rosarium", 800_000, 15), (4, "Tubus Conifer", 200_000, 15)
+                (01, "Tubus Conifer", 2415500, 15),
+                (02, "Tubus Sororibus", 5727600, 15),
+                (03, "Tubus Cavas", 11873200, 15),
+                (04, "Tubus Rosarium", 2637500, 15),
+                (05, "Tubus Compagibus", 7774700, 15)
             });
             AddGenus("Tussocks", "Tussock", new[]
             {
-                (1, "Tussock Albata", 300_000, 25), (2, "Tussock Capillum", 300_000, 25),
-                (3, "Tussock Cultrato", 300_000, 25), (4, "Tussock Divisa", 300_000, 25),
-                (5, "Tussock Ignis", 300_000, 25), (6, "Tussock Pennata", 800_000, 25),
-                (7, "Tussock Propagito", 300_000, 25), (8, "Tussock Serrati", 300_000, 25),
-                (9, "Tussock Ventusa", 300_000, 25), (10, "Tussock Virgam", 300_000, 25)
+                (01, "Tussock Pennata", 5853800, 25),
+                (02, "Tussock Ventusa", 3227700, 25),
+                (03, "Tussock Ignis", 1849000, 25),
+                (04, "Tussock Cultro", 1766600, 25),
+                (05, "Tussock Catena", 1766600, 25),
+                (06, "Tussock Pennatis", 1000000, 25),
+                (07, "Tussock Serrati", 4447100, 25),
+                (08, "Tussock Albata", 3252500, 25),
+                (09, "Tussock Propagito", 1000000, 25),
+                (10, "Tussock Divisa", 1766600, 25),
+                (11, "Tussock Caputus", 3472400, 25),
+                (12, "Tussock Triticum", 7774700, 25),
+                (13, "Tussock Stigmasis", 19010800, 25),
+                (14, "Tussock Virgam", 14313700, 25),
+                (15, "Tussock Capillum", 7025800, 25)
             });
 
             return ret;

@@ -249,6 +249,9 @@ namespace ODUtils.Models
         public AtmosphereClass Atmosphere { get; set; }
         public AtmosphereClass AtmosphereType { get; set; }
         public VolcanismType Volcanism { get; set; }
+        // Raw journal volcanism string (e.g. "Water Geysers Volcanism"); used by the
+        // exo prediction engine which mirrors BioScan's substring matching.
+        public string VolcanismName { get; set; } = string.Empty;
         public int BiologicalSignals { get; set; }
         public int GeologicalSignals { get; set; }
         public List<EliteJournalReader.Events.PlanetRing>? Rings { get; set; }

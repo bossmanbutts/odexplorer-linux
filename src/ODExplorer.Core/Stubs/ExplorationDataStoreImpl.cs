@@ -897,6 +897,7 @@ namespace ODExplorer.Stores
             body.Atmosphere = JournalEventMapper.GetAtmosphereClass(scanEvt.Atmosphere);
             body.AtmosphereType = JournalEventMapper.GetAtmosphereType(scanEvt.AtmosphereType);
             body.Volcanism = JournalEventMapper.GetVolcanism(scanEvt.Volcanism);
+            body.VolcanismName = JournalEventMapper.GetVolcanismName(scanEvt.Volcanism);
             body.SurfaceTemp = scanEvt.SurfaceTemperature ?? 0;
             body.SurfacePressure = scanEvt.SurfacePressure ?? 0;
             body.WasDiscovered = scanEvt.WasDiscovered ?? false;
@@ -928,6 +929,8 @@ namespace ODExplorer.Stores
             }
 
             body.GoverningStar = isStar ? body.StarType : GetGoverningStar(system, scanEvt.Parents);
+
+            UpdateBioPredictions(body, scanEvt.Timestamp);
 
             RecalcSystemCounts(system);
             return body;
@@ -997,6 +1000,8 @@ namespace ODExplorer.Stores
                     body.OrganicScanItems.Add(NewNotPredictedItem(body, timeStamp));
                 }
             }
+
+            UpdateBioPredictions(body, timeStamp);
 
             UpdateBioMinMaxValue(body);
         }
@@ -1443,6 +1448,52 @@ namespace ODExplorer.Stores
 
             var bonus = body.WasMapped ? 0 : bio.ScanTime < OrganicValues.NewPriceDate ? value : value * 4;
             return value + bonus;
+        }
+
+        // Replaces the "Not Predicted" placeholders on a body with the species that
+        // match its scan data, mirroring the BioScan rules. Runs as soon as the
+        // body has scan data (Scan event); a no-op otherwise. Predictions are
+        // best-effort: species whose BioScan rules need galaxy-position data are
+        // excluded at data-generation time, so some bodies legitimately stay
+        // "Not Predicted".
+        private void UpdateBioPredictions(SystemBody body, DateTime timeStamp)
+        {
+            if (body.BiologicalSignals <= 0 || body.PlanetClass == PlanetClass.Unknown)
+                return;
+
+            if (_cartoData.TryGetValue(body.Owner.Address, out var system) == false)
+                return;
+
+            body.OrganicScanItems ??= new OrganicScanItemList();
+
+            var predicted = ExoPredictionEngine.Predict(body, system).DistinctBy(x => x.Codex).ToList();
+            if (predicted.Count == 0)
+                return;
+
+            var placeholders = body.OrganicScanItems.Where(x => x.GenusLocalised == "Not Predicted").ToList();
+            if (placeholders.Count == 0)
+                return;
+
+            for (int i = 0; i < Math.Min(placeholders.Count, predicted.Count); i++)
+            {
+                var pred = predicted[i];
+                var names = ExoData.GetNamesFromSpecies(pred.Codex);
+                if (names is null)
+                    continue;
+
+                var bio = placeholders[i];
+                bio.GenusCodex = names.GenusCodex;
+                bio.GenusEnglish = names.Genus;
+                bio.GenusLocalised = names.Genus;
+                bio.SpeciesCodex = pred.Codex;
+                bio.SpeciesEnglish = pred.Name;
+                bio.SpeciesLocalised = pred.Name;
+                bio.ScanStage = OrganicScanStage.Prediction;
+                bio.ScanTime = timeStamp;
+                bio.Info = exoData.GetInfo(pred.Codex);
+                bio.BodyDssScanned = body.DssScanned;
+                bio.TotalValue = ComputeTotalValue(bio, body);
+            }
         }
 
         private void UpdateBioMinMaxValue(SystemBody body)

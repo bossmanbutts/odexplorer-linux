@@ -26,6 +26,10 @@
     <PackageReference Include="NLog" Version="6.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="TestApp" />
+  </ItemGroup>
+
   <!-- All remaining Stores/*.cs compile by default (dead real-store copies were deleted
        in favour of the Stubs/*Impl.cs implementations). Only the Windows-only
        DistanceFromArrival comparer stays excluded. -->

@@ -375,17 +375,110 @@ class Program
             };
             Check("system without jumponium materials reports None", emptySysVm.GreenSystem == ODExplorer.Models.Jumponium.None);
 
-            Check("exo table has 93 species", exo.AllGenus.Sum(g => g.Species.Count) == 93);
-            Check("exo Stratum Tectonicas value", exo.GetInfo("$Codex_Ent_Stratum_10_Name;") is { Value: 1_600_000 });
-            Check("exo Electricae Radialem value", exo.GetInfo("$Codex_Ent_Electricae_02_Name;") is { Value: 1_200_000 });
-            Check("exo Fungoida Setisis value", exo.GetInfo("$Codex_Ent_Fungoids_01_Name;") is { Value: 1_000_000 });
-            Check("exo Bacterium Acerosis value", exo.GetInfo("$Codex_Ent_Bacterial_01_Name;") is { Value: 100_000 });
+            Check("exo table has 90 species", exo.AllGenus.Sum(g => g.Species.Count) == 90);
+            Check("exo Stratum Tectonicas value", exo.GetInfo("$Codex_Ent_Stratum_07_Name;") is { Value: 19_010_800 });
+            Check("exo Electricae Radialem value", exo.GetInfo("$Codex_Ent_Electricae_02_Name;") is { Value: 6_284_600 });
+            Check("exo Fungoida Setisis value", exo.GetInfo("$Codex_Ent_Fungoids_01_Name;") is { Value: 1_670_100 });
+            Check("exo Bacterium Aurasus value", exo.GetInfo("$Codex_Ent_Bacterial_01_Name;") is { Value: 1_000_000 });
             Check("exo Bacterium colony range", exo.GetInfo("$Codex_Ent_Bacterial_01_Name;") is { ColonyRange: 2 });
             Check("exo unknown codex returns null", exo.GetInfo("$Codex_Ent_Bogus_01_Name;") is null);
-            Check("exo species name from codex", ExoData.GetNamesFromSpecies("$Codex_Ent_Stratum_10_Name;") is { Species: "Stratum Tectonicas" });
-            Check("exo variant name from codex", ExoData.GetNames("$Codex_Ent_Aleoids_01_A_Name;") is { Genus: "Aleoida", Species: "Aleoida Arcadian", Variant: "Aleoida Arcadian A" });
+            Check("exo species name from codex", ExoData.GetNamesFromSpecies("$Codex_Ent_Stratum_07_Name;") is { Species: "Stratum Tectonicas" });
+            Check("exo variant name from codex", ExoData.GetNames("$Codex_Ent_Aleoids_01_A_Name;") is { Genus: "Aleoida", Species: "Aleoida Arcus", Variant: "Aleoida Arcus A" });
             Check("exo species available in all regions", exo.AllGenus.SelectMany(g => g.Species)
                 .First(s => s.SpeciesName == "Stratum Tectonicas").IsAvailableIn(GalacticRegions.Bubble));
+
+            // ── Prediction engine: cross-validated against the BioScan rules. The
+            //    expected species lists below were produced by a Python mirror of
+            //    the C# engine run over the generated rule data. ──
+            SystemBody PredictBody(Action<SystemBody> setup)
+            {
+                var body = new SystemBody
+                {
+                    IsPlanet = true,
+                    GoverningStar = StarType.G
+                };
+                setup(body);
+                return body;
+            }
+
+            var gSystem = new StarSystem { StarType = StarType.G, Address = 1 };
+            var aSystem = new StarSystem { StarType = StarType.A, Address = 1 };
+
+            List<string> PredictNames(SystemBody body, StarSystem system)
+                => ExoPredictionEngine.Predict(body, system).Select(p => p.Name).OrderBy(n => n).ToList();
+
+
+            Check("HMC CO2 250K predicts Aurasus + Concha Renibus + Stratum Tectonicas",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.HighMetalContentBody;
+                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
+                    b.SurfaceGravity = 1.0;
+                    b.SurfaceTemp = 250;
+                    b.DistanceFromArrivalLs = 500;
+                }), gSystem)) == "Bacterium Aurasus,Concha Renibus,Stratum Tectonicas");
+
+            Check("Rocky no-atmosphere body predicts nothing (like Testes 1)",
+                PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.RockyBody;
+                    b.SurfaceGravity = 1.1;
+                    b.SurfaceTemp = 280;
+                    b.DistanceFromArrivalLs = 1800;
+                }), gSystem).Count == 0);
+
+            Check("Icy Argon around A-star predicts Vesicula + Pluma + Campestris",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.IcyBody;
+                    b.Atmosphere = AtmosphereClass.Argon;
+                    b.SurfaceGravity = 0.4;
+                    b.SurfaceTemp = 100;
+                    b.DistanceFromArrivalLs = 50;
+                }), aSystem)) == "Bacterium Vesicula,Electricae Pluma,Fonticulua Campestris");
+
+            Check("HMC CO2 with water geysers predicts Tela (any-volcanism rule)",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.HighMetalContentBody;
+                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
+                    b.SurfaceGravity = 1.0;
+                    b.SurfaceTemp = 250;
+                    b.VolcanismName = "Water Geysers Volcanism";
+                    b.DistanceFromArrivalLs = 500;
+                }), gSystem)) == "Bacterium Aurasus,Bacterium Tela,Stratum Tectonicas");
+
+            Check("Rocky ice methane 40K predicts nothing",
+                PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.RockyIceBody;
+                    b.Atmosphere = AtmosphereClass.Methane;
+                    b.SurfaceGravity = 0.3;
+                    b.SurfaceTemp = 40;
+                    b.DistanceFromArrivalLs = 100;
+                }), gSystem).Count == 0);
+
+            Check("HMC CO2 rich 1.5% SO2 adds Recepta Umbrux",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.HighMetalContentBody;
+                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
+                    b.SurfaceGravity = 1.0;
+                    b.SurfaceTemp = 200;
+                    b.AtmosphereComposition = [new ScanItemComponent { Name = "SulphurDioxide", Percent = 1.5 }];
+                    b.DistanceFromArrivalLs = 500;
+                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Recepta Umbrux,Stratum Tectonicas");
+
+            Check("HMC CO2 0.5% SO2 misses Recepta Umbrux (SO2 < 1.05)",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.HighMetalContentBody;
+                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
+                    b.SurfaceGravity = 1.0;
+                    b.SurfaceTemp = 200;
+                    b.AtmosphereComposition = [new ScanItemComponent { Name = "SulphurDioxide", Percent = 0.5 }];
+                    b.DistanceFromArrivalLs = 500;
+                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Stratum Tectonicas");
 
             int liveCount = 0, currentSystemEvents = 0, organicDetailsEvents = 0, cartoSold = 0, bioSold = 0;
             parser.OnParserStoreLive += (_, live) => { if (live) Interlocked.Increment(ref liveCount); };
