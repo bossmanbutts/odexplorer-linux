@@ -2,9 +2,9 @@
 // bio_scan/bio_data/rulesets/*.py — the 15 Odyssey genera. Do not edit by hand;
 // regenerate with the Python script in /tmp/opencode/bioscan (one-off port).
 //
-// Only rules usable from journal-derived body data are included here; rules that
-// require galaxy-position data (galactic regions, nebulae, guardian zones) are
-// omitted so the engine never makes a prediction it cannot verify.
+// Rules evaluable from journal-derived body data plus galaxy position (galactic
+// regions and nebulae, resolved via ExoGalaxyData); guardian/tuber/body-list
+// rules do not appear in the 15 Odyssey genera so are not represented here.
 
 using System;
 using System.Collections.Generic;
@@ -73,9 +73,11 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Aleoids_03_Name;", "Aleoida Spica", 3385200, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 170, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "!orion-cygnus-core", "!sagittarius-carina-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Aleoids_04_Name;", "Aleoida Laminiae", 3385200, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 152, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "orion-cygnus", "sagittarius-carina" ] },
     }),
     new PredSpecies("$Codex_Ent_Aleoids_05_Name;", "Aleoida Gravis", 12934900, new PredRule[]
     {
@@ -180,9 +182,11 @@ namespace ODUtils.Exobiology
     // ── cactoida ──
     new PredSpecies("$Codex_Ent_Cactoid_01_Name;", "Cactoida Cortexum", 3667600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 180, MaxTemperature = 197, MinPressure = 0.025, Volcanism = [ "None" ], Regions = [ "orion-cygnus" ] },
     }),
     new PredSpecies("$Codex_Ent_Cactoid_02_Name;", "Cactoida Lapis", 2483600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 160, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "sagittarius-carina" ] },
     }),
     new PredSpecies("$Codex_Ent_Cactoid_03_Name;", "Cactoida Vermis", 16202800, new PredRule[]
     {
@@ -192,9 +196,11 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Cactoid_04_Name;", "Cactoida Pullulanta", 3667600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 180, MaxTemperature = 197, MinPressure = 0.025, Volcanism = [ "None" ], Regions = [ "perseus" ] },
     }),
     new PredSpecies("$Codex_Ent_Cactoid_05_Name;", "Cactoida Peperatis", 2483600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 160, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "scutum-centaurus" ] },
     }),
     // ── clypeus ──
     new PredSpecies("$Codex_Ent_Clypeus_01_Name;", "Clypeus Lacrimam", 8418000, new PredRule[]
@@ -244,6 +250,8 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Electricae_02_Name;", "Electricae Radialem", 6284600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Icy body" ], Atmosphere = [ "Argon", "ArgonRich" ], MinGravity = 0.025, MaxGravity = 0.276, MinTemperature = 50, MaxTemperature = 150, Nebula = "all" },
+        new PredRule { BodyType = [ "Icy body" ], Atmosphere = [ "Neon", "NeonRich" ], MinGravity = 0.026, MaxGravity = 0.276, MinTemperature = 20, MaxTemperature = 70, MaxPressure = 0.005, Nebula = "all" },
     }),
     // ── fonticulua ──
     new PredSpecies("$Codex_Ent_Fonticulus_01_Name;", "Fonticulua Segmentatus", 19010800, new PredRule[]
@@ -273,9 +281,11 @@ namespace ODUtils.Exobiology
     // ── frutexa ──
     new PredSpecies("$Codex_Ent_Shrubs_01_Name;", "Frutexa Flabellum", 1808900, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 152, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "!scutum-centaurus" ] },
     }),
     new PredSpecies("$Codex_Ent_Shrubs_02_Name;", "Frutexa Acus", 7774700, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.237, MinTemperature = 146, MaxTemperature = 197, MinPressure = 0.0029, Volcanism = [ "None" ], Regions = [ "orion-cygnus" ] },
     }),
     new PredSpecies("$Codex_Ent_Shrubs_03_Name;", "Frutexa Metallicum", 1632500, new PredRule[]
     {
@@ -286,9 +296,11 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Shrubs_04_Name;", "Frutexa Flammasis", 10326000, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 152, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "scutum-centaurus" ] },
     }),
     new PredSpecies("$Codex_Ent_Shrubs_05_Name;", "Frutexa Fera", 1632500, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 146, MaxTemperature = 197, MinPressure = 0.003, Volcanism = [ "None" ], Regions = [ "outer" ] },
     }),
     new PredSpecies("$Codex_Ent_Shrubs_06_Name;", "Frutexa Sponsae", 5988000, new PredRule[]
     {
@@ -349,6 +361,12 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Fungoids_02_Name;", "Fungoida Stabitis", 2680300, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "Rocky ice body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.045, MinTemperature = 172, MaxTemperature = 177, Volcanism = [ "silicate" ], Regions = [ "orion-cygnus" ] },
+        new PredRule { BodyType = [ "Rocky ice body" ], Atmosphere = [ "Argon" ], MinGravity = 0.2, MaxGravity = 0.23, MinTemperature = 60, MaxTemperature = 90, Volcanism = [ "silicate", "rocky" ], Regions = [ "orion-cygnus" ] },
+        new PredRule { BodyType = [ "Icy body" ], Atmosphere = [ "ArgonRich" ], MinGravity = 0.3, MaxGravity = 0.5, MinTemperature = 60, MaxTemperature = 90, Regions = [ "orion-cygnus" ] },
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.0405, MaxGravity = 0.27, MinTemperature = 180, MinPressure = 0.025, Volcanism = [ "None" ], Regions = [ "orion-cygnus" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "Methane" ], MinGravity = 0.043, MaxGravity = 0.126, MinTemperature = 78.5, MaxTemperature = 109, MinPressure = 0.012, Volcanism = [ "major silicate" ], Regions = [ "orion-cygnus" ] },
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Water" ], MinGravity = 0.039, MaxGravity = 0.064, Volcanism = [ "None" ], Regions = [ "orion-cygnus" ] },
     }),
     new PredSpecies("$Codex_Ent_Fungoids_03_Name;", "Fungoida Bullarum", 3703200, new PredRule[]
     {
@@ -357,10 +375,17 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Fungoids_04_Name;", "Fungoida Gelata", 3330300, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "Rocky ice body" ], Atmosphere = [ "Argon" ], MinGravity = 0.041, MaxGravity = 0.276, MinTemperature = 160, MaxTemperature = 180, MaxPressure = 0.0135, Volcanism = [ "major silicate" ], Regions = [ "!orion-cygnus-core" ] },
+        new PredRule { BodyType = [ "Rocky body", "Rocky ice body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.042, MaxGravity = 0.071, MinTemperature = 160, MaxTemperature = 180, MaxPressure = 0.0135, Volcanism = [ "major silicate" ], Regions = [ "!orion-cygnus-core" ] },
+        new PredRule { BodyType = [ "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.042, MaxGravity = 0.071, MinTemperature = 160, MaxTemperature = 180, MaxPressure = 0.0135, Volcanism = [ "major rocky" ], Regions = [ "!orion-cygnus-core" ] },
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.041, MaxGravity = 0.276, MinTemperature = 180, MinPressure = 0.025, Volcanism = [ "None" ], Regions = [ "!orion-cygnus-core" ] },
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Methane" ], MinGravity = 0.044, MaxGravity = 0.125, MinTemperature = 80, MaxTemperature = 110, MinPressure = 0.01, Volcanism = [ "major silicate", "major metallic" ], Regions = [ "!orion-cygnus-core" ] },
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Water" ], MinGravity = 0.039, MaxGravity = 0.063, Volcanism = [ "None" ], Regions = [ "!orion-cygnus-core" ] },
     }),
     // ── osseus ──
     new PredSpecies("$Codex_Ent_Osseus_01_Name;", "Osseus Fractus", 4027800, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 180, MinPressure = 0.025, Volcanism = [ "None" ], Regions = [ "!perseus" ] },
     }),
     new PredSpecies("$Codex_Ent_Osseus_02_Name;", "Osseus Discus", 12934900, new PredRule[]
     {
@@ -384,9 +409,11 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Osseus_05_Name;", "Osseus Cornibus", 1483000, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.0405, MaxGravity = 0.276, MinTemperature = 180, MinPressure = 0.025, Volcanism = [ "None" ], Regions = [ "perseus" ] },
     }),
     new PredSpecies("$Codex_Ent_Osseus_06_Name;", "Osseus Pellebantus", 9739000, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.0405, MaxGravity = 0.276, MinTemperature = 191, MinPressure = 0.057, Volcanism = [ "None" ], Regions = [ "!perseus" ] },
     }),
     // ── recepta ──
     new PredSpecies("$Codex_Ent_Recepta_01_Name;", "Recepta Umbrux", 12934900, new PredRule[]
@@ -412,6 +439,8 @@ namespace ODUtils.Exobiology
     // ── stratum ──
     new PredSpecies("$Codex_Ent_Stratum_01_Name;", "Stratum Excutitus", 2448900, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.48, MinTemperature = 165, MaxTemperature = 190, MinPressure = 0.0035, Volcanism = [ "None" ], Regions = [ "orion-cygnus" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "SulphurDioxide" ], MinGravity = 0.27, MaxGravity = 0.4, MinTemperature = 165, MaxTemperature = 190, Regions = [ "orion-cygnus" ] },
     }),
     new PredSpecies("$Codex_Ent_Stratum_02_Name;", "Stratum Paleas", 1362000, new PredRule[]
     {
@@ -424,6 +453,7 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Stratum_03_Name;", "Stratum Laminamus", 2788300, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.34, MinTemperature = 165, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "orion-cygnus" ] },
     }),
     new PredSpecies("$Codex_Ent_Stratum_04_Name;", "Stratum Araneamus", 2448900, new PredRule[]
     {
@@ -431,9 +461,15 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Stratum_05_Name;", "Stratum Limaxus", 1362000, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.03, MaxGravity = 0.4, MinTemperature = 165, MaxTemperature = 190, MinPressure = 0.05, Volcanism = [ "None" ], Regions = [ "scutum-centaurus-core" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "SulphurDioxide" ], MinGravity = 0.27, MaxGravity = 0.4, MinTemperature = 165, MaxTemperature = 190, Regions = [ "scutum-centaurus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Stratum_06_Name;", "Stratum Cucumisis", 16202800, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.6, MinTemperature = 191, MaxTemperature = 371, Volcanism = [ "None" ], Regions = [ "sagittarius-carina" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxideRich" ], MinGravity = 0.44, MaxGravity = 0.56, MinTemperature = 210, MaxTemperature = 246, MinPressure = 0.01, Volcanism = [ "None" ], Regions = [ "sagittarius-carina" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "Oxygen" ], MinGravity = 0.4, MaxGravity = 0.6, MinTemperature = 200, MaxTemperature = 250, MinPressure = 0.01, Regions = [ "sagittarius-carina" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "SulphurDioxide" ], MinGravity = 0.26, MaxGravity = 0.55, MinTemperature = 191, MaxTemperature = 373, Regions = [ "sagittarius-carina" ] },
     }),
     new PredSpecies("$Codex_Ent_Stratum_07_Name;", "Stratum Tectonicas", 19010800, new PredRule[]
     {
@@ -447,10 +483,14 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Stratum_08_Name;", "Stratum Frigus", 2637500, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.043, MaxGravity = 0.54, MinTemperature = 191, MaxTemperature = 365, MinPressure = 0.001, Volcanism = [ "None" ], Regions = [ "perseus-core" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxideRich" ], MinGravity = 0.45, MaxGravity = 0.56, MinTemperature = 200, MaxTemperature = 250, MinPressure = 0.01, Volcanism = [ "None" ], Regions = [ "perseus-core" ] },
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "SulphurDioxide" ], MinGravity = 0.29, MaxGravity = 0.52, MinTemperature = 191, MaxTemperature = 369, Regions = [ "perseus-core" ] },
     }),
     // ── tubus ──
     new PredSpecies("$Codex_Ent_Tubus_01_Name;", "Tubus Conifer", 2415500, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.041, MaxGravity = 0.153, MinTemperature = 160, MaxTemperature = 197, MinPressure = 0.003, Volcanism = [ "None" ], Regions = [ "perseus" ] },
     }),
     new PredSpecies("$Codex_Ent_Tubus_02_Name;", "Tubus Sororibus", 5727600, new PredRule[]
     {
@@ -459,6 +499,7 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Tubus_03_Name;", "Tubus Cavas", 11873200, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.152, MinTemperature = 160, MaxTemperature = 197, MinPressure = 0.003, Volcanism = [ "None" ], Regions = [ "scutum-centaurus" ] },
     }),
     new PredSpecies("$Codex_Ent_Tubus_04_Name;", "Tubus Rosarium", 2637500, new PredRule[]
     {
@@ -466,43 +507,56 @@ namespace ODUtils.Exobiology
     }),
     new PredSpecies("$Codex_Ent_Tubus_05_Name;", "Tubus Compagibus", 7774700, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.153, MinTemperature = 160, MaxTemperature = 197, MinPressure = 0.003, Volcanism = [ "None" ], Regions = [ "sagittarius-carina" ] },
     }),
     // ── tussock ──
     new PredSpecies("$Codex_Ent_Tussocks_01_Name;", "Tussock Pennata", 5853800, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.09, MinTemperature = 146, MaxTemperature = 154, MinPressure = 0.00289, Volcanism = [ "None" ], Regions = [ "sagittarius-carina-core-9", "perseus-core", "orion-cygnus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_02_Name;", "Tussock Ventusa", 3227700, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.13, MinTemperature = 155, MaxTemperature = 160, MinPressure = 0.00289, Volcanism = [ "None" ], Regions = [ "sagittarius-carina-core-9", "perseus-core", "orion-cygnus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_03_Name;", "Tussock Ignis", 1849000, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.2, MinTemperature = 161, MaxTemperature = 170, MinPressure = 0.00289, Volcanism = [ "None" ], Regions = [ "sagittarius-carina-core-9", "perseus-core", "orion-cygnus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_04_Name;", "Tussock Cultro", 1766600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 152, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "orion-cygnus" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_05_Name;", "Tussock Catena", 1766600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 152, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "scutum-centaurus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_06_Name;", "Tussock Pennatis", 1000000, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 147, MaxTemperature = 197, MinPressure = 0.00289, Volcanism = [ "None" ], Regions = [ "outer" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_07_Name;", "Tussock Serrati", 4447100, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.042, MaxGravity = 0.23, MinTemperature = 171, MaxTemperature = 174, MinPressure = 0.01, MaxPressure = 0.071, Volcanism = [ "None" ], Regions = [ "sagittarius-carina-core-9", "perseus-core", "orion-cygnus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_08_Name;", "Tussock Albata", 3252500, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.042, MaxGravity = 0.276, MinTemperature = 175, MaxTemperature = 180, MinPressure = 0.016, Volcanism = [ "None" ], Regions = [ "sagittarius-carina-core-9", "perseus-core", "orion-cygnus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_09_Name;", "Tussock Propagito", 1000000, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 145, MaxTemperature = 197, MinPressure = 0.00289, Volcanism = [ "None" ], Regions = [ "scutum-centaurus" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_10_Name;", "Tussock Divisa", 1766600, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "Ammonia" ], MinGravity = 0.042, MaxGravity = 0.276, MinTemperature = 152, MaxTemperature = 177, MaxPressure = 0.0135, Regions = [ "perseus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_11_Name;", "Tussock Caputus", 3472400, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.041, MaxGravity = 0.27, MinTemperature = 181, MaxTemperature = 190, MinPressure = 0.0275, Volcanism = [ "None" ], Regions = [ "sagittarius-carina-core-9", "perseus-core", "orion-cygnus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_12_Name;", "Tussock Triticum", 7774700, new PredRule[]
     {
+        new PredRule { BodyType = [ "Rocky body", "High metal content body" ], Atmosphere = [ "CarbonDioxide" ], MinGravity = 0.04, MaxGravity = 0.276, MinTemperature = 191, MaxTemperature = 197, MinPressure = 0.058, Volcanism = [ "None" ], Regions = [ "sagittarius-carina-core-9", "perseus-core", "orion-cygnus-core" ] },
     }),
     new PredSpecies("$Codex_Ent_Tussocks_13_Name;", "Tussock Stigmasis", 19010800, new PredRule[]
     {

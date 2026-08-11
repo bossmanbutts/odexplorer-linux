@@ -1,8 +1,8 @@
 // Prediction engine mirroring the BioScan matcher (load.py, bio_scan/bio_data/
 // rulesets/*.py) for the rule subset that is evaluable from journal-derived body
-// data. Rules that depend on galaxy position (regions, nebulae, guardian zones)
-// are excluded at data-generation time so the engine never predicts a species
-// it cannot verify; it therefore under-predicts rather than over-predicts.
+// data. Galaxy-position rules (regions, nebulae) are evaluated against the
+// system's galactic coordinates via ExoGalaxyPosition; guardian/tuber rules do
+// not appear in the 15 Odyssey genera and are not represented in the rule data.
 
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,9 @@ namespace ODUtils.Exobiology
             if (body.IsPlanet == false || body.PlanetClass == PlanetClass.Unknown)
                 return result;
 
+            var regionId = ExoGalaxyPosition.FindRegionId(
+                system.Position.X, system.Position.Y, system.Position.Z);
+
             foreach (var species in ExoPredictionRules.All)
             {
                 if (species.Rules.Length == 0)
@@ -31,7 +34,7 @@ namespace ODUtils.Exobiology
 
                 foreach (var rule in species.Rules)
                 {
-                    if (Matches(rule, body, system))
+                    if (Matches(rule, body, system, regionId))
                     {
                         result.Add(species);
                         break;
@@ -42,7 +45,7 @@ namespace ODUtils.Exobiology
             return result;
         }
 
-        private static bool Matches(PredRule rule, SystemBody body, StarSystem system)
+        private static bool Matches(PredRule rule, SystemBody body, StarSystem system, int? regionId)
         {
             if (rule.BodyType is not null && rule.BodyType.Contains(GetBodyType(body)) == false)
                 return false;
@@ -86,6 +89,13 @@ namespace ODUtils.Exobiology
                 return false;
 
             if (rule.Distance is not null && body.DistanceFromArrivalLs < rule.Distance.Value)
+                return false;
+
+            if (rule.Regions is not null && ExoGalaxyPosition.MatchesRegions(regionId, rule.Regions) == false)
+                return false;
+
+            if (rule.Nebula is not null
+                && ExoGalaxyPosition.MatchesNebula(system.Name, system.Position.X, system.Position.Y, system.Position.Z, rule.Nebula) == false)
                 return false;
 
             return true;

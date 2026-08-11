@@ -389,7 +389,10 @@ class Program
 
             // ── Prediction engine: cross-validated against the BioScan rules. The
             //    expected species lists below were produced by a Python mirror of
-            //    the C# engine run over the generated rule data. ──
+            //    the C# engine run over the generated rule data. At the default
+            //    origin (0,0,0 = Sol, region id 18 = orion-cygnus) the region-gated
+            //    rules now contribute (Fungoida Stabitis, Osseus Fractus/Pellebantus,
+            //    Electricae Radialem), which the committed data previously omitted. ──
             SystemBody PredictBody(Action<SystemBody> setup)
             {
                 var body = new SystemBody
@@ -408,7 +411,7 @@ class Program
                 => ExoPredictionEngine.Predict(body, system).Select(p => p.Name).OrderBy(n => n).ToList();
 
 
-            Check("HMC CO2 250K predicts Aurasus + Concha Renibus + Stratum Tectonicas",
+            Check("HMC CO2 250K predicts Aurasus + Renibus + region species + Tectonicas",
                 string.Join(",", PredictNames(PredictBody(b =>
                 {
                     b.PlanetClass = PlanetClass.HighMetalContentBody;
@@ -416,7 +419,7 @@ class Program
                     b.SurfaceGravity = 1.0;
                     b.SurfaceTemp = 250;
                     b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Bacterium Aurasus,Concha Renibus,Stratum Tectonicas");
+                }), gSystem)) == "Bacterium Aurasus,Concha Renibus,Fungoida Stabitis,Osseus Fractus,Osseus Pellebantus,Stratum Tectonicas");
 
             Check("Rocky no-atmosphere body predicts nothing (like Testes 1)",
                 PredictNames(PredictBody(b =>
@@ -427,7 +430,7 @@ class Program
                     b.DistanceFromArrivalLs = 1800;
                 }), gSystem).Count == 0);
 
-            Check("Icy Argon around A-star predicts Vesicula + Pluma + Campestris",
+            Check("Icy Argon around A-star predicts Vesicula + Pluma + Radialem + Campestris",
                 string.Join(",", PredictNames(PredictBody(b =>
                 {
                     b.PlanetClass = PlanetClass.IcyBody;
@@ -435,7 +438,7 @@ class Program
                     b.SurfaceGravity = 0.4;
                     b.SurfaceTemp = 100;
                     b.DistanceFromArrivalLs = 50;
-                }), aSystem)) == "Bacterium Vesicula,Electricae Pluma,Fonticulua Campestris");
+                }), aSystem)) == "Bacterium Vesicula,Electricae Pluma,Electricae Radialem,Fonticulua Campestris");
 
             Check("HMC CO2 with water geysers predicts Tela (any-volcanism rule)",
                 string.Join(",", PredictNames(PredictBody(b =>
@@ -467,7 +470,7 @@ class Program
                     b.SurfaceTemp = 200;
                     b.AtmosphereComposition = [new ScanItemComponent { Name = "SulphurDioxide", Percent = 1.5 }];
                     b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Recepta Umbrux,Stratum Tectonicas");
+                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Fungoida Stabitis,Osseus Fractus,Osseus Pellebantus,Recepta Umbrux,Stratum Tectonicas");
 
             Check("HMC CO2 0.5% SO2 misses Recepta Umbrux (SO2 < 1.05)",
                 string.Join(",", PredictNames(PredictBody(b =>
@@ -478,7 +481,55 @@ class Program
                     b.SurfaceTemp = 200;
                     b.AtmosphereComposition = [new ScanItemComponent { Name = "SulphurDioxide", Percent = 0.5 }];
                     b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Stratum Tectonicas");
+                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Fungoida Stabitis,Osseus Fractus,Osseus Pellebantus,Stratum Tectonicas");
+
+            // Galaxy-position gates: Cactoida Lapis carries regions=[sagittarius-carina]
+            // and Electricae Radialem carries nebula=all, so they must appear only where
+            // the system actually sits inside the matching region / nebula.
+            var elysianShoreSystem = new StarSystem { StarType = StarType.G, Address = 1, Name = "Elysian Shore Probe", Position = new(-4499.4, 0, -5535.8) };
+
+            Check("HMC Ammonia region rule: Cactoida Lapis present in Sagittarius-Carina (Sol)",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.HighMetalContentBody;
+                    b.Atmosphere = AtmosphereClass.Ammonia;
+                    b.SurfaceGravity = 1.0;
+                    b.SurfaceTemp = 165;
+                    b.DistanceFromArrivalLs = 500;
+                }), gSystem)) == "Aleoida Laminiae,Bacterium Alcyoneum,Cactoida Lapis,Concha Aureolas,Frutexa Metallicum,Fungoida Setisis,Osseus Spiralis,Stratum Tectonicas,Tubus Sororibus,Tussock Cultro");
+
+            Check("HMC Ammonia region rule: no Cactoida Lapis outside Sagittarius-Carina (Elysian Shore)",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.HighMetalContentBody;
+                    b.Atmosphere = AtmosphereClass.Ammonia;
+                    b.SurfaceGravity = 1.0;
+                    b.SurfaceTemp = 165;
+                    b.DistanceFromArrivalLs = 500;
+                }), elysianShoreSystem)) == "Bacterium Alcyoneum,Concha Aureolas,Frutexa Metallicum,Fungoida Setisis,Osseus Spiralis,Stratum Tectonicas,Tubus Sororibus,Tussock Divisa");
+
+            var pleiadesSystem = new StarSystem { StarType = StarType.G, Address = 1, Name = "Pleiades Sector HR-V b2-0", Position = new(70, 0, -880) };
+            var farSystem = new StarSystem { StarType = StarType.G, Address = 1, Name = "Far Nebula Negative", Position = new(1000, 0, 1000) };
+
+            Check("Icy Argon nebula rule: Electricae Radialem present in Pleiades Sector",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.IcyBody;
+                    b.Atmosphere = AtmosphereClass.Argon;
+                    b.SurfaceGravity = 2.0;
+                    b.SurfaceTemp = 100;
+                    b.DistanceFromArrivalLs = 50;
+                }), pleiadesSystem)) == "Bacterium Vesicula,Electricae Radialem,Fonticulua Campestris");
+
+            Check("Icy Argon nebula rule: no Electricae Radialem far from nebulae",
+                string.Join(",", PredictNames(PredictBody(b =>
+                {
+                    b.PlanetClass = PlanetClass.IcyBody;
+                    b.Atmosphere = AtmosphereClass.Argon;
+                    b.SurfaceGravity = 2.0;
+                    b.SurfaceTemp = 100;
+                    b.DistanceFromArrivalLs = 50;
+                }), farSystem)) == "Bacterium Vesicula,Fonticulua Campestris");
 
             int liveCount = 0, currentSystemEvents = 0, organicDetailsEvents = 0, cartoSold = 0, bioSold = 0;
             parser.OnParserStoreLive += (_, live) => { if (live) Interlocked.Increment(ref liveCount); };
