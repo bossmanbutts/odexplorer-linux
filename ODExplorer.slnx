@@ -1,2 +1,5 @@
 <Solution>
+  <Project Path="src/ODExplorer.Core/ODExplorer.Core.csproj" Type="ClassLib" Id="{02D31DFB-E84A-24F3-0EFC-763028E13BEF}" />
+  <Project Path="src/ODExplorer.UI.Avalonia/ODExplorer.UI.Avalonia.csproj" Type="ClassLib" Id="{E9F554FA-1D09-6475-9F00-6C80E171F053}" />
+  <Project Path="src/ODExplorer.UI.Avalonia.Tests/ODExplorer.UI.Avalonia.Tests.csproj" Type="ClassLib" Id="{2F22C9A2-18C5-410C-9B36-F9785CAC62A7}" />
 </Solution>
