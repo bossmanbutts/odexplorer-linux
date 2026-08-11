@@ -20,3 +20,5 @@ jobs:
         run: dotnet build src/TestApp/TestApp.csproj -c Release --no-restore
       - name: Run TestApp
         run: dotnet run --project src/TestApp/TestApp.csproj -c Release --no-build
+      - name: Run NUnit tests
+        run: dotnet test src/ODExplorer.UI.Avalonia.Tests/ODExplorer.UI.Avalonia.Tests.csproj -c Release --no-restore

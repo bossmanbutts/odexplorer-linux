@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=ODExplorer
+Comment=Elite Dangerous exploration and exobiology companion
+Exec=odexplorer
+Icon=odexplorer
+Categories=Game;Utility;
+Terminal=false

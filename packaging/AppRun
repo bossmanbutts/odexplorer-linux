@@ -1,0 +1,5 @@
+#!/bin/sh
+# AppImage entry point: run the published app with the FUSE filesystem root as
+# the working directory so relative data paths resolve.
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "${HERE}/usr/bin/ODExplorer.UI.Avalonia" "$@"

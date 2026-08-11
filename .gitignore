@@ -57,3 +57,6 @@ Thumbs.db
 
 # Bundles created during migration
 *.bundle
+
+# Packaging output
+dist/

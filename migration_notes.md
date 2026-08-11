@@ -1,5 +1,15 @@
 Migration Handoff Note — ODExplorer core extraction + UI adapter implementation
 
+Status (2026-08-11, TODO-LIST COMPLETION SESSION):
+- **Audio**: `UI.Avalonia/Services/AudioPlayer.cs` rewritten from `paplay`/`aplay` shell-out to a real library — PulseAudio's simple API (`libpulse-simple.so.0`) via P/Invoke. New managed `WavReader` (RIFF/WAVE: PCM 8/16/24/32-bit + IEEE float32, tolerates WAVE_FORMAT_EXTENSIBLE fmt, junk/fact chunks, odd-size padding; null on malformed/unsupported so playback silently no-ops). Chunked writes let `Stop()` cancel between 64KB chunks. Playback verified live through the PulseAudio server in this environment.
+- **Notifications**: deleted the dead shell-based `NotificationAdapter` (notify-send) and the unused `INotificationAdapter`/`NoOpNotificationAdapter`/`NotificationModel` — the in-app Avalonia `ToastHost` (via `NotificationStore.OnToast`) is the notification mechanism; nothing referenced the notify-send path.
+- **Tests**: new `WavBuilder` + `WavReaderTests` (16 cases) + `AudioPlayerTests` (live pulse playback, skipped via `Assume.That(CanConnect())` when no audio server; garbage-file no-op). NUnit suite 10 → 27, all green; CI now runs it.
+- **CI**: `.github/workflows/ci.yml` gains a "Run NUnit tests" step (TestApp smoke + NUnit both run on every push; the live-audio test self-skips headless).
+- **Docs**: new `README.md` (build/run/test, layout, packaging) and `ARCHITECTURE.md` (three-layer structure, host-adapter seams, data flow, prediction design, stubs, testing).
+- **Packaging**: `scripts/publish.sh` — self-contained `linux-x64` publish staged as an installable tree with `.desktop` + icon, plus optional AppImage build when `appimagetool` is present. Verified: 109MB self-contained tree runs (XOpenDisplay is the only failure, expected headless). `packaging/odexplorer.desktop`, `packaging/AppRun`.
+- **Also**: `ODExplorer.slnx` populated (was an empty `<Solution/>`; only the .sln listed projects); `Stubs/ExoGalaxyData.cs` added (galaxy-region/nebula/guardian/tuber data, unused — see below). ExoPredictionData regions/nebula were tried then REVERTED: the engine can't evaluate them yet, so adding the rules would over-predict (see the reverted `1a5397d`-era header comment rationale).
+- **Remaining big-picture**: (1) wire galaxy-position prediction — add coordinates to the body/system model + a BioScan-compatible region resolver, then consume `ExoGalaxyData`; (2) real-desktop end-to-end validation (audio/notifications/clipboard); (3) ODUtils reconciliation stays blocked (private lib).
+
 Status (2026-08-10, ODUtils STUB LAYER MADE CORRECT + REAL-JOURNAL REPLAY HARNESS):
 - #3 Stub-accuracy pass: audited every file under `src/ODExplorer.Core/Stubs/` for genuine no-op/mis-mapped logic instead of approximation-level (documented) behavior. Two real bugs found and fixed:
   - `ODUtilsMissingStubs.cs` `EnumUtility.ContainsAllShipMaterials(object, object) => false` was a hard-coded no-op that made every jumponium recipe check fail. Now typed `ContainsAllShipMaterials(PlanetMaterial mats, PlanetMaterial required)` returning `(mats & required) == required`. Callers in `StarSystemViewModel.CheckSystemMaterials` pass OR'd per-body material flags.
@@ -139,44 +149,43 @@ Testing steps for the next agent (what to validate after cloning):
 What the next agent should do (step-by-step):
 
 **Phase 1: Verify state (immediate)**
-1) Clone and build (see Testing steps above).
-2) Run CI locally and via Actions.
-3) Run TestApp and verify output.
-4) If any build/run error: investigate and fix surgically.
+1) [done] Clone and build (see Testing steps above).
+2) [done] Run CI locally and via Actions.
+3) [done] Run TestApp and verify output.
+4) [done] If any build/run error: investigate and fix surgically.
 
 **Phase 2: Replace NoOp adapters and stubs (medium-term)**
-1) Replace IOdUtilsAdapter NoOp with real implementation (or vendor minimal ODUtils types from source library if available).
-2) Replace INotificationAdapter shell invocation with a robust cross-platform notification library (consider libappindicator3-dev for Linux, or Avalonia's built-in toast).
-3) Replace IAudioPlayer shell invocation with a real audio library (recommend ManagedBass or LibVLCSharp for cross-platform support).
-4) Remove Stubs/ directory and reconcile types with actual external libraries (ODUtils, EliteJournalReader).
-5) Rebuild, test, commit: "feat(adapters): replace NoOp implementations with real cross-platform libraries".
+1) [done] Replace IOdUtilsAdapter NoOp with real implementation (or vendor minimal ODUtils types from source library if available) — `OdUtilsAdapter` (clipboard wl-copy/xclip, open-url); EDSM flow real HTTP.
+2) [done] Replace INotificationAdapter shell invocation with Avalonia's built-in toast — `ToastHost`; shell adapter deleted.
+3) [done] Replace IAudioPlayer shell invocation with a real audio library — PulseAudio `libpulse-simple` P/Invoke (see session note above).
+4) [blocked] Remove Stubs/ directory and reconcile types with actual external libraries — EliteJournalReader vendored real; ODUtils private/unrecoverable, stubs stay.
+5) [done] Rebuild, test, commit.
 
 **Phase 3: Port remaining ViewModel/Store code to UI layer (medium-term)**
-1) Audit remaining ViewModels in src/ODExplorer.Core/ViewModels/ for WPF/UI dependencies.
-2) Move UI-specific ViewModels into src/ODExplorer.UI.Avalonia/ViewModels/ or refactor to use INotificationAdapter/IDialogService/etc.
-3) Remove any remaining System.Windows references from core.
-4) Rebuild and test.
-5) Commit: "refactor: migrate remaining ViewModel UI logic to UI layer".
+1) [done] Audit remaining ViewModels in src/ODExplorer.Core/ViewModels/ for WPF/UI dependencies.
+2) [done] Move UI-specific ViewModels into src/ODExplorer.UI.Avalonia/ViewModels/ or refactor to use adapters.
+3) [done] Remove any remaining System.Windows references from core.
+4) [done] Rebuild and test.
 
 **Phase 4: Port WPF Views to Avalonia (long-term)**
-1) Port Views/*.xaml (and handlers) to ODExplorer.UI.Avalonia/Views/*.axaml.
-2) Rewrite converters to Avalonia equivalents.
-3) Replace WPF commands with Avalonia RoutedCommands or ReactiveUI.
-4) Incrementally test each view.
+1) [done] Port Views/*.xaml (and handlers) to ODExplorer.UI.Avalonia/Views/*.axaml.
+2) [done] Rewrite converters to Avalonia equivalents.
+3) [done] Replace WPF commands with Avalonia RoutedCommands or ReactiveUI.
+4) [done] Incrementally test each view.
 
 **Phase 5: Harden CI and documentation (ongoing)**
-1) Extend CI to run unit tests if tests exist.
-2) Add solution-wide build step (currently only Core + TestApp).
-3) Update README.md with build instructions, architecture notes, and porting checklist.
-4) Create ARCHITECTURE.md describing the three-layer structure (Core, UI, Host adapters).
+1) [done] Extend CI to run unit tests if tests exist — NUnit suite added to `ci.yml`.
+2) [done] Add solution-wide build step — CI builds `ODExplorer.sln` (Core + UI + Tests).
+3) [done] Update README.md with build instructions, architecture notes, and porting checklist — `README.md` created.
+4) [done] Create ARCHITECTURE.md describing the three-layer structure (Core, UI, Host adapters) — `ARCHITECTURE.md` created.
 
 TODOs / Known issues (next agent fill these in as they work):
-- [ ] Replace shell-based audio (paplay/aplay) with real library (ManagedBass or LibVLCSharp).
-- [ ] Replace shell-based notifications (notify-send) with libappindicator3-dev or Avalonia UI.
-- [ ] Reconcile stubs (src/ODExplorer.Core/Stubs/*) with actual ODUtils/EliteJournalReader/ToastNotifications packages.
-- [ ] Port Views/*.xaml from WPF to Avalonia.
-- [ ] Test on actual Linux desktop (desktop environment, GNOME/KDE/etc.) to verify notifications/audio work end-to-end.
-- [ ] Consider packaging strategy (dotnet publish + AppImage, Flatpak, or snap) for distribution.
+- [x] Replace shell-based audio (paplay/aplay) with real library — done: `AudioPlayer` now plays through PulseAudio's simple API (`libpulse-simple` P/Invoke) with a managed RIFF/WAV reader; no shell. Live-playback verified; the test suite skips when no audio server is reachable.
+- [x] Replace shell-based notifications (notify-send) — done: in-app Avalonia `ToastHost` (wired via `NotificationStore.OnToast`) is the notification mechanism; the dead shell-based `NotificationAdapter` + unused `INotificationAdapter` were deleted.
+- [x] Port Views/*.xaml from WPF to Avalonia — done: all views incl. the 5 Carto layouts, pop-out overlays, onboarding, message box, spansh selector.
+- [x] Consider packaging strategy — done: `scripts/publish.sh` (self-contained linux-x64 + .desktop/icon staging + optional AppImage), `packaging/odexplorer.desktop` + `AppRun`.
+- [ ] Reconcile stubs (src/ODExplorer.Core/Stubs/*) with actual ODUtils packages — blocked: ODUtils is private/unrecoverable; EliteJournalReader is the real vendored lib. `ExoGalaxyData.cs` (galaxy regions/nebulae/guardian/tuber) is ported but unused — wiring region/nebula prediction needs coordinates on the body/system model + a BioScan-compatible region resolver.
+- [ ] Test on actual Linux desktop (GNOME/KDE/etc.) to verify notifications/audio work end-to-end — manual, requires a real desktop session.
 
 Notes & rationale:
 - Option C (adapter/wrapper pattern) was chosen to keep core platform-agnostic and small.
