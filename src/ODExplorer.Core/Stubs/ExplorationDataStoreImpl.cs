@@ -604,9 +604,37 @@ namespace ODExplorer.Stores
             {
                 InvokeLive(() =>
                 {
+                    ReprocessOrganicBodiesAtLive();
                     OnCurrentSystemUpdated?.Invoke(this, CurrentSystem);
                     OnRouteUpdated?.Invoke(this, new List<StarSystem>(Route));
                 });
+            }
+        }
+
+        // Go-live catch-up: during the history parse the FSSBodySignals handler only
+        // tracks bodies while IsLive, so bodies that were signalled but never scanned
+        // never entered _organicData. Re-run predictions for any body still holding
+        // "Not Predicted" placeholders now that the full system context (position,
+        // star types) is known, and surface the changes. Toasts are suppressed here:
+        // these are historical discoveries, not new live ones.
+        private void ReprocessOrganicBodiesAtLive()
+        {
+            foreach (var system in _cartoData.Values)
+            {
+                foreach (var body in system.SystemBodies)
+                {
+                    if (body.BiologicalSignals <= 0)
+                        continue;
+
+                    if (_organicData.Contains(body) == false)
+                        _organicData.Add(body);
+
+                    if (body.OrganicScanItems?.Any(x => x.GenusLocalised == "Not Predicted") == true)
+                    {
+                        if (UpdateBioPredictions(body, DateTime.UtcNow, notify: false))
+                            TriggerBodyBiosUpdatedIfLive(body);
+                    }
+                }
             }
         }
 
@@ -992,14 +1020,8 @@ namespace ODExplorer.Stores
                 body.ScanState = BodyScanState.FssScanned;
             }
 
-            if (bioCount > 0 && (body.OrganicScanItems is null || body.OrganicScanItems.Count == 0))
-            {
-                body.OrganicScanItems = new OrganicScanItemList();
-                for (int i = 0; i < bioCount; i++)
-                {
-                    body.OrganicScanItems.Add(NewNotPredictedItem(body, timeStamp));
-                }
-            }
+            if (bioCount > 0)
+                EnsurePredictionPlaceholders(body, timeStamp);
 
             UpdateBioPredictions(body, timeStamp);
 
@@ -1452,28 +1474,32 @@ namespace ODExplorer.Stores
 
         // Replaces the "Not Predicted" placeholders on a body with the species that
         // match its scan data, mirroring the BioScan rules. Runs as soon as the
-        // body has scan data (Scan event); a no-op otherwise. Predictions are
-        // best-effort: species whose BioScan rules need galaxy-position data are
-        // excluded at data-generation time, so some bodies legitimately stay
-        // "Not Predicted".
-        private void UpdateBioPredictions(SystemBody body, DateTime timeStamp)
+        // body has scan data (Scan event) or bio signals (FSSBodySignals /
+        // SAASignalsFound); a no-op otherwise. Galaxy-position rules (regions,
+        // nebulae) are evaluated against the owning system's coordinates, so a body
+        // with no matching rules legitimately stays "Not Predicted". When a
+        // prediction is filled while the parser is live, valuable-exo toasts are
+        // raised; the go-live history catch-up passes notify: false to avoid a
+        // burst of toasts for every historical body.
+        private bool UpdateBioPredictions(SystemBody body, DateTime timeStamp, bool notify = true)
         {
             if (body.BiologicalSignals <= 0 || body.PlanetClass == PlanetClass.Unknown)
-                return;
+                return false;
 
             if (_cartoData.TryGetValue(body.Owner.Address, out var system) == false)
-                return;
-
-            body.OrganicScanItems ??= new OrganicScanItemList();
+                return false;
 
             var predicted = ExoPredictionEngine.Predict(body, system).DistinctBy(x => x.Codex).ToList();
             if (predicted.Count == 0)
-                return;
+                return false;
+
+            EnsurePredictionPlaceholders(body, timeStamp);
 
             var placeholders = body.OrganicScanItems.Where(x => x.GenusLocalised == "Not Predicted").ToList();
             if (placeholders.Count == 0)
-                return;
+                return false;
 
+            var filled = false;
             for (int i = 0; i < Math.Min(placeholders.Count, predicted.Count); i++)
             {
                 var pred = predicted[i];
@@ -1493,7 +1519,28 @@ namespace ODExplorer.Stores
                 bio.Info = exoData.GetInfo(pred.Codex);
                 bio.BodyDssScanned = body.DssScanned;
                 bio.TotalValue = ComputeTotalValue(bio, body);
+                filled = true;
             }
+
+            if (filled)
+            {
+                UpdateBioMinMaxValue(body);
+                if (notify)
+                    NotifyBioDiscoveries(body);
+            }
+
+            return filled;
+        }
+
+        // Tops the body's organic items up to BiologicalSignals with "Not Predicted"
+        // placeholders, creating the list on demand. Called from the signals handlers
+        // and again before a re-prediction so a late Scan never loses a slot.
+        private void EnsurePredictionPlaceholders(SystemBody body, DateTime timeStamp)
+        {
+            body.OrganicScanItems ??= new OrganicScanItemList();
+
+            for (int i = body.OrganicScanItems.Count; i < body.BiologicalSignals; i++)
+                body.OrganicScanItems.Add(NewNotPredictedItem(body, timeStamp));
         }
 
         private void UpdateBioMinMaxValue(SystemBody body)

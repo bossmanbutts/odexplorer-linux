@@ -715,6 +715,63 @@ class Program
                 edsmSystem?.SystemBodies.Any(b => b.BodyName == "EdSmSys A 3") == true);
             Check("EDSM flow raises OnSystemUpdatedFromEDSM", edsmUpdated >= 1);
 
+            // ── Prediction pipeline: history prediction, go-live catch-up, live toasts. ──
+            // Body 1 is scanned BEFORE its FSSBodySignals arrive, so the placeholder
+            // slots must be topped up after the Scan and then filled by the engine;
+            // body 2 is only ever FSS-signalled, so it must be caught up at go-live.
+            var predDir = Path.Combine(Path.GetTempPath(), "odex_pred_smoke");
+            Directory.CreateDirectory(predDir);
+            foreach (var f in Directory.GetFiles(predDir, "*.log")) File.Delete(f);
+            File.WriteAllLines(Path.Combine(predDir, "Journal.240301000000.01.log"),
+            [
+                "{\"timestamp\":\"2024-03-01T00:00:00Z\",\"event\":\"Fileheader\",\"part\":1,\"language\":\"English\"}",
+                "{\"timestamp\":\"2024-03-01T00:00:01Z\",\"event\":\"LoadGame\",\"Commander\":\"PredCMDR\",\"Ship\":\"CobraMkIII\",\"GameMode\":\"Solo\",\"Credits\":1000000}",
+                "{\"timestamp\":\"2024-03-01T00:00:02Z\",\"event\":\"FSDJump\",\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"StarPos\":[30.0,-40.0,5.0],\"StarType\":\"G\",\"Body\":7,\"Bodies\":3,\"JumpDist\":10.0}",
+                "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 1\",\"BodyID\":1,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":1.0,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}",
+                "{\"timestamp\":\"2024-03-01T00:00:04Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":1,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":3}]}",
+                "{\"timestamp\":\"2024-03-01T00:00:05Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":2,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":2}]}"
+            ]);
+
+            settings.NotificationOptions |= ODExplorer.Models.NotificationOptions.ValuableBioPlanet;
+            settings.SystemGridSetting.ExoValuableBodyValue = 1;
+
+            var predParser = new JournalParserStore(db, settings);
+            var predChecklist = new OrganicCheckListDataStore(predParser, exo, settings, registerWithParser: false);
+            var predExploration = new ExplorationDataStore(predParser, new FakeEdsmApiService(), db, notifications, settings, exo, predChecklist);
+            predParser.RegisterParser(predChecklist);
+
+            predParser.ReadNewDirectory(predDir);
+            deadline = DateTime.UtcNow.AddSeconds(30);
+            while (!predParser.IsLive && DateTime.UtcNow < deadline) Thread.Sleep(50);
+
+            var predBody1 = predExploration.OrganicScanItems.FirstOrDefault(b => b.BodyName == "PredSys A 1");
+            Console.WriteLine($"[diag] predSys bodies: [{string.Join(", ", predExploration.OrganicScanItems.Select(b => b.BodyName))}]");
+            Check("journal Scan atmosphere parses to CarbonDioxide",
+                predBody1 != null && predBody1.Atmosphere == AtmosphereClass.CarbonDioxide);
+            Check("history prediction fills scanned-body placeholders",
+                predBody1 is { OrganicScanItems.Count: 3 }
+                && predBody1.OrganicScanItems.All(x => x.GenusLocalised != "Not Predicted")
+                && predBody1.OrganicScanItems.Any(x => x.SpeciesLocalised == "Bacterium Aurasus"));
+
+            var predBody2 = predExploration.OrganicScanItems.FirstOrDefault(b => b.BodyName == "PredSys 2");
+            Check("go-live catch-up tracks FSS-only bodies",
+                predBody2 is { OrganicScanItems.Count: 2 }
+                && predBody2.OrganicScanItems.All(x => x.GenusLocalised == "Not Predicted"));
+
+            // Live prediction toast: FSS + Scan a brand-new body while live, with the
+            // valuable threshold at 1 credit, must raise a Valuable Exobiology Body toast.
+            int predToastsBefore = toasts.Count;
+            File.AppendAllText(Path.Combine(predDir, "Journal.240301000000.01.log"),
+                "{\"timestamp\":\"2024-03-01T00:00:10Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":3,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":2}]}\n" +
+                "{\"timestamp\":\"2024-03-01T00:00:11Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 3\",\"BodyID\":3,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":1.0,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}\n");
+
+            deadline = DateTime.UtcNow.AddSeconds(15);
+            while (toasts.Count <= predToastsBefore && DateTime.UtcNow < deadline) Thread.Sleep(100);
+
+            Check("live prediction raises valuable exo body toast",
+                toasts.Skip(predToastsBefore).Any(x => x.Title == "Valuable Exobiology Body"));
+            Console.WriteLine($"[diag] toasts delta: [{string.Join(" | ", toasts.Skip(predToastsBefore).Select(x => $"{x.Title}: {x.Message}"))}]");
+
             Console.WriteLine();
             Console.WriteLine(failures == 0 ? "ALL CHECKS PASSED" : $"{failures} CHECK(S) FAILED");
             return failures == 0 ? 0 : 1;

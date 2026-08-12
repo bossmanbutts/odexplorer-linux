@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace EliteJournalReader.Events
 {
@@ -9,7 +8,11 @@ namespace EliteJournalReader.Events
 
         public class ScanOrganicEventArgs : JournalEventArgs
         {
-            [JsonConverter(typeof(StringEnumConverter))]
+            // Tolerant parse: the journal has historically emitted "Organic" here
+            // (and the odd localized string), which StringEnumConverter would throw
+            // on and drop the whole must-map event. Unknown values degrade to the
+            // default stage instead of losing the scan.
+            [JsonConverter(typeof(ExtendedStringEnumConverter<OrganicScanStage>))]
             public OrganicScanStage ScanType { get; set; }
             public string Genus { get; set; }
             public string Genus_Localised { get; set; }

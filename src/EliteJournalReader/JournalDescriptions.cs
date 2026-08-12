@@ -1224,165 +1224,165 @@ namespace EliteJournalReader
 
     public enum AtmosphereDescription
     {
-        [Description("No Atmosphere")]
+        [Description("No atmosphere")]
         None,
-        [Description("Ammonia Atmosphere")]
+        [Description("ammonia")]
         ammonia_atmosphere,
-        [Description("Ammonia Rich Atmosphere")]
+        [Description("ammonia-rich")]
         ammonia_rich_atmosphere,
-        [Description("Argon Atmosphere")]
+        [Description("argon")]
         argon_atmosphere,
-        [Description("Argon Rich Atmosphere")]
+        [Description("argon-rich")]
         argon_rich_atmosphere,
-        [Description("Carbon Dioxide Atmosphere")]
+        [Description("carbon dioxide")]
         carbon_dioxide_atmosphere,
-        [Description("Carbon Dioxide Rich Atmosphere")]
+        [Description("carbon dioxide-rich")]
         carbon_dioxide_rich_atmosphere,
-        [Description("Helium Atmosphere")]
+        [Description("helium")]
         helium_atmosphere,
-        [Description("Hot Argon Atmosphere")]
+        [Description("hot argon")]
         hot_argon_atmosphere,
-        [Description("Hot Argon Rich Atmosphere")]
+        [Description("hot argon-rich")]
         hot_argon_rich_atmosphere,
-        [Description("Hot Carbon Dioxide Atmosphere")]
+        [Description("hot carbon dioxide")]
         hot_carbon_dioxide_atmosphere,
-        [Description("Hot Carbon Dioxide Rich Atmosphere")]
+        [Description("hot carbon dioxide-rich")]
         hot_carbon_dioxide_rich_atmosphere,
-        [Description("Hot Metallic Vapour Atmosphere")]
+        [Description("hot metallic vapour")]
         hot_metallic_vapour_atmosphere,
-        [Description("Hot Silicate Vapour Atmosphere")]
+        [Description("hot silicate vapour")]
         hot_silicate_vapour_atmosphere,
-        [Description("Hot Sulfur Dioxide Atmosphere")]
+        [Description("hot sulfur dioxide")]
         hot_sulfur_dioxide_atmosphere,
-        [Description("Hot Sulphur Dioxide Atmosphere")]
+        [Description("hot sulphur dioxide")]
         hot_sulphur_dioxide_atmosphere,
-        [Description("Hot Thick Ammonia Atmosphere")]
+        [Description("hot thick ammonia")]
         hot_thick_ammonia_atmosphere,
-        [Description("Hot Thick Ammonia Rich Atmosphere")]
+        [Description("hot thick ammonia-rich")]
         hot_thick_ammonia_rich_atmosphere,
-        [Description("Hot Thick Argon Atmosphere")]
+        [Description("hot thick argon")]
         hot_thick_argon_atmosphere,
-        [Description("Hot Thick Argon Rich Atmosphere")]
+        [Description("hot thick argon-rich")]
         hot_thick_argon_rich_atmosphere,
-        [Description("Hot Thick Carbon Dioxide Atmosphere")]
+        [Description("hot thick carbon dioxide")]
         hot_thick_carbon_dioxide_atmosphere,
-        [Description("Hot Thick Carbon Dioxide Rich Atmosphere")]
+        [Description("hot thick carbon dioxide-rich")]
         hot_thick_carbon_dioxide_rich_atmosphere,
-        [Description("Hot Thick Metallic Vapour Atmosphere")]
+        [Description("hot thick metallic vapour")]
         hot_thick_metallic_vapour_atmosphere,
-        [Description("Hot Thick Methane Atmosphere")]
+        [Description("hot thick methane")]
         hot_thick_methane_atmosphere,
-        [Description("Hot Thick Methane Rich Atmosphere")]
+        [Description("hot thick methane-rich")]
         hot_thick_methane_rich_atmosphere,
-        [Description("Hot Thick Nitrogen Atmosphere")]
+        [Description("hot thick nitrogen")]
         hot_thick_nitrogen_atmosphere,
-        [Description("Hot Thick Silicate Vapour Atmosphere")]
+        [Description("hot thick silicate vapour")]
         hot_thick_silicate_vapour_atmosphere,
-        [Description("Hot Thick Sulfur Dioxide Atmosphere")]
+        [Description("hot thick sulfur dioxide")]
         hot_thick_sulfur_dioxide_atmosphere,
-        [Description("Hot Thick Sulphur Dioxide Atmosphere")]
+        [Description("hot thick sulphur dioxide")]
         hot_thick_sulphur_dioxide_atmosphere,
-        [Description("Hot Thick Water Atmosphere")]
+        [Description("hot thick water")]
         hot_thick_water_atmosphere,
-        [Description("Hot Thick Water Rich Atmosphere")]
+        [Description("hot thick water-rich")]
         hot_thick_water_rich_atmosphere,
-        [Description("Hot Thin Carbon Dioxide Atmosphere")]
+        [Description("hot thin carbon dioxide")]
         hot_thin_carbon_dioxide_atmosphere,
-        [Description("Hot Thin Metallic Vapour Atmosphere")]
+        [Description("hot thin metallic vapour")]
         hot_thin_metallic_vapour_atmosphere,
-        [Description("Hot Thin Silicate Vapour Atmosphere")]
+        [Description("hot thin silicate vapour")]
         hot_thin_silicate_vapour_atmosphere,
-        [Description("Hot Thin Sulfur Dioxide Atmosphere")]
+        [Description("hot thin sulfur dioxide")]
         hot_thin_sulfur_dioxide_atmosphere,
-        [Description("Hot Thin Sulphur Dioxide Atmosphere")]
+        [Description("hot thin sulphur dioxide")]
         hot_thin_sulphur_dioxide_atmosphere,
-        [Description("Hot Water Atmosphere")]
+        [Description("hot water")]
         hot_water_atmosphere,
-        [Description("Hot Water Rich Atmosphere")]
+        [Description("hot water-rich")]
         hot_water_rich_atmosphere,
-        [Description("Methane Atmosphere")]
+        [Description("methane")]
         methane_atmosphere,
-        [Description("Methane Rich Atmosphere")]
+        [Description("methane-rich")]
         methane_rich_atmosphere,
-        [Description("Neon Rich Atmosphere")]
+        [Description("neon-rich")]
         neon_rich_atmosphere,
-        [Description("Nitrogen Atmosphere")]
+        [Description("nitrogen")]
         nitrogen_atmosphere,
-        [Description("Oxygen Atmosphere")]
+        [Description("oxygen")]
         oxygen_atmosphere,
-        [Description("Sulfur Dioxide Atmosphere")]
+        [Description("sulfur dioxide")]
         sulfur_dioxide_atmosphere,
-        [Description("Sulphur Dioxide Atmosphere")]
+        [Description("sulphur dioxide")]
         sulphur_dioxide_atmosphere,
-        [Description("Thick  Atmosphere")]
+        [Description("Thick")]
         thick__atmosphere,
-        [Description("Thick Ammonia Atmosphere")]
+        [Description("thick ammonia")]
         thick_ammonia_atmosphere,
-        [Description("Thick Ammonia Rich Atmosphere")]
+        [Description("thick ammonia-rich")]
         thick_ammonia_rich_atmosphere,
-        [Description("Thick Argon Atmosphere")]
+        [Description("thick argon")]
         thick_argon_atmosphere,
-        [Description("Thick Argon Rich Atmosphere")]
+        [Description("thick argon-rich")]
         thick_argon_rich_atmosphere,
-        [Description("Thick Carbon Dioxide Atmosphere")]
+        [Description("thick carbon dioxide")]
         thick_carbon_dioxide_atmosphere,
-        [Description("Thick Carbon Dioxide Rich Atmosphere")]
+        [Description("thick carbon dioxide-rich")]
         thick_carbon_dioxide_rich_atmosphere,
-        [Description("Thick Helium Atmosphere")]
+        [Description("thick helium")]
         thick_helium_atmosphere,
-        [Description("Thick Methane Atmosphere")]
+        [Description("thick methane")]
         thick_methane_atmosphere,
-        [Description("Thick Methane Rich Atmosphere")]
+        [Description("thick methane-rich")]
         thick_methane_rich_atmosphere,
-        [Description("Thick Nitrogen Atmosphere")]
+        [Description("thick nitrogen")]
         thick_nitrogen_atmosphere,
-        [Description("Thick Sulfur Dioxide Atmosphere")]
+        [Description("thick sulfur dioxide")]
         thick_sulfur_dioxide_atmosphere,
-        [Description("Thick Sulphur Dioxide Atmosphere")]
+        [Description("thick sulphur dioxide")]
         thick_sulphur_dioxide_atmosphere,
-        [Description("Thick Water Atmosphere")]
+        [Description("thick water")]
         thick_water_atmosphere,
-        [Description("Thick Water Rich Atmosphere")]
+        [Description("thick water-rich")]
         thick_water_rich_atmosphere,
-        [Description("Thin  Atmosphere")]
+        [Description("Thin")]
         thin__atmosphere,
-        [Description("Thin Ammonia Atmosphere")]
+        [Description("thin ammonia")]
         thin_ammonia_atmosphere,
-        [Description("Thin Ammonia Rich Atmosphere")]
+        [Description("thin ammonia-rich")]
         thin_ammonia_rich_atmosphere,
-        [Description("Thin Argon Atmosphere")]
+        [Description("thin argon")]
         thin_argon_atmosphere,
-        [Description("Thin Argon Rich Atmosphere")]
+        [Description("thin argon-rich")]
         thin_argon_rich_atmosphere,
-        [Description("Thin Carbon Dioxide Atmosphere")]
+        [Description("thin carbon dioxide")]
         thin_carbon_dioxide_atmosphere,
-        [Description("Thin Carbon Dioxide Rich Atmosphere")]
+        [Description("thin carbon dioxide-rich")]
         thin_carbon_dioxide_rich_atmosphere,
-        [Description("Thin Helium Atmosphere")]
+        [Description("thin helium")]
         thin_helium_atmosphere,
-        [Description("Thin Methane Atmosphere")]
+        [Description("thin methane")]
         thin_methane_atmosphere,
-        [Description("Thin Methane Rich Atmosphere")]
+        [Description("thin methane-rich")]
         thin_methane_rich_atmosphere,
-        [Description("Thin Neon Atmosphere")]
+        [Description("thin neon")]
         thin_neon_atmosphere,
-        [Description("Thin Neon Rich Atmosphere")]
+        [Description("thin neon-rich")]
         thin_neon_rich_atmosphere,
-        [Description("Thin Nitrogen Atmosphere")]
+        [Description("thin nitrogen")]
         thin_nitrogen_atmosphere,
-        [Description("Thin Oxygen Atmosphere")]
+        [Description("thin oxygen")]
         thin_oxygen_atmosphere,
-        [Description("Thin Sulfur Dioxide Atmosphere")]
+        [Description("thin sulfur dioxide")]
         thin_sulfur_dioxide_atmosphere,
-        [Description("Thin Sulphur Dioxide Atmosphere")]
+        [Description("thin sulphur dioxide")]
         thin_sulphur_dioxide_atmosphere,
-        [Description("Thin Water Atmosphere")]
+        [Description("thin water")]
         thin_water_atmosphere,
-        [Description("Thin Water Rich Atmosphere")]
+        [Description("thin water-rich")]
         thin_water_rich_atmosphere,
-        [Description("Water Atmosphere")]
+        [Description("water")]
         water_atmosphere,
-        [Description("Water Rich Atmosphere")]
+        [Description("water-rich")]
         water_rich_atmosphere,
     }
 
