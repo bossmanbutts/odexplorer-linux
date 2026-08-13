@@ -154,6 +154,8 @@ namespace ODExplorer.ViewModels.ViewVMs
         private StarSystemViewModel? currentSystem;
         public StarSystemViewModel? CurrentSystem => currentSystem;
 
+        public SpanshCsvStore SpanshCsvStore => spanshCsvStore;
+
         private ObservableCollection<SystemBodyViewModel> organicSignals = [];
         public ObservableCollection<SystemBodyViewModel> OrganicSignals
         {

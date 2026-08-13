@@ -15,6 +15,7 @@ using ODExplorer.Models;
 using ODUtils.APis;
 using ODUtils.Database.Interfaces;
 using ODUtils.EliteDangerousHelpers.GalacticRegions;
+using ODUtils.EliteDangerousHelpers;
 using ODUtils.Exobiology;
 using ODUtils.Extensions;
 using ODUtils.Journal;
@@ -28,6 +29,7 @@ using ScanItemComponent = ODUtils.Models.ScanItemComponent;
 using ShipMaterials = ODUtils.Models.ShipMaterials;
 using StarType = ODUtils.Models.StarType;
 using SystemBody = ODUtils.Models.SystemBody;
+using StatusFileEvent = ODUtils.Journal.StatusFileEvent;
 
 namespace ODExplorer.Stores
 {
@@ -52,6 +54,7 @@ namespace ODExplorer.Stores
 
             parserStore.RegisterParser(this);
             parserStore.OnParserStoreLive += ParserStore_OnParserStoreLive;
+            parserStore.StatusUpdated += ParserStore_StatusUpdated;
         }
         #endregion
 
@@ -95,6 +98,7 @@ namespace ODExplorer.Stores
         private bool onFoot;
         private double longitude;
         private double latitude;
+        private long currentBodyDestinationId;
         #endregion
 
         #region Public Properties
@@ -219,6 +223,7 @@ namespace ODExplorer.Stores
         {
             parserStore.UnregisterParser(this);
             parserStore.OnParserStoreLive -= ParserStore_OnParserStoreLive;
+            parserStore.StatusUpdated -= ParserStore_StatusUpdated;
         }
 
         #region Event Parsing
@@ -673,6 +678,9 @@ namespace ODExplorer.Stores
         {
             if (parserStore.IsLive)
             {
+                if (!fromCodex)
+                    SetCurrentBio(bio);
+
                 if ((!fromCodex || !onFoot)
                     && bio.Info is not null
                     && settingsStore.NotificationOptions.HasFlag(NotificationOptions.NewBioScanned))
@@ -682,6 +690,103 @@ namespace ODExplorer.Stores
 
                 InvokeLive(() => OnBioDataUpdated?.Invoke(this, bio));
             }
+        }
+
+        private void ParserStore_StatusUpdated(object? sender, StatusFileEvent e)
+        {
+            CheckCurrentBody(e);
+
+            latitude = e.Latitude;
+            longitude = e.Longitude;
+
+            if (latitude == 0 && longitude == 0)
+                return;
+
+            if (CurrentBioItem is null)
+                return;
+
+            if (string.IsNullOrEmpty(e.BodyName))
+            {
+                CurrentBioItem = null;
+                return;
+            }
+
+            if (CurrentBioItem.Info is null || CurrentBioItem.ScanStage <= OrganicScanStage.Codex)
+                return;
+
+            var colonyRange = CurrentBioItem.Info.ColonyRange;
+
+            foreach (var scan in CurrentBioItem.ScanLocations)
+            {
+                scan.Distance = BodyHelpers.DistanceBetweenLongLats(scan.Latitude, scan.Longitude, e.Latitude, e.Longitude, e.PlanetRadius);
+
+                scan.DistanceState = scan.Distance > colonyRange ? ScanNotificationState.FarEnough : ScanNotificationState.TooClose;
+            }
+
+            if (settingsStore.NotificationOptions.HasFlag(NotificationOptions.DistanceFromBio) == false)
+                return;
+
+            var locations = CurrentBioItem.ScanLocations.Where(x => x.ScanStage > OrganicScanStage.Codex);
+
+            if (locations.All(x => x.HasPos && x.DistanceState == ScanNotificationState.FarEnough)
+                && CurrentBioItem.NotificationState == ScanNotificationState.TooClose)
+            {
+                CurrentBioItem.NotificationState = ScanNotificationState.FarEnough;
+                notificationStore.ShowExoBioNotification(CurrentBioItem, "Minimum Distance Travelled");
+                return;
+            }
+
+            if (locations.Any(x => x.HasPos && x.DistanceState == ScanNotificationState.TooClose)
+                && CurrentBioItem.NotificationState == ScanNotificationState.FarEnough)
+            {
+                CurrentBioItem.NotificationState = ScanNotificationState.TooClose;
+                notificationStore.ShowExoBioNotification(CurrentBioItem, "Moved Too Close To Scans");
+            }
+        }
+
+        private void CheckCurrentBody(StatusFileEvent e)
+        {
+            if (currentBodyDestinationId != e.Destination.Body && string.IsNullOrEmpty(e.BodyName))
+            {
+                var known = CurrentSystem?.SystemBodies.FirstOrDefault(x => x.BodyID == e.Destination.Body);
+
+                if (known is not null)
+                {
+                    currentBodyDestinationId = known.BodyID;
+                    OnBodyTargeted?.Invoke(this, known);
+                    return;
+                }
+            }
+
+            if (string.IsNullOrEmpty(e.BodyName) == false)
+            {
+                var known = CurrentSystem?.SystemBodies.FirstOrDefault(x => x.BodyName.Equals(e.BodyName));
+
+                if (known is not null && known.BodyID != currentBodyDestinationId)
+                {
+                    currentBodyDestinationId = known.BodyID;
+                    OnBodyTargeted?.Invoke(this, known);
+                }
+            }
+        }
+
+        private void SetCurrentBio(OrganicScanItem scanItem)
+        {
+            if (scanItem.ScanStage == OrganicScanStage.Analyse)
+            {
+                CurrentBioItem = null;
+                return;
+            }
+
+            // If we've scanned something new without finishing the last item
+            // then clear the scan locations so a far walk isn't falsely rewarded.
+            if (CurrentBioItem != scanItem && CurrentBioItem?.ScanStage < OrganicScanStage.Analyse)
+            {
+                CurrentBioItem.ScanLocations.RemoveAll(x => x.ScanStage >= OrganicScanStage.Codex);
+                CurrentBioItem.NotificationState = ScanNotificationState.TooClose;
+            }
+
+            CurrentBioItem = scanItem;
         }
 
         private void TriggerBioSoldIfLive()
@@ -911,14 +1016,17 @@ namespace ODExplorer.Stores
             body.Age_MY = scanEvt.Age_MY ?? 0;
             body.AbsoluteMagnitude = scanEvt.AbsoluteMagnitude ?? 0;
             body.DistanceFromArrivalLs = scanEvt.DistanceFromArrivalLs;
-            body.OrbitalPeriod = scanEvt.OrbitalPeriod ?? 0;
-            body.RotationPeriod = scanEvt.RotationPeriod ?? 0;
+            // Journal emits orbital/rotation periods in seconds; the model and UI
+            // display them in days. Radius is in metres; the model/UI use km.
+            // SurfaceGravity is m/s^2; the model compares against g-based thresholds.
+            body.OrbitalPeriod = (scanEvt.OrbitalPeriod ?? 0) / 86400;
+            body.RotationPeriod = (scanEvt.RotationPeriod ?? 0) / 86400;
             body.AxialTilt = scanEvt.AxialTilt ?? 0;
             body.Eccentricity = scanEvt.Eccentricity ?? 0;
             body.SemiMajorAxis = scanEvt.SemiMajorAxis ?? 0;
-            body.Radius = scanEvt.Radius ?? 0;
+            body.Radius = (scanEvt.Radius ?? 0) / 1000;
             body.MassEM = scanEvt.MassEM ?? 0;
-            body.SurfaceGravity = scanEvt.SurfaceGravity ?? 0;
+            body.SurfaceGravity = (scanEvt.SurfaceGravity ?? 0) / 9.80665;
             body.Landable = scanEvt.Landable ?? false;
             body.Terraformable = JournalEventMapper.IsTerraformable(scanEvt.TerraformState);
             body.TerraformState = scanEvt.TerraformState.ToString();
@@ -1296,7 +1404,12 @@ namespace ODExplorer.Stores
             bio.IsNewSpecies = organicCheckListData.IsNewSpecies(scanOrganic.Species);
             bio.BodyDssScanned = body.DssScanned;
             bio.WasLogged = true;
-            bio.ScanLocations.Add(new Position((double?)scanOrganic.OriginalEvent?["Longitude"] ?? 0, (double?)scanOrganic.OriginalEvent?["Latitude"] ?? 0, 0));
+            bio.ScanLocations.Add(new ScanLocation
+            {
+                Latitude = (double?)scanOrganic.OriginalEvent?["Latitude"] ?? 0,
+                Longitude = (double?)scanOrganic.OriginalEvent?["Longitude"] ?? 0,
+                ScanStage = bio.ScanStage
+            });
             bio.Variants = BuildVariants(scanOrganic);
             bio.TotalValue = ComputeTotalValue(bio, body);
         }
@@ -1364,7 +1477,15 @@ namespace ODExplorer.Stores
                 BodyDssScanned = body.DssScanned,
                 WasLogged = true,
                 Info = OrganicValues.GetOrganicInfo(scanOrganic.Species, scanOrganic.Species_Localised, scanOrganic.Timestamp),
-                ScanLocations = [new Position(scanLon, scanLat, 0)],
+                ScanLocations =
+                [
+                    new ScanLocation
+                    {
+                        Latitude = scanLat,
+                        Longitude = scanLon,
+                        ScanStage = JournalEventMapper.GetOrganicScanStage(scanOrganic.ScanType)
+                    }
+                ],
                 Variants = BuildVariants(scanOrganic)
             };
 
@@ -1394,7 +1515,15 @@ namespace ODExplorer.Stores
                 BodyDssScanned = body.DssScanned,
                 WasLogged = true,
                 Info = info,
-                ScanLocations = [new Position(codexEntry.Longitude, codexEntry.Latitude, 0)],
+                ScanLocations =
+                [
+                    new ScanLocation
+                    {
+                        Latitude = codexEntry.Latitude,
+                        Longitude = codexEntry.Longitude,
+                        ScanStage = OrganicScanStage.Codex
+                    }
+                ],
                 Variants =
                 [
                     new OrganicVariant
@@ -1550,7 +1679,7 @@ namespace ODExplorer.Stores
 
             if (body.OrganicScanItems is not null)
             {
-                var valued = body.OrganicScanItems.Where(x => x.Info is not null && x.ScanStage >= OrganicScanStage.Codex);
+                var valued = body.OrganicScanItems.Where(x => x.Info is not null && x.ScanStage >= OrganicScanStage.Prediction);
 
                 foreach (var bio in valued)
                 {

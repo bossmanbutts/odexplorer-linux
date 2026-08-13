@@ -125,7 +125,7 @@ namespace ODExplorer.Stores
                 Emit("Diverse Exobiology Body", $"{body.BodyName.ToUpper()}\n{body.BiologicalSignals} Signals");
             }
 
-            if (settings.BodyNotifications.HasFlag(BodyNotification.SmallPlanet) && body.Radius <= settings.SmallRadius)
+            if (settings.BodyNotifications.HasFlag(BodyNotification.SmallPlanet) && body.Radius > 0 && body.Radius <= settings.SmallRadius)
             {
                 Emit("Small Radius Body", $"{body.BodyName.ToUpper()}\nRadius: {FormatDistance(body.Radius)}");
             }
@@ -145,12 +145,14 @@ namespace ODExplorer.Stores
 
             if (settings.BodyNotifications.HasFlag(BodyNotification.FastRotation)
                && body.TidalLock == false
+               && body.RotationPeriod > 0
                && Math.Abs(body.RotationPeriod * 24) <= settings.FastRotationMin)
             {
                 Emit("Fast Rotating Body", $"{body.BodyName.ToUpper()}\nPeriod: {Math.Abs(body.RotationPeriod * 24):N1} hours");
             }
 
             if (settings.BodyNotifications.HasFlag(BodyNotification.FastOrbit)
+                && body.OrbitalPeriod > 0
                 && Math.Abs(body.OrbitalPeriod * 24) <= settings.FastOrbit)
             {
                 Emit("Body With Fast Orbit", $"{body.BodyName.ToUpper()}\nPeriod: {Math.Abs(body.OrbitalPeriod * 24):N1} hours");

@@ -272,14 +272,17 @@ namespace ODExplorer.Journal
         public static bool IsTerraformable(EliteJournalReader.TerraformState terraformState)
             => IsTerraformable(terraformState.ToString());
 
-        // The real lib's OrganicScanStage enum has more members than our model's;
-        // collapse the ones the stores track onto the ODUtils.Models enum.
+        // The real lib's OrganicScanStage enum mirrors the journal's; map each
+        // member across directly. Unknown values degrade to Log (a logged sample).
         public static OrganicScanStage GetOrganicScanStage(EliteJournalReader.OrganicScanStage stage)
         {
             return stage switch
             {
                 EliteJournalReader.OrganicScanStage.Analyse => OrganicScanStage.Analyse,
+                EliteJournalReader.OrganicScanStage.Sample => OrganicScanStage.Sample,
+                EliteJournalReader.OrganicScanStage.Log => OrganicScanStage.Log,
                 EliteJournalReader.OrganicScanStage.Codex => OrganicScanStage.Codex,
+                EliteJournalReader.OrganicScanStage.DSS => OrganicScanStage.DSS,
                 EliteJournalReader.OrganicScanStage.Prediction => OrganicScanStage.Prediction,
                 _ => OrganicScanStage.Log
             };

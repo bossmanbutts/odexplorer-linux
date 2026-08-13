@@ -4,6 +4,7 @@ using ODExplorer.Stores;
 using ODExplorer.ViewModels.ModelVMs;
 using ODUtils.Commands;
 using ODUtils.Dialogs.ViewModels;
+using ODUtils.Spansh;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -36,6 +37,10 @@ namespace ODExplorer.ViewModels.ViewVMs
             explorationData.OnCartoDataLost += ExplorationData_OnCartoValueChanged;
             explorationData.OnBioDataSold += ExplorationData_OnBioDataSold;
 
+            this.spanshStore = mainView.SpanshCsvStore;
+            this.spanshStore.OnCurrentTargetChanged += Spansh_OnCurrentTargetChanged;
+            this.spanshStore.OnCurrentContainerChanged += Spansh_OnCurrentContainerChanged;
+
             SwitchView = new RelayCommand<CartoViewState>(OnSwitchView, (viewState) => CurrentState != viewState);
             OpenValuableBodiesPopOut = new RelayCommand(OnOpenValuableBodiesPopOut);
             OpenExobiologyPopOut = new RelayCommand(OnOpenExobiologyPopOut);
@@ -64,10 +69,20 @@ namespace ODExplorer.ViewModels.ViewVMs
         private readonly JournalParserStore parserStore;
         private readonly SettingsStore settingsStore;
         private readonly MainViewModel mainView;
+        private readonly SpanshCsvStore spanshStore;
 
         public StarSystemViewModel? CurrentSystem => mainView.CurrentSystem;
         public ObservableCollection<StarSystemViewModel> Route => mainView.Route;
         public ObservableCollection<SystemBodyViewModel> OrganicSignals => mainView.OrganicSignals;
+
+        public bool HasSpanshRoute => spanshStore.CurrentContainer is { Targets.Count: > 0 };
+        public string? SpanshTargetSystem => spanshStore.CurrentTarget?.SystemName;
+        public string? SpanshTargetBodies => spanshStore.CurrentTarget?.BodiesInfo is { Count: > 0 }
+            ? string.Join(", ", spanshStore.CurrentTarget.BodiesInfo.Select(x => x.Body).Where(x => string.IsNullOrWhiteSpace(x) == false))
+            : null;
+        public bool IsInSpanshTargetSystem => CurrentSystem != null
+            && HasSpanshRoute
+            && string.Equals(CurrentSystem.Name, SpanshTargetSystem, StringComparison.OrdinalIgnoreCase);
 
         public SystemBodyViewModel? SelectedBody
         {
@@ -183,6 +198,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
                 OnPropertyChanged(nameof(CurrentSystem));
                 OnPropertyChanged(nameof(OrganicSignals));
+                OnPropertyChanged(nameof(IsInSpanshTargetSystem));
                 ApplyBodyCollectionViewSourceSorting();
             });
         }
@@ -210,6 +226,17 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         private bool IgnoreSystemBodiesFilter(SystemBodyViewModel body) => !body.IsNonBody;
 
+        private void Spansh_OnCurrentTargetChanged(object? sender, ExplorationTarget? e) => RefreshSpanshTarget();
+        private void Spansh_OnCurrentContainerChanged(object? sender, SpanshCsvContainer? e) => RefreshSpanshTarget();
+
+        private void RefreshSpanshTarget()
+        {
+            OnPropertyChanged(nameof(HasSpanshRoute));
+            OnPropertyChanged(nameof(SpanshTargetSystem));
+            OnPropertyChanged(nameof(SpanshTargetBodies));
+            OnPropertyChanged(nameof(IsInSpanshTargetSystem));
+        }
+
         public override void Dispose()
         {
 
@@ -218,6 +245,9 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.mainView.OnBodyUpdated -= MainView_OnBodyUpdated;
             this.mainView.OnBioUpdated -= MainView_OnBioUpdated;
             this.mainView.OnSelectedBodyUpdated -= MainView_OnSelectedBodyUpdated;
+
+            this.spanshStore.OnCurrentTargetChanged -= Spansh_OnCurrentTargetChanged;
+            this.spanshStore.OnCurrentContainerChanged -= Spansh_OnCurrentContainerChanged;
 
             this.explorationData.OnFSDJump -= ExplorationData_OnFSDJump;
         }

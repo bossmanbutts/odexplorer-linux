@@ -73,7 +73,19 @@ namespace ODUtils.Models
     public enum OrganicScanState { None = 0, Unavailable = 1, Discovered = 2, Analysed = 3, Sold = 4 }
 
     // ── OrganicScanStage ───────────────────────────────────────────────────────
-    public enum OrganicScanStage { Log = 0, Codex = 1, Prediction = 2, Analyse = 3 }
+    // Mirrors the journal values (in scan-progression order) so the progression
+    // comparisons used by the distance-to-sample feature keep their meaning:
+    // samples logged/sampled/analysed are all "past Codex".
+    public enum OrganicScanStage
+    {
+        MultiChoice = -1,
+        Prediction = 0,
+        DSS = 1,
+        Codex = 2,
+        Log = 3,
+        Sample = 4,
+        Analyse = 5
+    }
 
     // ── ExoBiologyViewState ────────────────────────────────────────────────────
     public enum ExoBiologyViewState { None = 0, CheckList, UnSoldList, Sold, Lost }
@@ -163,7 +175,24 @@ namespace ODUtils.Models
         public bool BodyDssScanned { get; set; }
         public bool WasLogged { get; set; }
         public ODUtils.Exobiology.OrganicInfo? Info { get; set; }
-        public List<Position> ScanLocations { get; set; } = new();
+        public List<ScanLocation> ScanLocations { get; set; } = new();
+        public ScanNotificationState NotificationState { get; set; } = ScanNotificationState.TooClose;
+    }
+
+    public enum ScanNotificationState
+    {
+        TooClose = 0,
+        FarEnough = 1
+    }
+
+    public sealed class ScanLocation
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public double Distance { get; set; }
+        public ScanNotificationState DistanceState { get; set; } = ScanNotificationState.TooClose;
+        public OrganicScanStage ScanStage { get; set; }
+        public bool HasPos => Latitude != 0 && Longitude != 0;
     }
 
     // ── OrganicScanItemList ───────────────────────────────────────────────────

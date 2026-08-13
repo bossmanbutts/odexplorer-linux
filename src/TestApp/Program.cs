@@ -71,6 +71,11 @@ class Program
             Check("store CurrentIndex starts at 0", spansh.CurrentIndex == 0);
             spansh.CurrentIndex = 1;
             Check("store CurrentIndex navigates targets", spansh.CurrentTarget?.SystemName == "SIRIUS" && spansh.NextTarget is null);
+            spansh.CurrentIndex = 0;
+            spansh.OnCurrentSystemChangedForTest("SOL");
+            Check("store advances only forward", spansh.CurrentIndex == 0 && spansh.CurrentTarget?.SystemName == "SOL");
+            spansh.OnCurrentSystemChangedForTest("SIRIUS");
+            Check("store advances on arrival at next system", spansh.CurrentIndex == 1 && spansh.CurrentTarget?.SystemName == "SIRIUS");
 
             var gpCsv = Path.Combine(Path.GetTempPath(), "odex_gp.csv");
             File.WriteAllText(gpCsv,
@@ -288,6 +293,28 @@ class Program
             notableToasts.Clear();
             notable.CheckForNotableNotifications(new SystemBody { BodyName = "Bio", BiologicalSignals = 9 });
             Check("notable checks suppressed when notifications disabled", notableToasts.Count == 0);
+
+            // ── False-toast regression: a minimal FSS body (all values zero) must
+            //    NOT trigger radius / fast-orbit / fast-rotation notifications. ──
+            notableSettings.NotificationSettings.NotificationsEnabled = true;
+            notableSettings.NotableSettings.BodyNotifications = ODExplorer.Models.BodyNotification.SmallPlanet
+                | ODExplorer.Models.BodyNotification.FastOrbit
+                | ODExplorer.Models.BodyNotification.FastRotation
+                | ODExplorer.Models.BodyNotification.HighEccentricity;
+            notableToasts.Clear();
+            notable.CheckForNotableNotifications(new SystemBody { BodyName = "Minimal" });
+            Check("minimal FSS body fires no false radius/orbit/rotation toasts", notableToasts.Count == 0);
+
+            // ── DistanceBetweenLongLats: ~111.2 km per degree of latitude on Earth. ──
+            var oneDegree = ODUtils.EliteDangerousHelpers.BodyHelpers.DistanceBetweenLongLats(0, 0, 1, 0, 6_371_000);
+            Check("DistanceBetweenLongLats ~111.2 km/degree", Math.Abs(oneDegree - 111_195) < 400);
+
+            // ── OrganicScanStage progression: a logged sample sits between Codex and
+            //    Analyse so the distance-to-sample checks apply while sampling. ──
+            Check("OrganicScanStage ordering Log>Codex<Analyse",
+                ODUtils.Models.OrganicScanStage.Log > ODUtils.Models.OrganicScanStage.Codex
+                && ODUtils.Models.OrganicScanStage.Log < ODUtils.Models.OrganicScanStage.Analyse
+                && ODUtils.Models.OrganicScanStage.Sample < ODUtils.Models.OrganicScanStage.Analyse);
 
             // ── EdAstro: GEC JSON → EdAstroPoi mapping (offline) ──────────────────
             const string gecJson =
@@ -755,6 +782,59 @@ class Program
             Check("settings round-trip SystemGridSetting", settings.SystemGridSetting.ExoValuableBodyValue == 9_999_999);
             Check("settings round-trip OnBoardingComplete", settings.OnBoardingComplete);
 
+            // ── Distance-to-sample toast: a live logged ScanOrganic on a body, then a
+            //    status.json far from the scan point, must raise "Minimum Distance
+            //    Travelled"; walking back near the scan must raise "Moved Too Close". ──
+            var distDir = Path.Combine(Path.GetTempPath(), "odex_dist_smoke");
+            Directory.CreateDirectory(distDir);
+            foreach (var f in Directory.GetFiles(distDir, "*.log")) File.Delete(f);
+            File.Delete(Path.Combine(distDir, "status.json"));
+            File.WriteAllLines(Path.Combine(distDir, "Journal.240301000000.01.log"),
+            [
+                "{\"timestamp\":\"2024-03-01T00:00:00Z\",\"event\":\"Fileheader\",\"part\":1,\"language\":\"English\"}",
+                "{\"timestamp\":\"2024-03-01T00:00:01Z\",\"event\":\"LoadGame\",\"Commander\":\"DistCMDR\",\"Ship\":\"CobraMkIII\",\"GameMode\":\"Solo\",\"Credits\":1000000}",
+                "{\"timestamp\":\"2024-03-01T00:00:02Z\",\"event\":\"FSDJump\",\"StarSystem\":\"DistSys\",\"SystemAddress\":5000000000001,\"StarPos\":[1.0,2.0,3.0],\"StarType\":\"G\",\"Body\":1,\"Bodies\":1,\"JumpDist\":20.0}",
+                "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":5000000000001,\"BodyID\":1,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":1}]}"
+            ]);
+
+            var distSettings = new SettingsStore(db);
+            distSettings.NotificationOptions = ODExplorer.Models.NotificationOptions.DistanceFromBio;
+            var distNotifications = new NotificationStore(distSettings);
+            var distToasts = new List<ODExplorer.Models.ToastMessage>();
+            distNotifications.OnToast += distToasts.Add;
+            var distParser = new JournalParserStore(persistedProvider, distSettings);
+            var distExploration = new ExplorationDataStore(distParser, new FakeEdsmApiService(), persistedProvider,
+                distNotifications, distSettings, exo, organicChecklist);
+            distParser.ReadNewDirectory(distDir);
+            deadline = DateTime.UtcNow.AddSeconds(30);
+            while (!distParser.IsLive && DateTime.UtcNow < deadline) Thread.Sleep(50);
+
+            File.AppendAllText(Path.Combine(distDir, "Journal.240301000000.01.log"),
+                "{\"timestamp\":\"2024-03-01T00:00:04Z\",\"event\":\"ScanOrganic\",\"ScanType\":\"Log\",\"Genus\":\"$Codex_Ent_Bacterial_Genus_Name;\",\"Genus_Localised\":\"Bacterium\",\"Species\":\"$Codex_Ent_Bacterial_01_Name;\",\"Species_Localised\":\"Bacterium Aurasus\",\"Variant\":\"$Codex_Ent_Bacterial_01_A_Name;\",\"Variant_Localised\":\"Bacterium Aurasus Amethyst\",\"SystemAddress\":5000000000001,\"Body\":1,\"Latitude\":1.0,\"Longitude\":2.0}\n");
+
+            deadline = DateTime.UtcNow.AddSeconds(15);
+            while (distExploration.CurrentBioItem is null && DateTime.UtcNow < deadline) Thread.Sleep(100);
+
+            Check("distance test: live log scan set CurrentBioItem", distExploration.CurrentBioItem is not null);
+
+            File.WriteAllText(Path.Combine(distDir, "status.json"),
+                "{\"timestamp\":\"2024-03-01T00:00:05Z\",\"event\":\"Status\",\"Flags\":0,\"Flags2\":0,\"Pips\":[4,2,0],\"Firegroup\":0,\"GuiFocus\":0,\"Fuel\":{\"FuelMain\":100.0,\"FuelReservoir\":1.0},\"Cargo\":0.0,\"LegalState\":\"\",\"Latitude\":10.0,\"Longitude\":2.0,\"Altitude\":10.0,\"Heading\":0.0,\"BodyName\":\"DistSys 1\",\"PlanetRadius\":6371000,\"Balance\":1000000,\"Destination\":{\"System\":\"DistSys\",\"Body\":1,\"Name\":\"DistSys 1\"},\"Oxygen\":0.0,\"Health\":100.0,\"Temperature\":300.0,\"SelectedWeapon\":\"\",\"Gravity\":9.8,\"OnFoot\":true}");
+
+            deadline = DateTime.UtcNow.AddSeconds(20);
+            while (distToasts.Any(x => x.Title == "Minimum Distance Travelled") == false && DateTime.UtcNow < deadline) Thread.Sleep(100);
+
+            Check("distance toast fires when far from last sample",
+                distToasts.Any(x => x.Title == "Minimum Distance Travelled" && x.Message.Contains("Bacterium Aurasus")));
+
+            File.WriteAllText(Path.Combine(distDir, "status.json"),
+                "{\"timestamp\":\"2024-03-01T00:00:06Z\",\"event\":\"Status\",\"Flags\":0,\"Flags2\":0,\"Pips\":[4,2,0],\"Firegroup\":0,\"GuiFocus\":0,\"Fuel\":{\"FuelMain\":100.0,\"FuelReservoir\":1.0},\"Cargo\":0.0,\"LegalState\":\"\",\"Latitude\":1.0,\"Longitude\":2.0,\"Altitude\":10.0,\"Heading\":0.0,\"BodyName\":\"DistSys 1\",\"PlanetRadius\":6371000,\"Balance\":1000000,\"Destination\":{\"System\":\"DistSys\",\"Body\":1,\"Name\":\"DistSys 1\"},\"Oxygen\":0.0,\"Health\":100.0,\"Temperature\":300.0,\"SelectedWeapon\":\"\",\"Gravity\":9.8,\"OnFoot\":true}");
+
+            deadline = DateTime.UtcNow.AddSeconds(20);
+            while (distToasts.Any(x => x.Title == "Moved Too Close To Scans") == false && DateTime.UtcNow < deadline) Thread.Sleep(100);
+
+            Check("distance toast fires again when too close",
+                distToasts.Any(x => x.Title == "Moved Too Close To Scans"));
+
             // ── EDSM system-details flow: a live FSDJump to a system with unknown
             //    star class / value / body count must fetch from the (fake) EDSM
             //    service and raise OnSystemUpdatedFromEDSM. ──
@@ -808,7 +888,7 @@ class Program
                 "{\"timestamp\":\"2024-03-01T00:00:01Z\",\"event\":\"LoadGame\",\"Commander\":\"PredCMDR\",\"Ship\":\"CobraMkIII\",\"GameMode\":\"Solo\",\"Credits\":1000000}",
                 "{\"timestamp\":\"2024-03-01T00:00:02Z\",\"event\":\"FSDJump\",\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"StarPos\":[30.0,-40.0,5.0],\"StarType\":\"M\",\"Body\":7,\"Bodies\":3,\"JumpDist\":10.0}",
                 "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"Scan\",\"BodyName\":\"PredSys A\",\"BodyID\":0,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":0.0,\"StarType\":\"M\",\"StellarClass\":\"M V\",\"WasDiscovered\":true}",
-                "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 1\",\"BodyID\":1,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":0.3,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"thin carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}",
+                "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 1\",\"BodyID\":1,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":2.94,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"thin carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}",
                 "{\"timestamp\":\"2024-03-01T00:00:04Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":1,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":3}]}",
                 "{\"timestamp\":\"2024-03-01T00:00:05Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":2,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":2}]}"
             ]);
@@ -844,7 +924,7 @@ class Program
             int predToastsBefore = toasts.Count;
             File.AppendAllText(Path.Combine(predDir, "Journal.240301000000.01.log"),
                 "{\"timestamp\":\"2024-03-01T00:00:10Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":3,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":2}]}\n" +
-                "{\"timestamp\":\"2024-03-01T00:00:11Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 3\",\"BodyID\":3,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":0.3,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"thin carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}\n");
+                "{\"timestamp\":\"2024-03-01T00:00:11Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 3\",\"BodyID\":3,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":2.94,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"thin carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}\n");
 
             deadline = DateTime.UtcNow.AddSeconds(15);
             while (toasts.Count <= predToastsBefore && DateTime.UtcNow < deadline) Thread.Sleep(100);

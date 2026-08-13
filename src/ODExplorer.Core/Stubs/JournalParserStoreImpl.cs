@@ -44,6 +44,7 @@ namespace ODExplorer.Stores
         private readonly Dictionary<string, long> filePositions = [];
         private FileSystemWatcher? fileWatcher;
         private Timer? watchDebounceTimer;
+        private Timer? statusFileTimer;
         private readonly object watchLock = new();
 
         public JournalParserStore(IOdToolsDatabaseProvider? databaseProvider = null,
@@ -390,6 +391,8 @@ namespace ODExplorer.Stores
             fileWatcher.EnableRaisingEvents = true;
 
             watchDebounceTimer = new Timer(_ => ProcessNewLogLines(), null, Timeout.Infinite, Timeout.Infinite);
+
+            statusFileTimer = new Timer(_ => PollStatusFile(directory), null, 1000, 1000);
         }
 
         private void StopWatching()
@@ -406,6 +409,57 @@ namespace ODExplorer.Stores
 
             watchDebounceTimer?.Dispose();
             watchDebounceTimer = null;
+
+            statusFileTimer?.Dispose();
+            statusFileTimer = null;
+        }
+
+        private void PollStatusFile(string directory)
+        {
+            if (IsLive == false)
+                return;
+
+            var statusPath = Path.Combine(directory, "status.json");
+            if (File.Exists(statusPath) == false)
+                return;
+
+            try
+            {
+                string json;
+                using (var fs = new FileStream(statusPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+                using (var reader = new StreamReader(fs))
+                {
+                    json = reader.ReadToEnd();
+                }
+
+                var obj = JObject.Parse(json);
+                var lat = (double?)obj["Latitude"] ?? 0;
+                var lon = (double?)obj["Longitude"] ?? 0;
+
+                if (lat == 0 && lon == 0)
+                    return;
+
+                var status = new StatusFileEvent
+                {
+                    BodyName = obj["BodyName"]?.ToString() ?? string.Empty,
+                    Latitude = lat,
+                    Longitude = lon,
+                    PlanetRadius = (double?)obj["PlanetRadius"] ?? 0,
+                    IsOnFoot = obj["OnFoot"]?.Value<bool>() ?? false,
+                    Destination = new StatusFileDestination
+                    {
+                        Body = (long?)obj["Destination"]?["Body"] ?? 0,
+                        BodyName = obj["Destination"]?["Name"]?.ToString() ?? string.Empty
+                    }
+                };
+
+                Raise(() => StatusUpdated?.Invoke(this, status));
+            }
+            catch
+            {
+                // status.json is rewritten every second; a torn read just means
+                // we skip that tick and pick the file up on the next one.
+            }
         }
 
         private void OnJournalFileChanged(object sender, FileSystemEventArgs e)

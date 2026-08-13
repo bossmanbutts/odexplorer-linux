@@ -525,6 +525,22 @@ namespace ODUtils.EliteDangerousHelpers
             if (meters >= 1_000) return $"{meters / 1_000:N2} km";
             return $"{meters:N0} m";
         }
+
+        // Great-circle distance in metres between two (latitude, longitude) points
+        // on a sphere of the given radius (metres).
+        public static double DistanceBetweenLongLats(double lat1, double lon1, double lat2, double lon2, double planetRadius)
+        {
+            const double DegToRad = Math.PI / 180;
+
+            double dLat = (lat2 - lat1) * DegToRad;
+            double dLon = (lon2 - lon1) * DegToRad;
+
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+                     + Math.Cos(lat1 * DegToRad) * Math.Cos(lat2 * DegToRad)
+                     * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            return 2 * planetRadius * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        }
     }
 }
 

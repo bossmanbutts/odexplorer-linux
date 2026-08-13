@@ -250,6 +250,8 @@ namespace ODExplorer.Stores
             }
         }
 
+        internal void OnCurrentSystemChangedForTest(string system) => AdvanceOnSystem(system);
+
         private void OnCurrentSystemChanged(string? system)
         {
             if (parserStore.IsLive == false || system is null || CurrentContainer is null || CurrentContainer.Targets.Count < 1)
@@ -257,25 +259,35 @@ namespace ODExplorer.Stores
                 return;
             }
 
-            if (NextTarget is not null && NextTarget.SystemName.Equals(system, StringComparison.OrdinalIgnoreCase))
+            AdvanceOnSystem(system);
+        }
+
+        private void AdvanceOnSystem(string? system)
+        {
+            if (system is null || CurrentContainer is null || CurrentContainer.Targets.Count < 1)
             {
-                int index = CurrentContainer.Targets.IndexOf(NextTarget);
+                return;
+            }
 
-                if (index > CurrentIndex)
-                {
-                    CurrentIndex = index;
+            // Advance when the player arrives at the next target system, or any
+            // later system in the route (e.g. they joined mid-route or skipped a
+            // stop). Only ever moves forward.
+            int index = CurrentContainer.Targets.FindIndex(x => x.SystemName.Equals(system, StringComparison.OrdinalIgnoreCase));
 
-                    if (currentContainerType == CsvType.GalaxyPlotter
+            if (index > CurrentIndex)
+            {
+                CurrentIndex = index;
+
+                if (currentContainerType == CsvType.GalaxyPlotter
                     && string.IsNullOrEmpty(CurrentTarget?.Property3) == false
                     && CurrentTarget.Property3.Contains("Yes", StringComparison.OrdinalIgnoreCase))
-                    {
-                        notificationStore.ShowSpanshNotification(Notifications.SpanshNotificationType.Refuel);
-                    }
+                {
+                    notificationStore.ShowSpanshNotification(Notifications.SpanshNotificationType.Refuel);
+                }
 
-                    if (NextTarget != null && settingsStore.SpanshCSVSettings.AutoCopySystemToClipboard)
-                    {
-                        notificationStore.CopyToClipBoard(NextTarget.SystemName);
-                    }
+                if (NextTarget != null && settingsStore.SpanshCSVSettings.AutoCopySystemToClipboard)
+                {
+                    notificationStore.CopyToClipBoard(NextTarget.SystemName);
                 }
             }
         }

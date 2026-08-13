@@ -139,14 +139,66 @@
             <Grid IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.DetailedExo}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0"
+
+                <!-- Current system header -->
+                <Border Grid.Row="0"
+                        Background="#282828"
+                        BorderBrush="#404040"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="8,6"
+                        Margin="0,0,0,6"
+                        IsVisible="{Binding CurrentSystem}">
+                    <StackPanel Spacing="2">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding CurrentSystem.Name}"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       TextTrimming="CharacterEllipsis" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                <TextBlock Text="Region" Foreground="#999999" FontSize="11" />
+                                <TextBlock Text="{Binding CurrentSystem.Region}" FontSize="11" />
+                            </StackPanel>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Star" Foreground="#999999" FontSize="12" />
+                                <TextBlock Text="{Binding CurrentSystem.StarClass}" FontSize="12" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Bodies" Foreground="#999999" FontSize="12" />
+                                <TextBlock Text="{Binding CurrentSystem.BodyCount, StringFormat=N0}" FontSize="12" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Discovered" Foreground="#999999" FontSize="12" />
+                                <TextBlock Text="{Binding CurrentSystem.DiscoveredBodiesCount, StringFormat=N0}" FontSize="12" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="Estimated Value" Foreground="#999999" FontSize="12" />
+                                <TextBlock Text="{Binding CurrentSystem.EstimatedValue}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="4"
+                                    IsVisible="{Binding HasSpanshRoute}">
+                            <TextBlock Text="Route target" Foreground="#CD9B1D" FontSize="12" />
+                            <TextBlock Text="{Binding SpanshTargetSystem}" Foreground="#CD9B1D" FontSize="12" FontWeight="SemiBold" />
+                            <TextBlock Text="-" Foreground="#CD9B1D" FontSize="12"
+                                       IsVisible="{Binding IsInSpanshTargetSystem}" />
+                            <TextBlock Text="{Binding SpanshTargetBodies}" Foreground="#CD9B1D" FontSize="12" FontWeight="SemiBold"
+                                       IsVisible="{Binding IsInSpanshTargetSystem}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Grid.Row="1"
                            Text="Exobiology Signals"
                            FontWeight="SemiBold"
                            Margin="4,0,0,4" />
-                <ScrollViewer Grid.Row="1">
+                <ScrollViewer Grid.Row="2">
                     <StackPanel>
                         <ItemsControl ItemsSource="{Binding OrganicSignals}">
                             <ItemsControl.ItemTemplate>
@@ -185,7 +237,7 @@
                                    IsVisible="{Binding OrganicSignals, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
                     </StackPanel>
                 </ScrollViewer>
-                <TextBlock Grid.Row="2"
+                <TextBlock Grid.Row="3"
                            Text="Use EXO / DET / CLS / HOR / EXT buttons above to switch layout"
                            FontSize="11"
                            Foreground="#777777"

@@ -434,7 +434,7 @@ namespace ODExplorer.ViewModels.ViewVMs
                 if (body.OrganicScanItems is null)
                     continue;
 
-                modelList.AddRange(body.OrganicScanItems.Where(x => x.ScanStage == OrganicScanStage.Analyse && x.DataState == DataState.Unsold).Select(x => new OrganicScanItemViewModel(x)));
+                modelList.AddRange(body.OrganicScanItems.Where(x => x.DataState == DataState.Unsold && x.ScanStage != OrganicScanStage.Prediction).Select(x => new OrganicScanItemViewModel(x)));
             }
             modelList.Sort((x, y) => string.Compare(x.BodyName, y.BodyName, StringComparison.Ordinal));
             Unsold.AddRangeToCollection(modelList);
