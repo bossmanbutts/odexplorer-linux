@@ -375,161 +375,241 @@ class Program
             };
             Check("system without jumponium materials reports None", emptySysVm.GreenSystem == ODExplorer.Models.Jumponium.None);
 
+            var saleDate = DateTime.Now;
             Check("exo table has 90 species", exo.AllGenus.Sum(g => g.Species.Count) == 90);
-            Check("exo Stratum Tectonicas value", exo.GetInfo("$Codex_Ent_Stratum_07_Name;") is { Value: 19_010_800 });
-            Check("exo Electricae Radialem value", exo.GetInfo("$Codex_Ent_Electricae_02_Name;") is { Value: 6_284_600 });
-            Check("exo Fungoida Setisis value", exo.GetInfo("$Codex_Ent_Fungoids_01_Name;") is { Value: 1_670_100 });
-            Check("exo Bacterium Aurasus value", exo.GetInfo("$Codex_Ent_Bacterial_01_Name;") is { Value: 1_000_000 });
-            Check("exo Bacterium colony range", exo.GetInfo("$Codex_Ent_Bacterial_01_Name;") is { ColonyRange: 2 });
-            Check("exo unknown codex returns null", exo.GetInfo("$Codex_Ent_Bogus_01_Name;") is null);
-            Check("exo species name from codex", ExoData.GetNamesFromSpecies("$Codex_Ent_Stratum_07_Name;") is { Species: "Stratum Tectonicas" });
-            Check("exo variant name from codex", ExoData.GetNames("$Codex_Ent_Aleoids_01_A_Name;") is { Genus: "Aleoida", Species: "Aleoida Arcus", Variant: "Aleoida Arcus A" });
-            Check("exo species available in all regions", exo.AllGenus.SelectMany(g => g.Species)
-                .First(s => s.SpeciesName == "Stratum Tectonicas").IsAvailableIn(GalacticRegions.Bubble));
+            Check("exo Stratum Tectonicas value",
+                OrganicValues.GetOrganicInfo("$Codex_Ent_Stratum_07_Name;", "Stratum Tectonicas", saleDate) is { Value: 19_010_800 });
+            Check("exo Electricae Radialem value",
+                OrganicValues.GetOrganicInfo("$Codex_Ent_Electricae_02_Name;", "Electricae Radialem", saleDate) is { Value: 6_284_600 });
+            Check("exo Fungoida Setisis value",
+                OrganicValues.GetOrganicInfo("$Codex_Ent_Fungoids_01_Name;", "Fungoida Setisis", saleDate) is { Value: 1_670_100 });
+            Check("exo Bacterium Aurasus value",
+                OrganicValues.GetOrganicInfo("$Codex_Ent_Bacterial_01_Name;", "Bacterium Aurasus", saleDate) is { Value: 1_000_000 });
+            Check("exo Bacterium colony range",
+                OrganicValues.GetOrganicInfo("$Codex_Ent_Bacterial_01_Name;", "Bacterium Aurasus", saleDate) is { ColonyRange: 500 });
+            Check("exo unknown codex falls back to zero value",
+                OrganicValues.GetOrganicInfo("$Codex_Ent_Bogus_01_Name;", "Bogus", saleDate) is { Value: 0, ColonyRange: 100 });
+            Check("exo species name from codex", ExoData.GetNamesFromSpecies("$Codex_Ent_Stratum_07_Name;") is { Genus: "Stratum", Species: "Tectonicas" });
+            Check("exo variant name from codex", ExoData.GetNames("$Codex_Ent_Aleoids_01_A_Name;") is { Genus: "Aleoida", Species: "Arcus", Variant: "Green" });
+            Check("exo species available in all regions", ExoData.SpeciesRegions["$Codex_Ent_Stratum_07_Name;"]
+                .Contains(EliteJournalReader.GalacticRegions.Codex_RegionName_18));
 
-            // ── Prediction engine: cross-validated against the BioScan rules. The
-            //    expected species lists below were produced by a Python mirror of
-            //    the C# engine run over the generated rule data. At the default
-            //    origin (0,0,0 = Sol, region id 18 = orion-cygnus) the region-gated
-            //    rules now contribute (Fungoida Stabitis, Osseus Fractus/Pellebantus,
-            //    Electricae Radialem), which the committed data previously omitted. ──
+            // ── Prediction engine: exercises the real ODUtils species rules ────
+            //    Each species' GetPredictions() checks gravity, temperature, planet
+            //    class, atmosphere description, region and volcanism itself, then
+            //    base.GetPredictions() keeps a species only when at least one of its
+            //    variants matches the body's materials / stars in system (or an
+            //    unlikely variant's star is the body's parent star). ─────────────
             SystemBody PredictBody(Action<SystemBody> setup)
             {
                 var body = new SystemBody
                 {
                     IsPlanet = true,
-                    GoverningStar = StarType.G
+                    GoverningStar = StarType.M,
+                    Owner = new Owner { Region = new SystemRegion { Name = "Sagittarius-Carina Arm" } }
                 };
                 setup(body);
                 return body;
             }
 
-            var gSystem = new StarSystem { StarType = StarType.G, Address = 1 };
-            var aSystem = new StarSystem { StarType = StarType.A, Address = 1 };
+            List<string> PredictNames(SystemBody body, StarSystem system, double distanceToNebula = 0)
+                => exo.GetPredictions(ExoPlanetBuilder.Build(body, system, DateTime.Now, distanceToNebula))
+                    .Values.SelectMany(v => v)
+                    .Select(p => p.SpeciesEnglishName)
+                    .Distinct()
+                    .OrderBy(n => n, StringComparer.Ordinal)
+                    .ToList();
 
-            List<string> PredictNames(SystemBody body, StarSystem system)
-                => ExoPredictionEngine.Predict(body, system).Select(p => p.Name).OrderBy(n => n).ToList();
+            string Joined(List<string> names) => string.Join(",", names);
 
+            // Star-variant driving systems. The real engine decides a species' variant
+            // from the stars in the system (plus body materials), so each scenario
+            // drives predictions through explicit system star lists.
+            StarSystem SystemWith(params StarType[] stars) => new()
+            {
+                StarType = stars[0],
+                Address = 1,
+                SystemBodies = stars.Select(s => new SystemBody { IsStar = true, StarType = s }).ToList()
+            };
 
-            Check("HMC CO2 250K predicts Aurasus + Renibus + region species + Tectonicas",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.HighMetalContentBody;
-                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
-                    b.SurfaceGravity = 1.0;
-                    b.SurfaceTemp = 250;
-                    b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Bacterium Aurasus,Concha Renibus,Fungoida Stabitis,Osseus Fractus,Osseus Pellebantus,Stratum Tectonicas");
+            var mSystem = SystemWith(StarType.M);
+            var aSystem = SystemWith(StarType.A);
+            // Body governed by an M star but orbiting a system whose only star is G:
+            // M-variants then match only as Unlikely (parent star, not in system).
+            var gOnlySystem = SystemWith(StarType.G);
 
-            Check("Rocky no-atmosphere body predicts nothing (like Testes 1)",
-                PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.RockyBody;
-                    b.SurfaceGravity = 1.1;
-                    b.SurfaceTemp = 280;
-                    b.DistanceFromArrivalLs = 1800;
-                }), gSystem).Count == 0);
+            // 1. HMC + thin CO2 around an M star: the broad exobiology-hosting body.
+            var s1 = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_carbon_dioxide_atmosphere;
+                b.SurfaceGravity = 0.3;
+                b.SurfaceTemp = 250;
+                b.DistanceFromArrivalLs = 500;
+            }), mSystem);
+            Check("HMC thin CO2 250K M-star species list", Joined(s1) == "Aurasus,Tectonicas");
+            Check("HMC thin CO2 includes Tectonicas", s1.Contains("Tectonicas"));
 
-            Check("Icy Argon around A-star predicts Vesicula + Pluma + Radialem + Campestris",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.IcyBody;
-                    b.Atmosphere = AtmosphereClass.Argon;
-                    b.SurfaceGravity = 0.4;
-                    b.SurfaceTemp = 100;
-                    b.DistanceFromArrivalLs = 50;
-                }), aSystem)) == "Bacterium Vesicula,Electricae Pluma,Electricae Radialem,Fonticulua Campestris");
+            // 2. Gravity window: Stratum Tectonicas caps at 0.607g.
+            var s2 = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_carbon_dioxide_atmosphere;
+                b.SurfaceGravity = 1.0;
+                b.SurfaceTemp = 250;
+                b.DistanceFromArrivalLs = 500;
+            }), mSystem);
+            Check("High gravity drops gravity-limited species", Joined(s2) == "");
+            Check("Tectonicas absent above 0.607g", s1.Contains("Tectonicas") && !s2.Contains("Tectonicas"));
 
-            Check("HMC CO2 with water geysers predicts Tela (any-volcanism rule)",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.HighMetalContentBody;
-                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
-                    b.SurfaceGravity = 1.0;
-                    b.SurfaceTemp = 250;
-                    b.VolcanismName = "Water Geysers Volcanism";
-                    b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Bacterium Aurasus,Bacterium Tela,Stratum Tectonicas");
+            // 3. Region gate: Cactoida Lapis requires Sagittarius-Carina, thin
+            //    ammonia atmosphere, 160-177K.
+            var sagAmmonia = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_ammonia_atmosphere;
+                b.SurfaceGravity = 0.2;
+                b.SurfaceTemp = 165;
+                b.DistanceFromArrivalLs = 500;
+            }), mSystem);
+            Check("HMC thin ammonia Sagittarius-Carina species list", Joined(sagAmmonia) == "Alcyoneum,Laminiae,Lapis,Metallicum,Tectonicas");
+            Check("Cactoida Lapis present in Sagittarius-Carina", sagAmmonia.Contains("Lapis"));
 
-            Check("Rocky ice methane 40K predicts nothing",
-                PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.RockyIceBody;
-                    b.Atmosphere = AtmosphereClass.Methane;
-                    b.SurfaceGravity = 0.3;
-                    b.SurfaceTemp = 40;
-                    b.DistanceFromArrivalLs = 100;
-                }), gSystem).Count == 0);
+            var elysianAmmonia = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_ammonia_atmosphere;
+                b.SurfaceGravity = 0.2;
+                b.SurfaceTemp = 165;
+                b.DistanceFromArrivalLs = 500;
+                b.Owner.Region.Name = "Elysian Shore";
+            }), mSystem);
+            Check("Cactoida Lapis absent outside Sagittarius-Carina",
+                sagAmmonia.Contains("Lapis") && !elysianAmmonia.Contains("Lapis"));
 
-            Check("HMC CO2 rich 1.5% SO2 adds Recepta Umbrux",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.HighMetalContentBody;
-                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
-                    b.SurfaceGravity = 1.0;
-                    b.SurfaceTemp = 200;
-                    b.AtmosphereComposition = [new ScanItemComponent { Name = "SulphurDioxide", Percent = 1.5 }];
-                    b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Fungoida Stabitis,Osseus Fractus,Osseus Pellebantus,Recepta Umbrux,Stratum Tectonicas");
+            // 4. Icy + thin argon around an A star, no materials: no variant matches.
+            var s4 = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.IcyBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_argon_atmosphere;
+                b.SurfaceGravity = 0.4;
+                b.SurfaceTemp = 100;
+                b.DistanceFromArrivalLs = 50;
+            }), aSystem);
+            Check("Icy thin argon without materials predicts nothing", Joined(s4) == "");
 
-            Check("HMC CO2 0.5% SO2 misses Recepta Umbrux (SO2 < 1.05)",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.HighMetalContentBody;
-                    b.Atmosphere = AtmosphereClass.CarbonDioxide;
-                    b.SurfaceGravity = 1.0;
-                    b.SurfaceTemp = 200;
-                    b.AtmosphereComposition = [new ScanItemComponent { Name = "SulphurDioxide", Percent = 0.5 }];
-                    b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Bacterium Aurasus,Concha Labiata,Concha Renibus,Fungoida Stabitis,Osseus Fractus,Osseus Pellebantus,Stratum Tectonicas");
+            // 5. Thick CO2 must not match the thin-CO2 species.
+            var s5 = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thick_carbon_dioxide_atmosphere;
+                b.SurfaceGravity = 0.3;
+                b.SurfaceTemp = 250;
+                b.DistanceFromArrivalLs = 500;
+            }), mSystem);
+            Check("Thick CO2 species list", Joined(s5) == "");
+            Check("Thick vs thin CO2 diverge", Joined(s5) != Joined(s1));
 
-            // Galaxy-position gates: Cactoida Lapis carries regions=[sagittarius-carina]
-            // and Electricae Radialem carries nebula=all, so they must appear only where
-            // the system actually sits inside the matching region / nebula.
-            var elysianShoreSystem = new StarSystem { StarType = StarType.G, Address = 1, Name = "Elysian Shore Probe", Position = new(-4499.4, 0, -5535.8) };
+            // 6. Volcanism gate: Bacterium Tela needs a non-None volcanism with a
+            //    thin atmosphere (journal "Carbon Dioxide Geysers") plus a material.
+            var s6 = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_carbon_dioxide_atmosphere;
+                b.SurfaceGravity = 0.3;
+                b.SurfaceTemp = 250;
+                b.VolcanismName = "Carbon Dioxide Geysers";
+                b.Materials = [new ShipMaterials { Name = "cadmium", Percent = 10 }];
+                b.DistanceFromArrivalLs = 500;
+            }), mSystem);
+            Check("Geysers species list", Joined(s6) == "Aurasus,Tectonicas,Tela");
+            Check("Geysers adds Bacterium Tela", !s1.Contains("Tela") && s6.Contains("Tela"));
 
-            Check("HMC Ammonia region rule: Cactoida Lapis present in Sagittarius-Carina (Sol)",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.HighMetalContentBody;
-                    b.Atmosphere = AtmosphereClass.Ammonia;
-                    b.SurfaceGravity = 1.0;
-                    b.SurfaceTemp = 165;
-                    b.DistanceFromArrivalLs = 500;
-                }), gSystem)) == "Aleoida Laminiae,Bacterium Alcyoneum,Cactoida Lapis,Concha Aureolas,Frutexa Metallicum,Fungoida Setisis,Osseus Spiralis,Stratum Tectonicas,Tubus Sororibus,Tussock Cultro");
+            // 7. Rocky + no atmosphere: nothing predicted.
+            var s7 = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.RockyBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.None;
+                b.SurfaceGravity = 1.1;
+                b.SurfaceTemp = 280;
+                b.DistanceFromArrivalLs = 1800;
+            }), mSystem);
+            Check("Rocky no-atmosphere predicts nothing", s7.Count == 0);
 
-            Check("HMC Ammonia region rule: no Cactoida Lapis outside Sagittarius-Carina (Elysian Shore)",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.HighMetalContentBody;
-                    b.Atmosphere = AtmosphereClass.Ammonia;
-                    b.SurfaceGravity = 1.0;
-                    b.SurfaceTemp = 165;
-                    b.DistanceFromArrivalLs = 500;
-                }), elysianShoreSystem)) == "Bacterium Alcyoneum,Concha Aureolas,Frutexa Metallicum,Fungoida Setisis,Osseus Spiralis,Stratum Tectonicas,Tubus Sororibus,Tussock Divisa");
+            // 8. Rocky ice + thin methane at 40K: nothing predicted.
+            var s8 = PredictNames(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.RockyIceBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_methane_atmosphere;
+                b.SurfaceGravity = 0.3;
+                b.SurfaceTemp = 40;
+                b.DistanceFromArrivalLs = 100;
+            }), mSystem);
+            Check("Rocky ice thin methane 40K predicts nothing", s8.Count == 0);
 
-            var pleiadesSystem = new StarSystem { StarType = StarType.G, Address = 1, Name = "Pleiades Sector HR-V b2-0", Position = new(70, 0, -880) };
-            var farSystem = new StarSystem { StarType = StarType.G, Address = 1, Name = "Far Nebula Negative", Position = new(1000, 0, 1000) };
+            // 9. Cadmium in the body pulls in Concha Renibus (HMC thin CO2, 180-196K,
+            //    >= 97.5% CO2, 0.0254-0.0987 atm); without Cadmium it is absent.
+            SystemBody renibusBody(bool withCadmium) => PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_carbon_dioxide_atmosphere;
+                b.SurfaceGravity = 0.2;
+                b.SurfaceTemp = 188;
+                b.SurfacePressure = 0.05 * 101325;
+                b.DistanceFromArrivalLs = 500;
+                b.AtmosphereComposition = [new ScanItemComponent { Name = "CarbonDioxide", Percent = 98 }];
+                if (withCadmium) b.Materials = [new ShipMaterials { Name = "cadmium", Percent = 10 }];
+            });
+            var sCd = PredictNames(renibusBody(withCadmium: true), mSystem);
+            var sNoCd = PredictNames(renibusBody(withCadmium: false), mSystem);
+            Check("Cadmium species list", Joined(sCd) == "Aurasus,Coronamus,Gelata,Metallicum,Renibus,Tectonicas");
+            Check("Cadmium pulls in Concha Renibus", !sNoCd.Contains("Renibus") && sCd.Contains("Renibus"));
 
-            Check("Icy Argon nebula rule: Electricae Radialem present in Pleiades Sector",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.IcyBody;
-                    b.Atmosphere = AtmosphereClass.Argon;
-                    b.SurfaceGravity = 2.0;
-                    b.SurfaceTemp = 100;
-                    b.DistanceFromArrivalLs = 50;
-                }), pleiadesSystem)) == "Bacterium Vesicula,Electricae Radialem,Fonticulua Campestris");
+            // 10. Nebula gate: Electricae Radialem (max nebula distance 500ls).
+            SystemBody radialemBody() => PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.IcyBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_argon_atmosphere;
+                b.SurfaceGravity = 0.2;
+                b.SurfaceTemp = 100;
+                b.DistanceFromArrivalLs = 50;
+                b.Materials = [new ShipMaterials { Name = "tellurium", Percent = 10 }];
+            });
+            var sNeb0 = PredictNames(radialemBody(), aSystem, 0);
+            var sNebFar = PredictNames(radialemBody(), aSystem, 50_000);
+            Check("Electricae Radialem requires proximity to a nebula", sNeb0.Contains("Radialem") && !sNebFar.Contains("Radialem"));
 
-            Check("Icy Argon nebula rule: no Electricae Radialem far from nebulae",
-                string.Join(",", PredictNames(PredictBody(b =>
-                {
-                    b.PlanetClass = PlanetClass.IcyBody;
-                    b.Atmosphere = AtmosphereClass.Argon;
-                    b.SurfaceGravity = 2.0;
-                    b.SurfaceTemp = 100;
-                    b.DistanceFromArrivalLs = 50;
-                }), farSystem)) == "Bacterium Vesicula,Fonticulua Campestris");
+            // 11. Material-gated variant predicted as Likely.
+            var materialPred = exo.GetPredictions(ExoPlanetBuilder.Build(renibusBody(withCadmium: true), mSystem, DateTime.Now)).Values.SelectMany(v => v)
+                .FirstOrDefault(p => p.Variants.Any(v => v.Material == EliteJournalReader.PlanetMaterial.cadmium));
+            Check("material-gated variant predicted as Likely",
+                materialPred is not null && materialPred.Variants.All(v => v.Chance == VariantChance.Likely));
+
+            // 12. Parent-star variant without the star in the system: Unlikely.
+            var unlikelyPred = exo.GetPredictions(ExoPlanetBuilder.Build(PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_carbon_dioxide_atmosphere;
+                b.SurfaceGravity = 0.3;
+                b.SurfaceTemp = 250;
+                b.DistanceFromArrivalLs = 500;
+            }), gOnlySystem, DateTime.Now)).Values.SelectMany(v => v)
+                .FirstOrDefault(p => p.Variants.All(v => v.Chance == VariantChance.Unlikely));
+            Check("parent-star variant predicted as Unlikely when star absent from system", unlikelyPred is not null);
+
+            // 13. Recepta Umbrux: needs >= 1.05% sulphur dioxide, thin CO2 at 151-195K.
+            SystemBody umbruxBody(double so2) => PredictBody(b =>
+            {
+                b.PlanetClass = PlanetClass.HighMetalContentBody;
+                b.AtmosphereDescription = EliteJournalReader.AtmosphereDescription.thin_carbon_dioxide_atmosphere;
+                b.SurfaceGravity = 0.2;
+                b.SurfaceTemp = 170;
+                b.DistanceFromArrivalLs = 500;
+                b.AtmosphereComposition = [new ScanItemComponent { Name = "SulphurDioxide", Percent = so2 }];
+            });
+            var sSo2 = PredictNames(umbruxBody(1.5), mSystem);
+            var sNoSo2 = PredictNames(umbruxBody(0.5), mSystem);
+            Check("Recepta Umbrux present with 1.5% SO2", sSo2.Contains("Umbrux") && !sNoSo2.Contains("Umbrux"));
 
             int liveCount = 0, currentSystemEvents = 0, organicDetailsEvents = 0, cartoSold = 0, bioSold = 0;
             parser.OnParserStoreLive += (_, live) => { if (live) Interlocked.Increment(ref liveCount); };
@@ -726,8 +806,9 @@ class Program
             [
                 "{\"timestamp\":\"2024-03-01T00:00:00Z\",\"event\":\"Fileheader\",\"part\":1,\"language\":\"English\"}",
                 "{\"timestamp\":\"2024-03-01T00:00:01Z\",\"event\":\"LoadGame\",\"Commander\":\"PredCMDR\",\"Ship\":\"CobraMkIII\",\"GameMode\":\"Solo\",\"Credits\":1000000}",
-                "{\"timestamp\":\"2024-03-01T00:00:02Z\",\"event\":\"FSDJump\",\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"StarPos\":[30.0,-40.0,5.0],\"StarType\":\"G\",\"Body\":7,\"Bodies\":3,\"JumpDist\":10.0}",
-                "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 1\",\"BodyID\":1,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":1.0,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}",
+                "{\"timestamp\":\"2024-03-01T00:00:02Z\",\"event\":\"FSDJump\",\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"StarPos\":[30.0,-40.0,5.0],\"StarType\":\"M\",\"Body\":7,\"Bodies\":3,\"JumpDist\":10.0}",
+                "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"Scan\",\"BodyName\":\"PredSys A\",\"BodyID\":0,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":0.0,\"StarType\":\"M\",\"StellarClass\":\"M V\",\"WasDiscovered\":true}",
+                "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 1\",\"BodyID\":1,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":0.3,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"thin carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}",
                 "{\"timestamp\":\"2024-03-01T00:00:04Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":1,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":3}]}",
                 "{\"timestamp\":\"2024-03-01T00:00:05Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":2,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":2}]}"
             ]);
@@ -750,8 +831,8 @@ class Program
                 predBody1 != null && predBody1.Atmosphere == AtmosphereClass.CarbonDioxide);
             Check("history prediction fills scanned-body placeholders",
                 predBody1 is { OrganicScanItems.Count: 3 }
-                && predBody1.OrganicScanItems.All(x => x.GenusLocalised != "Not Predicted")
-                && predBody1.OrganicScanItems.Any(x => x.SpeciesLocalised == "Bacterium Aurasus"));
+                && predBody1.OrganicScanItems.Count(x => x.GenusLocalised != "Not Predicted") >= 1
+                && predBody1.OrganicScanItems.Any(x => x.SpeciesLocalised == "Aurasus"));
 
             var predBody2 = predExploration.OrganicScanItems.FirstOrDefault(b => b.BodyName == "PredSys 2");
             Check("go-live catch-up tracks FSS-only bodies",
@@ -763,7 +844,7 @@ class Program
             int predToastsBefore = toasts.Count;
             File.AppendAllText(Path.Combine(predDir, "Journal.240301000000.01.log"),
                 "{\"timestamp\":\"2024-03-01T00:00:10Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":3103895106055,\"BodyID\":3,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":2}]}\n" +
-                "{\"timestamp\":\"2024-03-01T00:00:11Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 3\",\"BodyID\":3,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":1.0,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}\n");
+                "{\"timestamp\":\"2024-03-01T00:00:11Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"PredSys A 3\",\"BodyID\":3,\"StarSystem\":\"PredSys\",\"SystemAddress\":3103895106055,\"DistanceFromArrivalLS\":500.0,\"PlanetClass\":\"High metal content body\",\"Landable\":true,\"SurfaceTemperature\":250.0,\"MassEM\":0.5,\"Radius\":7000000.0,\"SurfaceGravity\":0.3,\"OrbitalPeriod\":100000.0,\"Atmosphere\":\"thin carbon dioxide\",\"WasDiscovered\":true,\"WasMapped\":false}\n");
 
             deadline = DateTime.UtcNow.AddSeconds(15);
             while (toasts.Count <= predToastsBefore && DateTime.UtcNow < deadline) Thread.Sleep(100);

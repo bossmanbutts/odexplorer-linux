@@ -537,6 +537,48 @@ namespace ODUtils.Helpers
     {
         public static bool ContainsAllShipMaterials(ODUtils.Models.PlanetMaterial mats, ODUtils.Models.PlanetMaterial required)
             => (mats & required) == required;
+
+        public static bool ContainsAllShipMaterials(EliteJournalReader.PlanetMaterial a, EliteJournalReader.PlanetMaterial b)
+            => (a & b) == b;
+
+        public static object[] GetValuesAndDescriptions(Type enumType)
+        {
+            return Enum.GetValues(enumType).Cast<object>()
+                .Select(value => (object)new
+                {
+                    Value = value,
+                    Description = value.GetType().GetMember(value.ToString() ?? "?")[0]
+                        .GetCustomAttributes(true).OfType<DescriptionAttribute>().First().Description
+                })
+                .ToArray();
+        }
+
+        public static string GetEnumDescription(Enum? enumObj)
+        {
+            if (enumObj == null)
+                return string.Empty;
+
+            var field = enumObj.GetType().GetField(enumObj.ToString());
+            if (field == null)
+                return string.Empty;
+
+            var attribute = field.GetCustomAttributes(false).OfType<DescriptionAttribute>().FirstOrDefault();
+            return attribute?.Description ?? enumObj.ToString();
+        }
+
+        public static T? GetEnumValueFromDescription<T>(string description) where T : struct
+        {
+            foreach (var memberInfo in typeof(T).GetFields())
+            {
+                var attributes = memberInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                if (attributes.Length != 0
+                    && ((DescriptionAttribute)attributes[0]).Description.ToLower() == description.ToLower())
+                {
+                    return (T)Enum.Parse(typeof(T), memberInfo.Name);
+                }
+            }
+            return default;
+        }
     }
 
     public static class OperatingSystem

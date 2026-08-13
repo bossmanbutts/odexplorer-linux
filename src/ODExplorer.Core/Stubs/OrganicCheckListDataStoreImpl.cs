@@ -82,7 +82,7 @@ namespace ODExplorer.Stores
                             continue;
                         }
 
-                        var available = value.Regions.Contains(region);
+                        var available = value.Regions.Contains((EliteJournalReader.GalacticRegions)region);
                         species.AddRegion(region, available ? OrganicScanState.None : OrganicScanState.Unavailable);
 
                         if (available == false)

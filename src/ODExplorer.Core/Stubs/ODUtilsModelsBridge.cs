@@ -1,6 +1,7 @@
 // Lightweight stubs to satisfy references to ODUtils.Models used in the core. These are temporary; UI/host should provide real models or map via adapters.
 
 using System.Collections.Generic;
+using ODUtils.Exobiology;
 
 namespace ODUtils.Models
 {
@@ -82,12 +83,6 @@ namespace ODUtils.Models
 
     // ── JournalLogAge ──────────────────────────────────────────────────────────
     public enum JournalLogAge { AllLogs = 0, LastYear, LastSixMonths, LastThreeMonths, LastMonth, LastWeek }
-
-    // ── VariantColours ─────────────────────────────────────────────────────────
-    public enum VariantColours { Unknown = 0, Amethyst, Aquamarine, Blue, Cobalt, Cyan, Emerald, Gold, Green, Grey, Indigo, Lime, Magenta, Mauve, Mulberry, Ocher, Orange, Peach, Red, Sage, Teal, Turquoise, White, Yellow }
-
-    // ── VariantChance ──────────────────────────────────────────────────────────
-    public enum VariantChance { Unknown = 0, VeryLow, Low, Common, High, VeryHigh }
 
     // ── Composition ───────────────────────────────────────────────────────────
     public sealed class Composition
@@ -248,6 +243,9 @@ namespace ODUtils.Models
         public string TerraformState { get; set; } = string.Empty;
         public AtmosphereClass Atmosphere { get; set; }
         public AtmosphereClass AtmosphereType { get; set; }
+        // Full journal atmosphere description (e.g. "thin carbon dioxide-rich");
+        // preserved so the exo prediction engine can distinguish thin/thick/hot.
+        public EliteJournalReader.AtmosphereDescription AtmosphereDescription { get; set; }
         public VolcanismType Volcanism { get; set; }
         // Raw journal volcanism string (e.g. "Water Geysers Volcanism"); used by the
         // exo prediction engine which mirrors BioScan's substring matching.

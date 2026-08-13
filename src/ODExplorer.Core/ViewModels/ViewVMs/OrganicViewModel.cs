@@ -113,7 +113,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
                 if (selectedItem != null)
                 {
-                    SelectedRegionList = ExoData.SpeciesRegions[selectedItem.CodexValue];
+                    SelectedRegionList = ExoData.SpeciesRegions[selectedItem.CodexValue].Select(r => (GalacticRegions)r).ToList();
 
                     var names = ExoData.GetNamesFromSpecies(selectedItem.CodexValue);
 

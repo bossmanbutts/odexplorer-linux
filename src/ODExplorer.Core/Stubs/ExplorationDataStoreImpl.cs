@@ -923,6 +923,7 @@ namespace ODExplorer.Stores
             body.Terraformable = JournalEventMapper.IsTerraformable(scanEvt.TerraformState);
             body.TerraformState = scanEvt.TerraformState.ToString();
             body.Atmosphere = JournalEventMapper.GetAtmosphereClass(scanEvt.Atmosphere);
+            body.AtmosphereDescription = scanEvt.Atmosphere;
             body.AtmosphereType = JournalEventMapper.GetAtmosphereType(scanEvt.AtmosphereType);
             body.Volcanism = JournalEventMapper.GetVolcanism(scanEvt.Volcanism);
             body.VolcanismName = JournalEventMapper.GetVolcanismName(scanEvt.Volcanism);
@@ -1291,7 +1292,7 @@ namespace ODExplorer.Stores
             bio.ScanStage = JournalEventMapper.GetOrganicScanStage(scanOrganic.ScanType);
             bio.ScanTime = scanOrganic.Timestamp;
             bio.DataState = DataState.Unsold;
-            bio.Info = exoData.GetInfo(scanOrganic.Species);
+            bio.Info = OrganicValues.GetOrganicInfo(scanOrganic.Species, scanOrganic.Species_Localised, scanOrganic.Timestamp);
             bio.IsNewSpecies = organicCheckListData.IsNewSpecies(scanOrganic.Species);
             bio.BodyDssScanned = body.DssScanned;
             bio.WasLogged = true;
@@ -1318,7 +1319,7 @@ namespace ODExplorer.Stores
             bio.ScanStage = OrganicScanStage.Codex;
             bio.ScanTime = codexEntry.Timestamp;
             bio.DataState = DataState.Unsold;
-            bio.Info = exoData.GetInfo(bio.SpeciesCodex);
+            bio.Info = OrganicValues.GetOrganicInfo(bio.SpeciesCodex, bio.SpeciesLocalised, bio.ScanTime);
             bio.IsNewSpecies = false;
             bio.BodyDssScanned = body.DssScanned;
             bio.WasLogged = true;
@@ -1362,7 +1363,7 @@ namespace ODExplorer.Stores
                 IsNewSpecies = organicCheckListData.IsNewSpecies(scanOrganic.Species),
                 BodyDssScanned = body.DssScanned,
                 WasLogged = true,
-                Info = exoData.GetInfo(scanOrganic.Species),
+                Info = OrganicValues.GetOrganicInfo(scanOrganic.Species, scanOrganic.Species_Localised, scanOrganic.Timestamp),
                 ScanLocations = [new Position(scanLon, scanLat, 0)],
                 Variants = BuildVariants(scanOrganic)
             };
@@ -1374,7 +1375,7 @@ namespace ODExplorer.Stores
         private OrganicScanItem NewBioFromCodex(CodexEntryEvent.CodexEntryEventArgs codexEntry, SystemBody body)
         {
             var names = ExoData.GetNames(codexEntry.Name);
-            var info = names is null ? null : exoData.GetInfo(names.SpeciesCodex);
+            var info = names is null ? null : OrganicValues.GetOrganicInfo(names.SpeciesCodex, names.Species ?? string.Empty, codexEntry.Timestamp);
 
             var bio = new OrganicScanItem
             {
@@ -1473,14 +1474,13 @@ namespace ODExplorer.Stores
         }
 
         // Replaces the "Not Predicted" placeholders on a body with the species that
-        // match its scan data, mirroring the BioScan rules. Runs as soon as the
-        // body has scan data (Scan event) or bio signals (FSSBodySignals /
-        // SAASignalsFound); a no-op otherwise. Galaxy-position rules (regions,
-        // nebulae) are evaluated against the owning system's coordinates, so a body
-        // with no matching rules legitimately stays "Not Predicted". When a
-        // prediction is filled while the parser is live, valuable-exo toasts are
-        // raised; the go-live history catch-up passes notify: false to avoid a
-        // burst of toasts for every historical body.
+        // match its scan data, using the ODUtils exobiology prediction engine. Runs
+        // as soon as the body has scan data (Scan event) or bio signals
+        // (FSSBodySignals / SAASignalsFound); a no-op otherwise. A body with no
+        // matching rules legitimately stays "Not Predicted". When a prediction is
+        // filled while the parser is live, valuable-exo toasts are raised; the
+        // go-live history catch-up passes notify: false to avoid a burst of toasts
+        // for every historical body.
         private bool UpdateBioPredictions(SystemBody body, DateTime timeStamp, bool notify = true)
         {
             if (body.BiologicalSignals <= 0 || body.PlanetClass == PlanetClass.Unknown)
@@ -1489,7 +1489,10 @@ namespace ODExplorer.Stores
             if (_cartoData.TryGetValue(body.Owner.Address, out var system) == false)
                 return false;
 
-            var predicted = ExoPredictionEngine.Predict(body, system).DistinctBy(x => x.Codex).ToList();
+            var predicted = exoData.GetPredictions(ExoPlanetBuilder.Build(body, system, timeStamp))
+                .Values.SelectMany(x => x)
+                .DistinctBy(x => x.SpeciesCodex)
+                .ToList();
             if (predicted.Count == 0)
                 return false;
 
@@ -1503,20 +1506,17 @@ namespace ODExplorer.Stores
             for (int i = 0; i < Math.Min(placeholders.Count, predicted.Count); i++)
             {
                 var pred = predicted[i];
-                var names = ExoData.GetNamesFromSpecies(pred.Codex);
-                if (names is null)
-                    continue;
-
                 var bio = placeholders[i];
-                bio.GenusCodex = names.GenusCodex;
-                bio.GenusEnglish = names.Genus;
-                bio.GenusLocalised = names.Genus;
-                bio.SpeciesCodex = pred.Codex;
-                bio.SpeciesEnglish = pred.Name;
-                bio.SpeciesLocalised = pred.Name;
+
+                bio.GenusCodex = pred.GenusCodex;
+                bio.GenusEnglish = pred.GenusEnglishName;
+                bio.GenusLocalised = pred.GenusEnglishName;
+                bio.SpeciesCodex = pred.SpeciesCodex;
+                bio.SpeciesEnglish = pred.SpeciesEnglishName;
+                bio.SpeciesLocalised = pred.SpeciesEnglishName;
                 bio.ScanStage = OrganicScanStage.Prediction;
                 bio.ScanTime = timeStamp;
-                bio.Info = exoData.GetInfo(pred.Codex);
+                bio.Info = OrganicValues.GetOrganicInfo(pred.SpeciesCodex, pred.SpeciesEnglishName, timeStamp);
                 bio.BodyDssScanned = body.DssScanned;
                 bio.TotalValue = ComputeTotalValue(bio, body);
                 filled = true;
