@@ -163,6 +163,7 @@ namespace ODExplorer.ViewModels.ModelVMs
                 Bodies.AddToCollection(new(body, _settingsStore));
             }
             OnPropertyChanged(nameof(Bodies));
+            OnPropertyChanged(nameof(BodyCount));
             OnPropertyChanged(nameof(EstimatedValue));
             OnPropertyChanged(nameof(IsKnownToEDSM));
             OnPropertyChanged(nameof(EdsmPercentage));
@@ -188,6 +189,7 @@ namespace ODExplorer.ViewModels.ModelVMs
                 known.OnBodyUpdated();
                 OnPropertyChanged(nameof(known));
                 OnPropertyChanged(nameof(Bodies));
+                OnPropertyChanged(nameof(BodyCount));
                 OnPropertyChanged(nameof(PercentageScanned));
                 OnPropertyChanged(nameof(GreenSystem));
                 OnPropertyChanged(nameof(EstimatedValue));
@@ -198,6 +200,7 @@ namespace ODExplorer.ViewModels.ModelVMs
             newBody.AddOrganicItems();
             Bodies.AddToCollection(newBody);
             OnPropertyChanged(nameof(Bodies));
+            OnPropertyChanged(nameof(BodyCount));
             OnPropertyChanged(nameof(PercentageScanned));
             OnPropertyChanged(nameof(GreenSystem));
             OnPropertyChanged(nameof(EstimatedValue));
