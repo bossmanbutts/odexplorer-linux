@@ -164,6 +164,7 @@ namespace ODExplorer.ViewModels.ModelVMs
             }
             OnPropertyChanged(nameof(Bodies));
             OnPropertyChanged(nameof(BodyCount));
+            OnPropertyChanged(nameof(StarClass));
             OnPropertyChanged(nameof(EstimatedValue));
             OnPropertyChanged(nameof(IsKnownToEDSM));
             OnPropertyChanged(nameof(EdsmPercentage));

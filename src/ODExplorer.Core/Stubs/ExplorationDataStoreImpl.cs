@@ -830,6 +830,8 @@ namespace ODExplorer.Stores
             {
                 value.Position = system.Position;
                 value.Region = new SystemRegion { Name = RegionMap.FindRegion(system.Position.X, system.Position.Y, system.Position.Z).Name };
+                if (value.StarType == StarType.Unknown && system.StarType != StarType.Unknown)
+                    value.StarType = system.StarType;
                 return value;
             }
             _cartoData.TryAdd(system.Address, system);
@@ -853,10 +855,11 @@ namespace ODExplorer.Stores
                 {
                     var updatedRouteSnapshot = new List<StarSystem>(Route);
                     InvokeLive(() => OnRouteUpdated?.Invoke(this, updatedRouteSnapshot));
+                    var captured = CurrentSystem;
                     _ = Task.Run(async () =>
                     {
-                        if (await UpdateKnownBodyCount(CurrentSystem).ConfigureAwait(true))
-                            InvokeLive(() => OnSystemUpdatedFromEDSM?.Invoke(this, CurrentSystem));
+                        if (await UpdateKnownBodyCount(captured).ConfigureAwait(true))
+                            InvokeLive(() => OnSystemUpdatedFromEDSM?.Invoke(this, captured));
                     });
                 }
                 return CurrentSystem;
@@ -871,13 +874,14 @@ namespace ODExplorer.Stores
 
             if (parserStore.IsLive)
             {
+                var captured = CurrentSystem;
                 _ = Task.Run(async () =>
                 {
-                    var starUpdate = CurrentSystem.StarType == StarType.Unknown && await UpdateSystemStarClass(CurrentSystem).ConfigureAwait(true);
-                    var valueUpdate = CurrentSystem.EstimatedValue == 0 && await GetSystemValue(CurrentSystem).ConfigureAwait(true);
-                    var countUpdate = CurrentSystem.BodyCount == 0 && await UpdateKnownBodyCount(CurrentSystem).ConfigureAwait(true);
-                    if (starUpdate || valueUpdate || countUpdate)
-                        InvokeLive(() => OnSystemUpdatedFromEDSM?.Invoke(this, CurrentSystem));
+                    var starUpdate = captured.StarType == StarType.Unknown && await UpdateSystemStarClass(captured).ConfigureAwait(true);
+                    var valueUpdate = captured.EstimatedValue == 0 && await GetSystemValue(captured).ConfigureAwait(true);
+                    var countUpdate = captured.BodyCount == 0 && await UpdateKnownBodyCount(captured).ConfigureAwait(true);
+                    if ((starUpdate || valueUpdate || countUpdate) && CurrentSystem == captured)
+                        InvokeLive(() => OnSystemUpdatedFromEDSM?.Invoke(this, captured));
                 });
             }
 

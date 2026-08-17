@@ -6,6 +6,7 @@ using Avalonia.Headless.NUnit;
 using Avalonia.Threading;
 using NUnit.Framework;
 using ODExplorer.ViewModels.ViewVMs;
+using ODUtils.Models;
 
 namespace ODExplorer.UI.Avalonia.Tests;
 
@@ -131,5 +132,43 @@ public class CartoLiveUpdateTests
             "the header body count must tick up as bodies are scanned live");
         Assert.That(raised, Does.Contain("BodyCount"),
             "BodyCount must raise PropertyChanged on a live body scan so the header binding refreshes");
+    }
+
+    // Regression: CheckIfSystemKnown must merge StarType from a new FSDJump
+    // when the system was first added via Location with StarType.Unknown.
+    [AvaloniaTest]
+    public void Carto_startype_merges_from_fsijump_over_location_unknown()
+    {
+        var mainView = TestHarness.CreateMainViewModel();
+        mainView.SettingsStore.OnBoardingComplete = true;
+
+        var dir = Path.Combine(Path.GetTempPath(), "odex_carto_st_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        var journal = Path.Combine(dir, "Journal.240301000000.01.log");
+
+        // First: a Location event (which passes StarType.Unknown), then a FSDJump
+        // to the same system which should carry the real StarType.
+        File.WriteAllLines(journal,
+        [
+            "{\"timestamp\":\"2024-03-01T00:00:00Z\",\"event\":\"Fileheader\",\"part\":1,\"language\":\"English\"}",
+            "{\"timestamp\":\"2024-03-01T00:00:01Z\",\"event\":\"LoadGame\",\"Commander\":\"StarTypeCMDR\",\"Ship\":\"CobraMkIII\",\"GameMode\":\"Solo\",\"Credits\":1000000}",
+            "{\"timestamp\":\"2024-03-01T00:00:02Z\",\"event\":\"Location\",\"StarSystem\":\"Alpha Centauri\",\"SystemAddress\":123456789,\"StarPos\":[3.03125,3.15625,3.15625]}",
+            "{\"timestamp\":\"2024-03-01T00:00:03Z\",\"event\":\"FSDJump\",\"StarSystem\":\"Alpha Centauri\",\"SystemAddress\":123456789,\"StarPos\":[3.03125,3.15625,3.15625],\"StarType\":\"A\",\"StarClass\":\"A\",\"Body\":7,\"Bodies\":4,\"JumpDist\":1.0}"
+        ]);
+
+        mainView.OnboardingFinishedWithDirectory(dir);
+
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+        while (mainView.UiEnabled == false && DateTime.UtcNow < deadline)
+        {
+            Thread.Sleep(50);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        var carto = mainView.CurrentViewModel as CartographicViewModel;
+        Assert.That(carto, Is.Not.Null, "parser-live navigation should land on the Carto view");
+        Assert.That(carto.CurrentSystem?.Name, Is.EqualTo("ALPHA CENTAURI"));
+        Assert.That(carto.CurrentSystem?.StarClass, Is.EqualTo("A"),
+            "StarType from FSDJump must be preserved over Location's Unknown when CheckIfSystemKnown merges");
     }
 }
