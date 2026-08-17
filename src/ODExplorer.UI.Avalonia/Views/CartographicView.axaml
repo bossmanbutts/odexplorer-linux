@@ -142,6 +142,8 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <!-- Current system header -->
@@ -195,10 +197,60 @@
                 </Border>
 
                 <TextBlock Grid.Row="1"
-                           Text="Exobiology Signals"
+                           Text="Bodies"
                            FontWeight="SemiBold"
                            Margin="4,0,0,4" />
                 <ScrollViewer Grid.Row="2">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding CurrentSystemBodies}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
+                                    <Border Background="#282828"
+                                            BorderBrush="#404040"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Padding="8"
+                                            Margin="0,0,0,4">
+                                        <Grid ColumnDefinitions="50,*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                            <TextBlock Text="{Binding BodyID}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2" Text="{Binding ScanStage}"
+                                                       Foreground="#AAAAAA"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="3" Text="{Binding DataValue, StringFormat=N0}"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right"
+                                                       Margin="8,0,0,0" />
+                                            <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="10" Margin="50,2,0,0">
+                                                <TextBlock Text="{Binding BodyDescription}" Foreground="#BBBBBB" FontSize="11" />
+                                                <TextBlock Text="{Binding DistanceFromArrivalLs}" Foreground="#999999" FontSize="11" />
+                                                <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBiologicalSignals}">
+                                                    <TextBlock Text="Bio" Foreground="#8FBC8F" FontSize="11" />
+                                                    <TextBlock Text="{Binding BiologicalSignalsString}" Foreground="#8FBC8F" FontSize="11" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasGeologicalSignals}">
+                                                    <TextBlock Text="Geo" Foreground="#CD9B1D" FontSize="11" />
+                                                    <TextBlock Text="{Binding GeologicalSignalsString}" Foreground="#CD9B1D" FontSize="11" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="No bodies scanned yet. Use the Full Spectrum Scanner to discover bodies."
+                                   IsVisible="{Binding CurrentSystemBodies, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <TextBlock Grid.Row="3"
+                           Text="Exobiology Signals"
+                           FontWeight="SemiBold"
+                           Margin="4,4,0,4" />
+                <ScrollViewer Grid.Row="4" MaxHeight="180">
                     <StackPanel>
                         <ItemsControl ItemsSource="{Binding OrganicSignals}">
                             <ItemsControl.ItemTemplate>
@@ -237,7 +289,7 @@
                                    IsVisible="{Binding OrganicSignals, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
                     </StackPanel>
                 </ScrollViewer>
-                <TextBlock Grid.Row="3"
+                <TextBlock Grid.Row="5"
                            Text="Use EXO / DET / CLS / HOR / EXT buttons above to switch layout"
                            FontSize="11"
                            Foreground="#777777"
