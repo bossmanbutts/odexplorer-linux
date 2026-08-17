@@ -30,6 +30,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.mainView.OnRouteUpdated += MainView_OnRouteUpdated;
             this.mainView.OnBodyUpdated += MainView_OnBodyUpdated;
             this.mainView.OnBioUpdated += MainView_OnBioUpdated;
+            this.parserStore.OnParserStoreLive += (_, _) => OnPropertyChanged(nameof(CurrentState));
            
             this.mainView.OnSelectedBodyUpdated += MainView_OnSelectedBodyUpdated;
             this.explorationData.OnFSDJump += ExplorationData_OnFSDJump;
