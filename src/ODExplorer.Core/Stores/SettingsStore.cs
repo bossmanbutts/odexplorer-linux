@@ -50,7 +50,7 @@ namespace ODExplorer.Stores
         public SpanshCSVSettings SpanshCSVSettings { get; set; } = new();
         public ExoBiologyViewState BiologyViewState { get; set; }
         public CartoDetailsViewState CartoDetailsViewState { get; set; }
-        public CartoViewState CartoViewState { get; set; } = CartoViewState.DetailedExo;
+        public CartoViewState CartoViewState { get; set; } = CartoViewState.DetailedView;
         public CodexEntryHistory CodexEntryHistory { get; set; }
         public JournalLogAge JournalAge { get; set; }
         public GalacticRegions ExoCheckListRegion { get; set; }
