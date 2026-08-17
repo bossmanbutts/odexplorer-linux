@@ -289,11 +289,7 @@
                                    IsVisible="{Binding OrganicSignals, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
                     </StackPanel>
                 </ScrollViewer>
-                <TextBlock Grid.Row="5"
-                           Text="Use EXO / DET / CLS / HOR / EXT buttons above to switch layout"
-                           FontSize="11"
-                           Foreground="#777777"
-                           Margin="4,6,0,0" />
+
             </Grid>
 
             <!-- Detailed layout: one card per body with key stats. -->
@@ -451,7 +447,7 @@
 
         <!-- Footer -->
         <Border Grid.Row="1" Background="#323232">
-            <Grid ColumnDefinitions="*,*,*,Auto,Auto">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
                 <StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center">
                     <TextBlock Text="Systems In Route : " VerticalAlignment="Center" />
                     <TextBlock Text="{Binding Route.Count, StringFormat=N0}" VerticalAlignment="Center" />
@@ -467,7 +463,7 @@
                     <TextBlock Text="{Binding ExoValue}" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="5,0,30,0" VerticalAlignment="Center">
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="VB" Width="30" Height="30" Margin="2"
                             ToolTip.Tip="Valuable Bodies Overlay"
                             Command="{Binding OpenValuableBodiesPopOut}" />

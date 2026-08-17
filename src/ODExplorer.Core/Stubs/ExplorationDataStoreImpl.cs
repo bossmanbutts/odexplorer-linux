@@ -6,6 +6,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using EliteJournalReader;
 using EliteJournalReader.Events;
@@ -87,6 +89,14 @@ namespace ODExplorer.Stores
         private readonly ExoData exoData;
         private readonly OrganicCheckListDataStore organicCheckListData;
 
+        private const string CartoDataSettingsKey = "CartoDataState";
+
+        private static readonly JsonSerializerOptions CartoJsonOptions = new()
+        {
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            WriteIndented = false
+        };
+
         private readonly Dictionary<long, StarSystem> _cartoData = [];
         private readonly List<SystemBody> _organicData = [];
         private readonly Dictionary<long, string> _ignoredSystems = [];
@@ -99,6 +109,8 @@ namespace ODExplorer.Stores
         private double longitude;
         private double latitude;
         private long currentBodyDestinationId;
+        private int currentCmdrId;
+        private int eventsSinceLastSave;
         #endregion
 
         #region Public Properties
@@ -165,7 +177,9 @@ namespace ODExplorer.Stores
 
         public void RunBeforeParsingLogs(int currentCmdrId)
         {
+            this.currentCmdrId = currentCmdrId;
             PopulateIgnoredSystems(currentCmdrId);
+            LoadCartoData();
         }
 
         public Task ParseHistoryStream(JournalEntry entry)
@@ -176,7 +190,9 @@ namespace ODExplorer.Stores
 
         public void ParseHistory(IEnumerable<JournalEntry> journalEntries, int currentCmdrId)
         {
+            this.currentCmdrId = currentCmdrId;
             PopulateIgnoredSystems(currentCmdrId);
+            LoadCartoData();
 
             foreach (var journalEntry in journalEntries)
             {
@@ -186,7 +202,9 @@ namespace ODExplorer.Stores
 
         public Task ParseHistoryStream(IEnumerable<JournalEntry> journalEntries, int currentCmdrId)
         {
+            this.currentCmdrId = currentCmdrId;
             PopulateIgnoredSystems(currentCmdrId);
+            LoadCartoData();
 
             foreach (var journalEntry in journalEntries)
             {
@@ -208,8 +226,75 @@ namespace ODExplorer.Stores
             }
         }
 
+        public void SaveCartoData()
+        {
+            try
+            {
+                if (databaseProvider is not OdExplorerDatabaseProvider provider)
+                    return;
+
+                var json = JsonSerializer.Serialize(_cartoData, CartoJsonOptions);
+
+                provider.AddSettings(
+                [
+                    new ODUtils.Database.DTOs.SettingsDTO
+                    {
+                        Id = CartoDataSettingsKey,
+                        StringValue = json,
+                    }
+                ]);
+            }
+            catch
+            {
+                // Serialization or DB failure — non-fatal, data is still in memory.
+            }
+        }
+
+        public void LoadCartoData()
+        {
+            try
+            {
+                if (databaseProvider is not OdExplorerDatabaseProvider provider)
+                    return;
+
+                var saved = provider.GetAllSettings().FirstOrDefault(x => x.Id == CartoDataSettingsKey);
+
+                if (saved?.StringValue is not { Length: > 0 } json)
+                    return;
+
+                var loaded = JsonSerializer.Deserialize<Dictionary<long, StarSystem>>(json, CartoJsonOptions);
+
+                if (loaded is null || loaded.Count == 0)
+                    return;
+
+                _cartoData.Clear();
+                _organicData.Clear();
+
+                foreach (var (addr, system) in loaded)
+                {
+                    _cartoData[addr] = system;
+
+                    // Reconstruct Owner.SystemBodies back-reference (null after
+                    // ReferenceHandler.IgnoreCycles deserialization).
+                    foreach (var body in system.SystemBodies)
+                    {
+                        if (body.Owner is not null)
+                            body.Owner.SystemBodies = system.SystemBodies;
+
+                        if (body.BiologicalSignals > 0)
+                            _organicData.Add(body);
+                    }
+                }
+            }
+            catch
+            {
+                // Malformed data — keep empty state, user will repopulate from journals.
+            }
+        }
+
         public void ClearData()
         {
+            SaveCartoData();
             CurrentSystem = null;
             CurrentBody = null;
             CurrentBioItem = null;
@@ -221,6 +306,7 @@ namespace ODExplorer.Stores
 
         public void Dispose()
         {
+            SaveCartoData();
             parserStore.UnregisterParser(this);
             parserStore.OnParserStoreLive -= ParserStore_OnParserStoreLive;
             parserStore.StatusUpdated -= ParserStore_StatusUpdated;
@@ -560,6 +646,12 @@ namespace ODExplorer.Stores
             catch (Exception ex)
             {
                 App.Logger.Error(ex, "Exception parsing journal logs");
+            }
+
+            if (parserStore.IsLive && ++eventsSinceLastSave >= 50)
+            {
+                eventsSinceLastSave = 0;
+                SaveCartoData();
             }
         }
         #endregion
