@@ -134,6 +134,71 @@ public class CartoLiveUpdateTests
             "BodyCount must raise PropertyChanged on a live body scan so the header binding refreshes");
     }
 
+    // Regression: when body signals arrive BEFORE FSSDiscoveryScan (the honk),
+    // the honk's OnCurrentSystemUpdated must not discard the already-populated body list.
+    // RefreshBodiesView must replace (not just mutate) the ObservableCollection so the
+    // Avalonia ItemsControl binding always picks up the new collection reference.
+    [AvaloniaTest]
+    public void Carto_bodies_survive_honk_after_body_signals()
+    {
+        var mainView = TestHarness.CreateMainViewModel();
+        mainView.SettingsStore.OnBoardingComplete = true;
+
+        var dir = Path.Combine(Path.GetTempPath(), "odex_carto_honk_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        var journal = Path.Combine(dir, "Journal.240401000000.01.log");
+        File.WriteAllLines(journal, StartupLines("HonkCMDR", "HonkSys", 7000000000001));
+
+        mainView.OnboardingFinishedWithDirectory(dir);
+
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+        while (mainView.UiEnabled == false && DateTime.UtcNow < deadline)
+        {
+            Thread.Sleep(50);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        var carto = mainView.CurrentViewModel as CartographicViewModel;
+        Assert.That(carto, Is.Not.Null);
+        Assert.That(carto.CurrentSystem?.Name, Is.EqualTo("HONKSYS"));
+
+        // Live: body signals + scan arrive BEFORE the honk.
+        File.AppendAllText(journal,
+            "{\"timestamp\":\"2024-04-01T00:00:03Z\",\"event\":\"FSSBodySignals\",\"SystemAddress\":7000000000001,\"BodyID\":2,\"Signals\":[{\"Type\":\"$SAA_SignalType_Biological;\",\"Type_Localised\":\"Biological\",\"Count\":1}]}\n" +
+            "{\"timestamp\":\"2024-04-01T00:00:04Z\",\"event\":\"Scan\",\"ScanType\":\"Detailed\",\"BodyName\":\"HonkSys 2\",\"BodyID\":2,\"StarSystem\":\"HonkSys\",\"SystemAddress\":7000000000001,\"DistanceFromArrivalLS\":400.0,\"PlanetClass\":\"Icy body\",\"Landable\":false,\"SurfaceTemperature\":50.0,\"MassEM\":0.02,\"Radius\":500000.0,\"SurfaceGravity\":0.5,\"OrbitalPeriod\":200000.0,\"WasDiscovered\":false,\"WasMapped\":false}\n");
+
+        deadline = DateTime.UtcNow.AddSeconds(15);
+        while (carto.CurrentSystemBodies?.Any(x => x.BodyID == 2) != true && DateTime.UtcNow < deadline)
+        {
+            Thread.Sleep(50);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        TestContext.Out.WriteLine("After body signals: "
+            + string.Join(", ", (carto.CurrentSystemBodies ?? []).Select(x => $"{x.Name}(id={x.BodyID})")));
+        Assert.That(carto.CurrentSystemBodies?.Any(x => x.BodyID == 2), Is.True,
+            "body signals must appear in body list before the honk");
+
+        // Now the honk arrives. This triggers OnCurrentSystemUpdated which creates a new VM.
+        File.AppendAllText(journal,
+            "{\"timestamp\":\"2024-04-01T00:00:05Z\",\"event\":\"FSSDiscoveryScan\",\"SystemName\":\"HonkSys\",\"SystemAddress\":7000000000001,\"BodyCount\":3,\"Progress\":0.33}\n");
+
+        var honkDeadline = DateTime.UtcNow.AddSeconds(15);
+        while (carto.CurrentSystem?.DiscoveredBodiesCount != 3 && DateTime.UtcNow < honkDeadline)
+        {
+            Thread.Sleep(50);
+            Dispatcher.UIThread.RunJobs();
+        }
+
+        TestContext.Out.WriteLine("After honk: "
+            + string.Join(", ", (carto.CurrentSystemBodies ?? []).Select(x => $"{x.Name}(id={x.BodyID})")));
+
+        Assert.That(carto.CurrentSystem?.DiscoveredBodiesCount, Is.EqualTo(3),
+            "honk must update discovered body count");
+        Assert.That(carto.CurrentSystemBodies?.Any(x => x.BodyID == 2), Is.True,
+            "body list must survive the honk's VM rebuild and still show previously scanned bodies");
+    }
+
     // Regression: CheckIfSystemKnown must merge StarType from a new FSDJump
     // when the system was first added via Location with StarType.Unknown.
     [AvaloniaTest]

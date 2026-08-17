@@ -280,17 +280,14 @@ namespace ODExplorer.ViewModels.ViewVMs
         {
             ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
-                if (currentSystemBodies == null || CurrentSystem == null)
+                if (CurrentSystem == null)
                     return;
                 var gridSettings = settingsStore.SystemGridSetting;
                 var comparer = new SystemBodyViewModelMainComparer(gridSettings);
                 var filtered = CurrentSystem.Bodies
                     .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
-                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
-                    .ToList();
-                currentSystemBodies.Clear();
-                foreach (var item in filtered)
-                    currentSystemBodies.Add(item);
+                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)));
+                currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);
                 OnPropertyChanged(nameof(CurrentSystemBodies));
             });
         }
