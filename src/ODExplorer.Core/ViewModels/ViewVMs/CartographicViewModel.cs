@@ -42,7 +42,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.spanshStore.OnCurrentTargetChanged += Spansh_OnCurrentTargetChanged;
             this.spanshStore.OnCurrentContainerChanged += Spansh_OnCurrentContainerChanged;
 
-            SwitchView = new RelayCommand<CartoViewState>(OnSwitchView, (viewState) => CurrentState != viewState);
+            SwitchView = new RelayCommand<CartoViewState>(OnSwitchView);
             OpenValuableBodiesPopOut = new RelayCommand(OnOpenValuableBodiesPopOut);
             OpenExobiologyPopOut = new RelayCommand(OnOpenExobiologyPopOut);
 
