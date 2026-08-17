@@ -18,7 +18,6 @@ namespace ODExplorer.Models
     {
         None = -1,
         DetailedView,
-        ClassicView,
         HorizontalView,
         ExtendedBodyInfo,
         DetailedExo

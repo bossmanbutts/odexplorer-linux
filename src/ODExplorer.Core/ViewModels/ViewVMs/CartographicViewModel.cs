@@ -1,5 +1,4 @@
-﻿using ODExplorer.Controls;
-using ODExplorer.Models;
+﻿using ODExplorer.Models;
 using ODExplorer.Stores;
 using ODExplorer.ViewModels.ModelVMs;
 using ODUtils.Commands;
@@ -43,8 +42,6 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.spanshStore.OnCurrentContainerChanged += Spansh_OnCurrentContainerChanged;
 
             SwitchView = new RelayCommand<CartoViewState>(OnSwitchView);
-            OpenValuableBodiesPopOut = new RelayCommand(OnOpenValuableBodiesPopOut);
-            OpenExobiologyPopOut = new RelayCommand(OnOpenExobiologyPopOut);
 
             ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
@@ -255,24 +252,10 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         #region Commands
         public ICommand SwitchView { get; }
-        public ICommand OpenValuableBodiesPopOut { get; }
-        public ICommand OpenExobiologyPopOut { get; }
 
         private void OnSwitchView(CartoViewState state)
         {
             CurrentState = state;
-        }
-
-        private void OnOpenValuableBodiesPopOut(object? obj)
-        {
-            var popOut = new SystemBodiesOverlay();
-            mainView.OpenPopout(popOut);
-        }
-
-        private void OnOpenExobiologyPopOut(object? obj)
-        {
-            var popOut = new ExobiologyOverlay();
-            mainView.OpenPopout(popOut);
         }
         #endregion       
 

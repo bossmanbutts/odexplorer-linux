@@ -3,9 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Threading;
-using ODExplorer.Controls;
 using ODExplorer.Models;
-using ODExplorer.UI.Avalonia.Views.PopOutOverlays;
 using ODExplorer.ViewModels.ViewVMs;
 using AvaloniaWindowState = global::Avalonia.Controls.WindowState;
 
@@ -48,17 +46,12 @@ public sealed class PopOutWindow : Window
 
     private static Control BuildContent(PopOutBase popOut)
     {
-        return popOut switch
+        return new TextBlock
         {
-            SystemBodiesOverlay => new SystemBodiesOverlayView(),
-            ExobiologyOverlay => new ExobiologyOverlayView(),
-            _ => new TextBlock
-            {
-                Text = popOut.Title,
-                FontSize = 20,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-            },
+            Text = popOut.Title,
+            FontSize = 20,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
         };
     }
 

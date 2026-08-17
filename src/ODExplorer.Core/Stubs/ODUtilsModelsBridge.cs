@@ -141,7 +141,16 @@ namespace ODUtils.Models
     public enum VolcanismType { None = 0, MinorRocky, MinorMetallic, MinorCarbon, Rocky, Metallic, Carbon, MajorRocky, MajorMetallic, MajorCarbon, Nitrogen, Silicate, Iron, Water, Ammonia }
 
     // ── BodyScanState ──────────────────────────────────────────────────────────
-    public enum BodyScanState { None = 0, NavBeacon, HonkScanned, FssScanned, Predicted, DssScanned, Analysed }
+    public enum BodyScanState
+    {
+        [System.ComponentModel.Description("")] None = 0,
+        [System.ComponentModel.Description("Nav Beacon")] NavBeacon,
+        [System.ComponentModel.Description("Honk Scanned")] HonkScanned,
+        [System.ComponentModel.Description("FSS Scanned")] FssScanned,
+        [System.ComponentModel.Description("Predicted")] Predicted,
+        [System.ComponentModel.Description("DSS Scanned")] DssScanned,
+        [System.ComponentModel.Description("Analysed")] Analysed
+    }
 
     // ── StarLuminosityClass ────────────────────────────────────────────────────
     public enum StarLuminosityClass { Unknown = 0, O, Ia, Ib, II, III, IIIa, IIIb, IV, V, Va, Vb, Vz, VI, VII }

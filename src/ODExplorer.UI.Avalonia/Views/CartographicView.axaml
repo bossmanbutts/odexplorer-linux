@@ -26,9 +26,6 @@
                                    FontSize="13"
                                    Foreground="#BBBBBB"
                                    TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding ScanStage}"
-                                   FontSize="12"
-                                   Foreground="#999999" />
                     </StackPanel>
 
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
@@ -119,7 +116,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Text="{Binding Name_Localised}" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap" />
                                         <TextBlock Grid.Column="1" Text="{Binding Percent, StringFormat={}{0:0.0}%}" Foreground="#AAAAAA" Margin="12,0,0,0" />
                                     </Grid>
                                 </DataTemplate>
@@ -321,8 +318,13 @@
                                         <TextBlock Text="{Binding BodyDescription}" Foreground="#BBBBBB" />
                                         <TextBlock Text="{Binding DistanceFromArrivalLs}" Foreground="#999999" />
                                         <TextBlock Text="{Binding SurfaceTemp}" Foreground="#999999" />
-                                        <TextBlock Text="{Binding Gravity}" Foreground="#999999" />
-                                        <TextBlock Text="{Binding AtmosphereDescription}" Foreground="#999999" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasGravity}">
+                                            <TextBlock Text="Gravity" Foreground="#999999" />
+                                            <TextBlock Text="{Binding Gravity}" Foreground="#999999" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasAtmosphere}">
+                                            <TextBlock Text="{Binding AtmosphereDescription}" Foreground="#999999" />
+                                        </StackPanel>
                                     </StackPanel>
                                     <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="12" Margin="60,2,0,0">
                                         <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding HasBiologicalSignals}">
@@ -342,28 +344,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-
-            <!-- Classic layout: tabular grid of bodies. -->
-            <DataGrid IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.ClassicView}}"
-                      ItemsSource="{Binding CurrentSystemBodies}"
-                      IsReadOnly="True"
-                      AutoGenerateColumns="False"
-                      GridLinesVisibility="All"
-                      HeadersVisibility="Column"
-                      Background="#1E1E1E"
-                      RowBackground="#252525"
-                  CanUserResizeColumns="True"
-                  CanUserSortColumns="True"
-                  SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Id" Width="60" Binding="{Binding BodyID}" />
-                    <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
-                    <DataGridTextColumn Header="Class" Width="*" Binding="{Binding BodyDescription}" />
-                    <DataGridTextColumn Header="Scan Stage" Width="120" Binding="{Binding ScanStage}" />
-                    <DataGridTextColumn Header="Arrival ls" Width="130" Binding="{Binding DistanceFromArrivalLs}" />
-                    <DataGridTextColumn Header="Value" Width="130" Binding="{Binding DataValue, StringFormat=N0}" />
-                </DataGrid.Columns>
-            </DataGrid>
 
             <!-- Horizontal layout: body cards across the top, detail pane below. -->
             <Grid IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.HorizontalView}}"
@@ -477,10 +457,6 @@
                             ToolTip.Tip="Detailed Layout"
                             Command="{Binding SwitchView}"
                             CommandParameter="{x:Static models:CartoViewState.DetailedView}" />
-                    <Button Content="Classic" Height="30" Margin="2" Padding="6,0"
-                            ToolTip.Tip="Classic Layout"
-                            Command="{Binding SwitchView}"
-                            CommandParameter="{x:Static models:CartoViewState.ClassicView}" />
                     <Button Content="Horizontal" Height="30" Margin="2" Padding="6,0"
                             ToolTip.Tip="Horizontal Layout"
                             Command="{Binding SwitchView}"
@@ -489,12 +465,6 @@
                             ToolTip.Tip="Extended Body Info Layout"
                             Command="{Binding SwitchView}"
                             CommandParameter="{x:Static models:CartoViewState.ExtendedBodyInfo}" />
-                    <Button Content="VB" Width="30" Height="30" Margin="2"
-                            ToolTip.Tip="Valuable Bodies Overlay"
-                            Command="{Binding OpenValuableBodiesPopOut}" />
-                    <Button Content="EX" Width="30" Height="30" Margin="2"
-                            ToolTip.Tip="Exobiology Overlay"
-                            Command="{Binding OpenExobiologyPopOut}" />
                 </WrapPanel>
             </Grid>
         </Border>

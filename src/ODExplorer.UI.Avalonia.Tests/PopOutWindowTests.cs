@@ -1,18 +1,19 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Headless.NUnit;
 using NUnit.Framework;
 using ODExplorer.Controls;
 using ODExplorer.Models;
 using ODExplorer.UI.Avalonia.Views;
-using ODExplorer.UI.Avalonia.Views.PopOutOverlays;
 using ODExplorer.ViewModels.ModelVMs;
 
 namespace ODExplorer.UI.Avalonia.Tests;
 
-// Headless smoke tests for the pop-out overlay windows (VB/EX buttons and
-// startup restore): content selection, mode/title/topmost application, the
-// parser-offline force-close path and the reset-geometry path.
+// Headless smoke tests for the pop-out overlay windows (startup restore):
+// content selection, mode/title/topmost application, the parser-offline
+// force-close path and the reset-geometry path.
 public class PopOutWindowTests
 {
     [AvaloniaTest]
@@ -29,7 +30,7 @@ public class PopOutWindowTests
         var window = new PopOutWindow(vm, popOut);
         window.Show();
 
-        Assert.That(window.Content, Is.TypeOf<SystemBodiesOverlayView>(), "system-bodies popout hosts the bodies overlay");
+        Assert.That(window.Content, Is.TypeOf<TextBlock>(), "popout hosts a title TextBlock");
         Assert.That(window.Opacity, Is.EqualTo(0.65).Within(0.001), "semitransparent mode maps to 0.65 opacity");
         Assert.That(window.Topmost, Is.True);
         Assert.That(window.Title, Is.Empty, "ShowTitle=false suppresses the title bar text");
