@@ -2,15 +2,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ODExplorer.ViewModels.ViewVMs"
              xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
+             xmlns:conv="using:ODExplorer.UI.Avalonia.Converters"
              x:Class="ODExplorer.UI.Avalonia.Views.PopOutOverlays.ExobiologyOverlayView"
              x:DataType="vm:MainViewModel">
+    <UserControl.Resources>
+        <conv:CountToBoolConverter x:Key="CountToBool" />
+    </UserControl.Resources>
     <Grid RowDefinitions="Auto,*">
         <TextBlock Grid.Row="0"
                    Text="Exobiology Signals"
                    FontWeight="SemiBold"
                    Margin="4,0,4,6" />
         <ScrollViewer Grid.Row="1">
-            <StackPanel>
+            <StackPanel Background="#1E1E1E">
                 <ItemsControl ItemsSource="{Binding OrganicSignals}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
@@ -19,7 +23,7 @@
                                     BorderThickness="1"
                                     CornerRadius="4"
                                     Padding="8"
-                                    Margin="0,0,0,6">
+                                    Margin="4,0,4,6">
                                 <Grid ColumnDefinitions="60,*,Auto,Auto" RowDefinitions="Auto,Auto">
                                     <TextBlock Text="{Binding BodyID}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="{Binding Name}"
@@ -44,6 +48,10 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                <TextBlock Text="No organic signals detected in this system."
+                           Foreground="#888888"
+                           Margin="8,12"
+                           IsVisible="{Binding OrganicSignals, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
             </StackPanel>
         </ScrollViewer>
     </Grid>

@@ -475,9 +475,16 @@ namespace ODExplorer.ViewModels.ModelVMs
                 return _body.BodyName;
             }
 
-            return _body.BodyName.StartsWith(SystemName, StringComparison.OrdinalIgnoreCase) && _body.BodyName.Length > SystemName.Length
+            var name = _body.BodyName.StartsWith(SystemName, StringComparison.OrdinalIgnoreCase) && _body.BodyName.Length > SystemName.Length
                 ? _body.BodyName.Remove(0, SystemName.Length + 1)
                 : _body.BodyName;
+
+            if (long.TryParse(name, out _))
+            {
+                return $"Body {name}";
+            }
+
+            return name;
         }
 
         internal void OnBodyUpdated()

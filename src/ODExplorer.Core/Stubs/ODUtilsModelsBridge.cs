@@ -32,16 +32,93 @@ namespace ODUtils.Models
     // ── PlanetClass ────────────────────────────────────────────────────────────
     public enum PlanetClass
     {
-        Unknown = 0, EdsmValuableBody, IcyBody, RockyBody, RockyIceBody,
-        MetalRichBody, HighMetalContentBody, EarthlikeBody, WaterWorld,
-        WaterGiant, WaterGiantWithLife, AmmoniaWorld, GasGiantWithWaterBasedLife,
-        GasGiantWithAmmoniaBasedLife, SudarskyClassIGasGiant, SudarskyClassIIGasGiant,
-        SudarskyClassIIIGasGiant, SudarskyClassIVGasGiant, SudarskyClassVGasGiant,
-        HeliumRichGasGiant, HeliumGasGiant
+        [System.ComponentModel.Description("Unknown")] Unknown = 0,
+        [System.ComponentModel.Description("EDSM Valuable Body")] EdsmValuableBody,
+        [System.ComponentModel.Description("Icy Body")] IcyBody,
+        [System.ComponentModel.Description("Rocky Body")] RockyBody,
+        [System.ComponentModel.Description("Rocky Ice Body")] RockyIceBody,
+        [System.ComponentModel.Description("Metal Rich Body")] MetalRichBody,
+        [System.ComponentModel.Description("High Metal Content Body")] HighMetalContentBody,
+        [System.ComponentModel.Description("Earth-like World")] EarthlikeBody,
+        [System.ComponentModel.Description("Water World")] WaterWorld,
+        [System.ComponentModel.Description("Water Giant")] WaterGiant,
+        [System.ComponentModel.Description("Water Giant with Life")] WaterGiantWithLife,
+        [System.ComponentModel.Description("Ammonia World")] AmmoniaWorld,
+        [System.ComponentModel.Description("Gas Giant with Water-based Life")] GasGiantWithWaterBasedLife,
+        [System.ComponentModel.Description("Gas Giant with Ammonia-based Life")] GasGiantWithAmmoniaBasedLife,
+        [System.ComponentModel.Description("Sudarsky Class I Gas Giant")] SudarskyClassIGasGiant,
+        [System.ComponentModel.Description("Sudarsky Class II Gas Giant")] SudarskyClassIIGasGiant,
+        [System.ComponentModel.Description("Sudarsky Class III Gas Giant")] SudarskyClassIIIGasGiant,
+        [System.ComponentModel.Description("Sudarsky Class IV Gas Giant")] SudarskyClassIVGasGiant,
+        [System.ComponentModel.Description("Sudarsky Class V Gas Giant")] SudarskyClassVGasGiant,
+        [System.ComponentModel.Description("Helium Rich Gas Giant")] HeliumRichGasGiant,
+        [System.ComponentModel.Description("Helium Gas Giant")] HeliumGasGiant
     }
 
     // ── StarType ───────────────────────────────────────────────────────────────
-    public enum StarType { Unknown = 0, O, B, A, F, G, K, M, L, T, Y, TTS, AeBe, W, WN, WNC, WC, WO, CS, C, CN, CJ, CH, CHd, MS, S, D, DA, DAB, DAO, DAZ, DAV, DB, DBZ, DBV, DO, DOV, DQ, DC, DCV, DX, N, BH, H, X }
+    public enum StarType
+    {
+        [System.ComponentModel.Description("Unknown")] Unknown = 0,
+        [System.ComponentModel.Description("O")] O,
+        [System.ComponentModel.Description("B")] B,
+        [System.ComponentModel.Description("A")] A,
+        [System.ComponentModel.Description("F")] F,
+        [System.ComponentModel.Description("G")] G,
+        [System.ComponentModel.Description("K")] K,
+        [System.ComponentModel.Description("M")] M,
+        [System.ComponentModel.Description("L")] L,
+        [System.ComponentModel.Description("T")] T,
+        [System.ComponentModel.Description("Y")] Y,
+        [System.ComponentModel.Description("TTS Proto Star")] TTS,
+        [System.ComponentModel.Description("AeBe Proto Star")] AeBe,
+        [System.ComponentModel.Description("Wolf-Rayet")] W,
+        [System.ComponentModel.Description("Wolf-Rayet N")] WN,
+        [System.ComponentModel.Description("Wolf-Rayet NC")] WNC,
+        [System.ComponentModel.Description("Wolf-Rayet C")] WC,
+        [System.ComponentModel.Description("Wolf-Rayet O")] WO,
+        [System.ComponentModel.Description("Carbon Sequence")] CS,
+        [System.ComponentModel.Description("Carbon Star")] C,
+        [System.ComponentModel.Description("Carbon Star N")] CN,
+        [System.ComponentModel.Description("Carbon Star J")] CJ,
+        [System.ComponentModel.Description("Carbon Star H")] CH,
+        [System.ComponentModel.Description("Carbon Star Hd")] CHd,
+        [System.ComponentModel.Description("MS-Type Star")] MS,
+        [System.ComponentModel.Description("S-Type Star")] S,
+        [System.ComponentModel.Description("White Dwarf")] D,
+        [System.ComponentModel.Description("DA")]
+        DA,
+        [System.ComponentModel.Description("DAB")]
+        DAB,
+        [System.ComponentModel.Description("DAO")]
+        DAO,
+        [System.ComponentModel.Description("DAZ")]
+        DAZ,
+        [System.ComponentModel.Description("DAV")]
+        DAV,
+        [System.ComponentModel.Description("DB")]
+        DB,
+        [System.ComponentModel.Description("DBZ")]
+        DBZ,
+        [System.ComponentModel.Description("DBV")]
+        DBV,
+        [System.ComponentModel.Description("DO")]
+        DO,
+        [System.ComponentModel.Description("DOV")]
+        DOV,
+        [System.ComponentModel.Description("DQ")]
+        DQ,
+        [System.ComponentModel.Description("DC")]
+        DC,
+        [System.ComponentModel.Description("DCV")]
+        DCV,
+        [System.ComponentModel.Description("DX")]
+        DX,
+        [System.ComponentModel.Description("Neutron Star")] N,
+        [System.ComponentModel.Description("Black Hole")] BH,
+        [System.ComponentModel.Description("Rogue Planet")] H,
+        [System.ComponentModel.Description("X")]
+        X
+    }
 
     // ── PlanetMaterial ─────────────────────────────────────────────────────────
     [System.Flags]

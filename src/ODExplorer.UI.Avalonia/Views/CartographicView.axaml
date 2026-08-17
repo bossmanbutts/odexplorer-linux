@@ -131,7 +131,7 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid RowDefinitions="*,40">
+    <Grid RowDefinitions="*,Auto">
         <!-- Body area -->
         <Grid Grid.Row="0" Margin="5">
 
@@ -349,7 +349,12 @@
                       IsReadOnly="True"
                       AutoGenerateColumns="False"
                       GridLinesVisibility="All"
-                      HeadersVisibility="Column">
+                      HeadersVisibility="Column"
+                      Background="#1E1E1E"
+                      RowBackground="#252525"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="True"
+                  SelectionMode="Single">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id" Width="60" Binding="{Binding BodyID}" />
                     <DataGridTextColumn Header="Name" Width="*" Binding="{Binding Name}" />
@@ -446,8 +451,8 @@
         </Grid>
 
         <!-- Footer -->
-        <Border Grid.Row="1" Background="#323232">
-            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+        <Border Grid.Row="1" Background="#323232" Padding="0,4">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*">
                 <StackPanel Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center">
                     <TextBlock Text="Systems In Route : " VerticalAlignment="Center" />
                     <TextBlock Text="{Binding Route.Count, StringFormat=N0}" VerticalAlignment="Center" />
@@ -463,16 +468,7 @@
                     <TextBlock Text="{Binding ExoValue}" VerticalAlignment="Center" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="VB" Width="30" Height="30" Margin="2"
-                            ToolTip.Tip="Valuable Bodies Overlay"
-                            Command="{Binding OpenValuableBodiesPopOut}" />
-                    <Button Content="EX" Width="30" Height="30" Margin="2"
-                            ToolTip.Tip="Exobiology Overlay"
-                            Command="{Binding OpenExobiologyPopOut}" />
-                </StackPanel>
-
-                <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="5,0" VerticalAlignment="Center">
+                <WrapPanel Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="4,0">
                     <Button Content="System/Exo" Height="30" Margin="2" Padding="6,0"
                             ToolTip.Tip="Current System/Exo Layout"
                             Command="{Binding SwitchView}"
@@ -493,7 +489,13 @@
                             ToolTip.Tip="Extended Body Info Layout"
                             Command="{Binding SwitchView}"
                             CommandParameter="{x:Static models:CartoViewState.ExtendedBodyInfo}" />
-                </StackPanel>
+                    <Button Content="VB" Width="30" Height="30" Margin="2"
+                            ToolTip.Tip="Valuable Bodies Overlay"
+                            Command="{Binding OpenValuableBodiesPopOut}" />
+                    <Button Content="EX" Width="30" Height="30" Margin="2"
+                            ToolTip.Tip="Exobiology Overlay"
+                            Command="{Binding OpenExobiologyPopOut}" />
+                </WrapPanel>
             </Grid>
         </Border>
     </Grid>

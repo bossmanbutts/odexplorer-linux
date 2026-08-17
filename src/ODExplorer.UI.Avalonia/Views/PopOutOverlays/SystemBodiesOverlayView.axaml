@@ -4,7 +4,7 @@
              xmlns:modelvms="using:ODExplorer.ViewModels.ModelVMs"
              x:Class="ODExplorer.UI.Avalonia.Views.PopOutOverlays.SystemBodiesOverlayView"
              x:DataType="vm:MainViewModel">
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*" Background="#1E1E1E">
         <TextBlock Grid.Row="0"
                    Text="{Binding CurrentSystem.Name, StringFormat='System Bodies — {0}'}"
                    FontWeight="SemiBold"
@@ -14,7 +14,12 @@
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   GridLinesVisibility="Horizontal"
-                  HeadersVisibility="Column">
+                  HeadersVisibility="Column"
+                  Background="#1E1E1E"
+                  RowBackground="#252525"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="True"
+                  SelectionMode="Single">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding BodyID}" Width="50" />
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
