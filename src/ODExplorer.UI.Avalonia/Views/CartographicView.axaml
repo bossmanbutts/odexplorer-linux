@@ -197,9 +197,14 @@
                 </Border>
 
                 <TextBlock Grid.Row="1"
-                           Text="Bodies"
                            FontWeight="SemiBold"
-                           Margin="4,0,0,4" />
+                           Margin="4,0,0,4">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="Bodies (debug count: {0})">
+                            <Binding Path="CurrentSystemBodies.Count" FallbackValue="N/A" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
                 <ScrollViewer Grid.Row="2">
                     <StackPanel>
                         <ItemsControl ItemsSource="{Binding CurrentSystemBodies}">
@@ -298,7 +303,15 @@
 
             <!-- Detailed layout: one card per body with key stats. -->
             <ScrollViewer IsVisible="{Binding CurrentState, Converter={StaticResource StateVisible}, ConverterParameter={x:Static models:CartoViewState.DetailedView}}">
-                <ItemsControl ItemsSource="{Binding CurrentSystemBodies}">
+                <StackPanel>
+                    <TextBlock FontWeight="SemiBold" Margin="4,0,0,4">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="Bodies (debug count: {0})">
+                                <Binding Path="CurrentSystemBodies.Count" FallbackValue="N/A" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <ItemsControl ItemsSource="{Binding CurrentSystemBodies}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
                             <Border Background="#282828"
@@ -345,6 +358,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                </StackPanel>
             </ScrollViewer>
 
             <!-- Classic layout: tabular grid of bodies. -->

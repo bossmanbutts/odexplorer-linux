@@ -19,7 +19,10 @@ public class ViewLocator : IDataTemplate
 
         if (viewType is not null)
         {
-            return (Control?)Activator.CreateInstance(viewType);
+            var control = (Control?)Activator.CreateInstance(viewType);
+            if (control is not null)
+                control.DataContext = data;
+            return control;
         }
 
         return new TextBlock
