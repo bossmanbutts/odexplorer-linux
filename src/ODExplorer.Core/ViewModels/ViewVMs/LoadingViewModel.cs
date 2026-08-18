@@ -1,6 +1,9 @@
 ﻿using ODExplorer.Stores;
+using ODUtils.APis;
 using ODUtils.Commands;
 using ODUtils.Dialogs.ViewModels;
+using ODUtils.IO;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -16,8 +19,11 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             OpenPayPal = new RelayCommand(OnOpenPayPal);
             OpenGitHub = new RelayCommand(OnOpenGitHub);
+            DownloadUpdate = new RelayCommand(OnDownloadUpdate);
             if (settingsStore.SelectedCommanderID >= 0)
                 journalStore.ReadNewCommander(settingsStore.SelectedCommanderID);
+
+            _ = CheckForUpdatesAsync();
         }
 
         private readonly JournalParserStore journalStore;
@@ -25,6 +31,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         public ICommand OpenPayPal { get; }
         public ICommand OpenGitHub { get; }
+        public ICommand DownloadUpdate { get; }
 
         private string statusText = string.Empty;
         public string StatusText
@@ -35,6 +42,47 @@ namespace ODExplorer.ViewModels.ViewVMs
                 statusText = value;
                 OnPropertyChanged(nameof(StatusText));
             }
+        }
+
+        private string updateText = string.Empty;
+        public string UpdateText
+        {
+            get => updateText;
+            set
+            {
+                updateText = value;
+                OnPropertyChanged(nameof(UpdateText));
+                OnPropertyChanged(nameof(HasUpdate));
+            }
+        }
+
+        private string? updateDownloadUrl;
+        public bool HasUpdate => !string.IsNullOrEmpty(updateText);
+
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                var updateInfo = await Json.GetJsonFromUrlAndDeserialise<UpdateInfo>(
+                    "https://raw.githubusercontent.com",
+                    "/WarmedxMints/ODUpdates/main/ODExplorerUpdate.json");
+
+                if (updateInfo?.Version is not null && updateInfo.Version > App.AppVersion)
+                {
+                    UpdateText = $"Update available: v{updateInfo.Version}";
+                    updateDownloadUrl = updateInfo.DownloadUrl;
+                }
+            }
+            catch
+            {
+                // Network or parse failure; silently continue.
+            }
+        }
+
+        private void OnDownloadUpdate(object? obj)
+        {
+            if (!string.IsNullOrEmpty(updateDownloadUrl))
+                ODUtils.Helpers.OperatingSystem.OpenUrl(updateDownloadUrl);
         }
 
         private void OnOpenPayPal(object? obj)
