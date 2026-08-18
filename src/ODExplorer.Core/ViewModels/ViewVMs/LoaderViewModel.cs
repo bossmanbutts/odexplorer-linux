@@ -90,7 +90,7 @@ namespace ODExplorer.ViewModels.ViewVMs
                 UpdateStatusText("Error Accessing Database\nApplication will now close");
                 await Task.Delay(5000);
                 App.Logger.Error(ex.Message);
-                App.Logger.Error(ex.StackTrace);
+                App.Logger.Error(ex.StackTrace ?? string.Empty);
                 App.Current.Shutdown();
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ namespace ODExplorer.ViewModels.ViewVMs
                 UpdateStatusText("Error Loading OD Explorer\nApplication will now close");
                 await Task.Delay(5000);
                 App.Logger.Error(ex.Message);
-                App.Logger.Error(ex.StackTrace);
+                App.Logger.Error(ex.StackTrace ?? string.Empty);
                 App.Current.Shutdown();
             }
         }

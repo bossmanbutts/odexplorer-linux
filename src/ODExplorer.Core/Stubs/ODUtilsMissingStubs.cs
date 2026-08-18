@@ -116,7 +116,9 @@ namespace ODUtils.ViewModelNavigation
     {
         private readonly OdNavigationService<TViewModel> service;
         public OdNavigateCommand(OdNavigationService<TViewModel> service) => this.service = service;
+#pragma warning disable CS0067
         public event System.EventHandler? CanExecuteChanged;
+#pragma warning restore CS0067
         public bool CanExecute(object? p) => true;
         public void Execute(object? p) => service.Navigate();
     }

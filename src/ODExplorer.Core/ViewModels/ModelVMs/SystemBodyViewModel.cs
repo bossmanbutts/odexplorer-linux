@@ -14,7 +14,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
-using ODExplorer.Models;
 using Composition = ODUtils.Models.Composition;
 using AtmosphereClass = ODUtils.Models.AtmosphereClass;
 using OrganicScanStage = ODUtils.Models.OrganicScanStage;

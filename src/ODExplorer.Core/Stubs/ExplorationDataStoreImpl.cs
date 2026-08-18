@@ -1310,10 +1310,10 @@ namespace ODExplorer.Stores
 
                 body = CurrentSystem.SystemBodies.FirstOrDefault(x => x.BodyID == scanOrganic.Body);
 
-                body ??= CreateMinimalBody(scanOrganic.Body, string.Empty, CurrentSystem);
+                body ??= CreateMinimalBody(scanOrganic.Body, string.Empty, CurrentSystem!);
             }
 
-            SetOwner(body, CurrentSystem);
+            SetOwner(body, CurrentSystem!);
             body.OrganicScanItems ??= new OrganicScanItemList();
 
             var known = body.OrganicScanItems.FirstOrDefault(x =>
@@ -1366,7 +1366,7 @@ namespace ODExplorer.Stores
                 body ??= CreateMinimalBody(codexEntry.BodyID, string.Empty, CurrentSystem);
             }
 
-            SetOwner(body, CurrentSystem);
+            SetOwner(body, CurrentSystem!);
             body.OrganicScanItems ??= new OrganicScanItemList();
 
             var genus = string.Join('_', codexEntry.Name.Split('_').Take(3));
@@ -1733,7 +1733,7 @@ namespace ODExplorer.Stores
 
             EnsurePredictionPlaceholders(body, timeStamp);
 
-            var placeholders = body.OrganicScanItems.Where(x => x.GenusLocalised == "Not Predicted").ToList();
+            var placeholders = body.OrganicScanItems!.Where(x => x.GenusLocalised == "Not Predicted").ToList();
             if (placeholders.Count == 0)
                 return false;
 

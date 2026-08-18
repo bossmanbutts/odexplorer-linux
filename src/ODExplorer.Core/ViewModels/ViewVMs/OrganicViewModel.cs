@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using ODExplorer.Models;
 using GalacticRegions = ODUtils.Models.GalacticRegions;
 using OrganicScanStage = ODUtils.Models.OrganicScanStage;
 
@@ -477,7 +476,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             OnPropertyChanged(nameof(Lost));
         }
 
-        private void OnCopyToClipboard(string value)
+        private void OnCopyToClipboard(string? value)
         {
             if (string.IsNullOrEmpty(value))
             {

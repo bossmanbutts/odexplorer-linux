@@ -149,7 +149,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             CurrentState = CartoDetailsViewState.Unsold;
         }
 
-        private void OnCopyToClipboard(string value)
+        private void OnCopyToClipboard(string? value)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -179,7 +179,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             BuildUnsoldSystems();
         }
 
-        private void OnToggleRestore(IgnoredSystemsViewModel model)
+        private void OnToggleRestore(IgnoredSystemsViewModel? model)
         {
             if (model == null)
                 return;

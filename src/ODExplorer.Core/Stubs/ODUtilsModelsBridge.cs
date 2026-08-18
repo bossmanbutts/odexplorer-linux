@@ -197,7 +197,17 @@ namespace ODUtils.Models
         public string Name_Localised { get; set; } = string.Empty;
         public double Percent { get; set; }
         // Used as flags bitmask via '|=' on PlanetMaterial
-        public PlanetMaterial Name_AsMaterial => PlanetMaterial.None;
+        public PlanetMaterial Name_AsMaterial => Name?.ToLowerInvariant() switch
+        {
+            "carbon" => PlanetMaterial.carbon,
+            "vanadium" => PlanetMaterial.vanadium,
+            "germanium" => PlanetMaterial.germanium,
+            "cadmium" => PlanetMaterial.cadmium,
+            "niobium" => PlanetMaterial.niobium,
+            "yttrium" => PlanetMaterial.yttrium,
+            "polonium" => PlanetMaterial.polonium,
+            _ => PlanetMaterial.None,
+        };
     }
 
     // ── ShipMaterials ─────────────────────────────────────────────────────────

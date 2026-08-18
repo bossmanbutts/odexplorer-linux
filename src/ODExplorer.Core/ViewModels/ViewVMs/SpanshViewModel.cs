@@ -184,7 +184,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             csvStore.CurrentIndex--;
         }
 
-        private void CopySystemNameToClipboard(ExplorationTargetViewModel model)
+        private void CopySystemNameToClipboard(ExplorationTargetViewModel? model)
         {
             if (model == null)
             {
