@@ -353,7 +353,9 @@
                          SelectedItem="{Binding SelectedBody, Mode=TwoWay}"
                          SelectionMode="Single"
                          Height="96"
-                         HorizontalAlignment="Stretch">
+                         HorizontalAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel Orientation="Horizontal" />

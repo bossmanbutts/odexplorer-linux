@@ -283,7 +283,7 @@ namespace ODExplorer.ViewModels.ModelVMs
         public PlanetClass PlanetClass => _body.PlanetClass;
         public string PlanetClassDescription => _body.PlanetClass.GetEnumDescription();
         public string EarthMasses => $"{_body.MassEM}";
-        public string Gravity => $"{_body.SurfaceGravity:N2}";
+        public string Gravity => $"{_body.SurfaceGravity:N2}G";
         public bool HasGravity => _body.SurfaceGravity > 0;
         public string AtmosphereType => _body.AtmosphereType.GetDescription();
         public bool HasAtmosphere => _body.AtmosphereType is not AtmosphereClass.None and not AtmosphereClass.NoAtmosphere and not AtmosphereClass.Unknown;

@@ -16,7 +16,20 @@ namespace ODExplorer.ViewModels.ModelVMs
     {
         public string Name => ring.Name.Replace(ownerName, "").Trim();
         public string RingClass => GetRingClass(ring.RingClass);
-        public string MassMT => ring.MassMT.ToString("N0");
+        public string MassMT => FormatMass(ring.MassMT);
+
+        private static string FormatMass(double massMT)
+        {
+            if (massMT >= 1e12)
+                return $"{massMT / 1e12:N2}Tt";
+            if (massMT >= 1e9)
+                return $"{massMT / 1e9:N2}Gt";
+            if (massMT >= 1e6)
+                return $"{massMT / 1e6:N2}Mt";
+            if (massMT >= 1e3)
+                return $"{massMT / 1e3:N2}kt";
+            return $"{massMT:N0}t";
+        }
         public string InnRad => BodyHelpers.FormatMeters(ring.InnerRad);
         public string OutRad => BodyHelpers.FormatMeters(ring.OuterRad);
         private static string GetRingClass(string ringClass)

@@ -487,18 +487,6 @@ namespace ODExplorer.Stores
                         }
                         break;
                     case ScanBaryCentreEvent.ScanBaryCentreEventArgs scanBarycentre:
-                        {
-                            if (_cartoData.TryGetValue(scanBarycentre.SystemAddress, out var system))
-                            {
-                                var known = system.SystemBodies.FirstOrDefault(x => x.BodyID == scanBarycentre.BodyID);
-
-                                if (known is null)
-                                {
-                                    var body = CreateMinimalBody(scanBarycentre.BodyID, string.Empty, system);
-                                    system.SystemBodies.Add(body);
-                                }
-                            }
-                        }
                         break;
                     case SellExplorationDataEvent.SellExplorationDataEventArgs sellCarto:
                         {
