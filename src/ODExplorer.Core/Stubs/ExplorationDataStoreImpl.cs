@@ -393,6 +393,28 @@ namespace ODExplorer.Stores
                             });
                         }
                         break;
+                    case NavRouteEvent.NavRouteEventArgs:
+                        {
+                            var navRoute = parserStore.GetNavRoute();
+                            if (navRoute?.Route is { Count: > 0 })
+                            {
+                                Route.Clear();
+                                foreach (var sys in navRoute.Route)
+                                {
+                                    if (sys is null) continue;
+                                    var system = CheckIfSystemKnown(BuildSystem(sys.StarSystem, sys.SystemAddress,
+                                        sys.StarPos, JournalEventMapper.GetStarType(sys.StarClass)));
+                                    if (!Route.Contains(system))
+                                    {
+                                        _cartoData.TryAdd(system.Address, system);
+                                        Route.Add(system);
+                                    }
+                                }
+                                var navRouteSnapshot = new List<StarSystem>(Route);
+                                InvokeLive(() => OnRouteUpdated?.Invoke(this, navRouteSnapshot));
+                            }
+                        }
+                        break;
                     case NavRouteClearEvent.NavRoutClearEventArgs:
                         Route.Clear();
                         var clearedSnapshot = new List<StarSystem>(Route);

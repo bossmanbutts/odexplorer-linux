@@ -71,7 +71,45 @@ namespace ODExplorer.Stores
 
         public List<JournalCommander> JournalCommanders => _journalCommanders;
 
-        public NavigationRoute? GetNavRoute() => null;
+        public NavigationRoute? GetNavRoute()
+        {
+            if (string.IsNullOrEmpty(currentDirectory))
+                return null;
+
+            var navPath = Path.Combine(currentDirectory, "NavRoute.json");
+            if (!File.Exists(navPath))
+                return null;
+
+            try
+            {
+                var json = File.ReadAllText(navPath, Encoding.UTF8);
+                var obj = JObject.Parse(json);
+                var routeArray = obj["Route"] as JArray;
+                if (routeArray is null || routeArray.Count == 0)
+                    return null;
+
+                var route = new NavigationRoute();
+                foreach (var entry in routeArray)
+                {
+                    var sys = new SystemInRoute
+                    {
+                        StarSystem = entry["StarSystem"]?.ToString() ?? string.Empty,
+                        SystemAddress = entry["SystemAddress"]?.Value<long>() ?? 0,
+                        StarClass = entry["StarClass"]?.ToString() ?? string.Empty,
+                        StarPos = entry["StarPos"] is JArray pos
+                            ? pos.Select(p => p.Value<double>()).ToArray()
+                            : Array.Empty<double>()
+                    };
+                    route.Route.Add(sys);
+                }
+
+                return route.Route.Count > 0 ? route : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public void RegisterParser(IProcessJournalLogs journalLogParser)
         {
