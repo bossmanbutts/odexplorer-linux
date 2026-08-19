@@ -61,6 +61,9 @@ Thumbs.db
 # Packaging output
 dist/
 
+# Decompiled reference source (not part of the project)
+reference/
+
 # Root build outputs (UI publish leaves binaries at the repo root)
 /ODExplorer.exe
 /ODExplorer.pdb
