@@ -298,7 +298,6 @@ namespace ODExplorer.ViewModels.ViewVMs
             allSpecies.AddRange(Fumerola);
             allSpecies.AddRange(Fungoida);
             allSpecies.AddRange(Osseus);
-            allSpecies.AddRange(Fumerola);
             allSpecies.AddRange(Recepta);
             allSpecies.AddRange(Frutexa);
             allSpecies.AddRange(Stratum);
@@ -351,11 +350,11 @@ namespace ODExplorer.ViewModels.ViewVMs
                     UpdateSpeciesCounts(Concha);
                     OnPropertyChanged(nameof(Concha));
                     break;
-                case "$Codex_Ent_Electricae_Genus_Name":
+                case "$Codex_Ent_Electricae_Genus_Name;":
                     UpdateSpeciesCounts(Electricae);
                     OnPropertyChanged(nameof(Electricae));
                     break;
-                case "$Codex_Ent_Fonticulus_Genus_Name":
+                case "$Codex_Ent_Fonticulus_Genus_Name;":
                     UpdateSpeciesCounts(Fonticulua);
                     OnPropertyChanged(nameof(Fonticulua));
                     break;

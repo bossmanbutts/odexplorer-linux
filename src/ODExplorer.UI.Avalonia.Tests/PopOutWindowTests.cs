@@ -7,6 +7,7 @@ using NUnit.Framework;
 using ODExplorer.Controls;
 using ODExplorer.Models;
 using ODExplorer.UI.Avalonia.Views;
+using ODExplorer.UI.Avalonia.Views.PopOutOverlays;
 using ODExplorer.ViewModels.ModelVMs;
 
 namespace ODExplorer.UI.Avalonia.Tests;
@@ -30,7 +31,7 @@ public class PopOutWindowTests
         var window = new PopOutWindow(vm, popOut);
         window.Show();
 
-        Assert.That(window.Content, Is.TypeOf<TextBlock>(), "popout hosts a title TextBlock");
+        Assert.That(window.Content, Is.TypeOf<SystemBodiesOverlayView>(), "popout hosts the system bodies overlay view");
         Assert.That(window.Opacity, Is.EqualTo(0.65).Within(0.001), "semitransparent mode maps to 0.65 opacity");
         Assert.That(window.Topmost, Is.True);
         Assert.That(window.Title, Is.Empty, "ShowTitle=false suppresses the title bar text");
