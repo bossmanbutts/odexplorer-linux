@@ -158,6 +158,10 @@ namespace ODUtils.APis
     public sealed class UpdateInfo
     {
         public System.Version Version { get; set; } = new(0, 0, 0);
+        public string[] PatchNotes { get; set; } = [];
+        public string? Url { get; set; }
+        public string? FileUrl { get; set; }
+        // Legacy compat
         public string? DownloadUrl { get; set; }
         public string? ChangeLog { get; set; }
     }
@@ -232,7 +236,7 @@ namespace ODUtils.APis
         private static ODUtils.Models.EdAstro.EDAstroType ParseType(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                return ODUtils.Models.EdAstro.EDAstroType.Unknown;
+                return ODUtils.Models.EdAstro.EDAstroType.Community;
 
             var normalized = Normalize(value);
             foreach (var member in Enum.GetNames<ODUtils.Models.EdAstro.EDAstroType>())
@@ -241,7 +245,7 @@ namespace ODUtils.APis
                     return Enum.Parse<ODUtils.Models.EdAstro.EDAstroType>(member);
             }
 
-            return ODUtils.Models.EdAstro.EDAstroType.Unknown;
+            return ODUtils.Models.EdAstro.EDAstroType.Community;
         }
 
         private static string Normalize(string value)
@@ -444,15 +448,68 @@ namespace ODUtils.IO
 {
     public static class Json
     {
-        public static async Task<T?> GetJsonFromUrlAndDeserialise<T>(string baseUrl, string path)
+        private static readonly Newtonsoft.Json.JsonSerializerSettings s_settings = new()
+        {
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+            DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+            ObjectCreationHandling = Newtonsoft.Json.ObjectCreationHandling.Replace
+        };
+
+        public static T? LoadJson<T>(string filename)
+        {
+            try
+            {
+                if (System.IO.File.Exists(filename))
+                {
+                    var text = System.IO.File.ReadAllText(filename);
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text, s_settings);
+                }
+                return default;
+            }
+            catch { return default; }
+        }
+
+        public static async Task<T?> GetJsonFromUrlAndDeserialise<T>(string baseUrl, string url)
         {
             try
             {
                 using var http = new System.Net.Http.HttpClient();
-                var json = await http.GetStringAsync(baseUrl + path).ConfigureAwait(false);
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+                http.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue { NoCache = true };
+                http.BaseAddress = new System.Uri(baseUrl);
+                http.DefaultRequestHeaders.Add("User-Agent", "C# Application");
+                http.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                var response = await http.GetAsync(url).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json, s_settings);
             }
             catch { return default; }
+        }
+
+        public static T? DeserialiseJsonFromString<T>(string json)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json, s_settings);
+        }
+
+        public static string SerialiseJsonToString(object json)
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(json, Newtonsoft.Json.Formatting.Indented, s_settings);
+        }
+
+        public static bool SaveJson<T>(T objectToSave, string filename)
+        {
+            try
+            {
+                var dir = System.IO.Path.GetDirectoryName(filename);
+                if (dir != null && !System.IO.Directory.Exists(dir))
+                    System.IO.Directory.CreateDirectory(dir);
+                var value = Newtonsoft.Json.JsonConvert.SerializeObject(objectToSave, Newtonsoft.Json.Formatting.Indented, s_settings);
+                using var stream = new System.IO.FileStream(filename, System.IO.FileMode.Create);
+                using var writer = new System.IO.StreamWriter(stream);
+                writer.Write(value);
+                return true;
+            }
+            catch { return false; }
         }
     }
 }
@@ -494,10 +551,35 @@ namespace ODUtils.Database.Interfaces
 // ────────────────────────────────────────────────────────────────────────────
 namespace ODUtils.Extensions
 {
-    public static class NumberExtensions
+    public static class NumbericalExtensions
     {
-        public static string FormatNumber(this long value) => value.ToString("N0");
-        public static string FormatNumber(this double value) => value.ToString("N0");
+        public static string FormatNumber(this long num)
+        {
+            var cultureInfo = new System.Globalization.CultureInfo("en-GB");
+            num = (long)MaxThreeSignificantDigits(num);
+            if (Math.Abs(num) >= 1000000000)
+                return ((double)num / 1000000000.0).ToString("0.## B", cultureInfo);
+            if (Math.Abs(num) >= 100000000)
+                return ((double)num / 1000000.0).ToString("0.## M", cultureInfo);
+            if (Math.Abs(num) >= 1000000)
+                return ((double)num / 1000000.0).ToString("0.## M", cultureInfo);
+            if (Math.Abs(num) >= 100000)
+                return ((double)num / 1000.0).ToString("0 k", cultureInfo);
+            if (Math.Abs(num) >= 10000)
+                return ((double)num / 1000.0).ToString("0.## k", cultureInfo);
+            if (Math.Abs(num) >= 1000)
+                return ((double)num / 1000.0).ToString("0.## k", cultureInfo);
+            return num.ToString("+#;-#;0", cultureInfo);
+        }
+
+        public static string FormatNumber(this double num) => ((long)num).FormatNumber();
+
+        private static double MaxThreeSignificantDigits(double x)
+        {
+            if (x == 0.0) return 0.0;
+            double n = Math.Pow(10.0, Math.Floor(Math.Log10(Math.Abs(x))) + 1.0);
+            return n * Math.Round(x / n, 3);
+        }
     }
 
     public static class EnumExtensions
@@ -523,9 +605,25 @@ namespace ODUtils.EliteDangerousHelpers
     {
         public static string FormatMeters(double meters)
         {
-            if (meters >= 1_000_000) return $"{meters / 1_000_000:N2} Mm";
-            if (meters >= 1_000) return $"{meters / 1_000:N2} km";
-            return $"{meters:N0} m";
+            meters = MaxThreeSignificantDigits(meters);
+            if (Math.Abs(meters) >= 1_000_000_000) return $"{meters / 1_000_000:N0} Mm";
+            if (Math.Abs(meters) >= 1_000_000) return $"{meters / 1_000_000:N1} Mm";
+            if (Math.Abs(meters) >= 1_000) return $"{meters / 1_000:N1} km";
+            return $"{meters:N1} m";
+        }
+
+        public static double OrbitalDistance(double orbitalPeriodSeconds)
+        {
+            double x = orbitalPeriodSeconds / 31556952.0;
+            double num = Math.Pow(Math.Pow(x, 2.0), 1.0 / 3.0);
+            return num * 499.00478380614;
+        }
+
+        private static double MaxThreeSignificantDigits(double x)
+        {
+            if (x == 0.0) return 0.0;
+            double n = Math.Pow(10.0, Math.Floor(Math.Log10(Math.Abs(x))) + 1.0);
+            return n * Math.Round(x / n, 3);
         }
 
         // Great-circle distance in metres between two (latitude, longitude) points

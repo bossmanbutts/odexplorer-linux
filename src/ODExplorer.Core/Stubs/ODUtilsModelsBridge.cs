@@ -1,11 +1,61 @@
 // Lightweight stubs to satisfy references to ODUtils.Models used in the core. These are temporary; UI/host should provide real models or map via adapters.
 
 using System.Collections.Generic;
+using System.Linq;
 using ODUtils.Exobiology;
 
 namespace ODUtils.Models
 {
     // ── Regions ────────────────────────────────────────────────────────────────
+    // Matches real ODUtils.Models.GalacticRegion (36 values)
+    public enum GalacticRegion
+    {
+        All,
+        GalacticCentre,
+        EmpyreanStraits,
+        RykersHope,
+        OdinsHold,
+        NormaArm,
+        ArcadianStream,
+        Izanami,
+        InnerOrionPerseusConflux,
+        InnerScutumCentaurusArm,
+        NormaExpanse,
+        TrojanBelt,
+        TheVeils,
+        NewtonsVault,
+        TheConduit,
+        OuterOrionPerseusConflux,
+        OrionCygnusArm,
+        Temple,
+        InnerOrionSpur,
+        HawkingsGap,
+        DrymansPoint,
+        SagittariusCarinaArm,
+        MareSomnia,
+        Acheron,
+        FormorianFrontier,
+        HieronymusDelta,
+        OuterScutumCentaurusArm,
+        OuterArm,
+        AquilasHalo,
+        ErrantMarches,
+        PerseusArm,
+        FormidineRift,
+        VulcanGate,
+        ElysianShore,
+        SanguineousRim,
+        OuterOrionSpur,
+        AchillessAltar,
+        Xibalba,
+        LyrasSong,
+        Tenebrae,
+        TheAbyss,
+        KeplersCrest,
+        TheVoid
+    }
+
+    // Legacy alias used by some ViewModels
     public enum GalacticRegions { Unknown = 0, Core, Bubble, OuterRim }
 
     public sealed class SystemRegion
@@ -14,20 +64,95 @@ namespace ODUtils.Models
     }
 
     // ── Position ───────────────────────────────────────────────────────────────
-    public readonly record struct Position(double X, double Y, double Z)
+    // Matches real ODUtils: sealed class with math operators.
+    public sealed class Position
     {
-        public double DistanceFrom(Position other)
+        public const double KEpsilon = 9.999999747378752E-06;
+        public const double KEpsilonNormalSqrt = 1.0000000036274937E-15;
+
+        public double X { get; }
+        public double Y { get; }
+        public double Z { get; }
+
+        public Position(double x, double y, double z) { X = x; Y = y; Z = z; }
+
+        public Position FlipZ => new Position(X, Y, Z * -1.0);
+
+        public double DistanceFrom(Position other) => Distance(this, other);
+
+        public double GetMagnitude() => System.Math.Sqrt(X * X + Y * Y + Z * Z);
+        public double GetSqrMagnitude() => X * X + Y * Y + Z * Z;
+
+        public static double SqrMagnitude(Position p) => p.X * p.X + p.Y * p.Y + p.Z * p.Z;
+        public static double Magnitude(Position p) => System.Math.Sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
+
+        public static double Distance(Position a, Position b)
         {
-            var dx = X - other.X; var dy = Y - other.Y; var dz = Z - other.Z;
+            var dx = a.X - b.X; var dy = a.Y - b.Y; var dz = a.Z - b.Z;
             return System.Math.Sqrt(dx * dx + dy * dy + dz * dz);
         }
+
+        public static double Angle(Position from, Position to)
+        {
+            double mag = System.Math.Sqrt(SqrMagnitude(from) * SqrMagnitude(to));
+            if (mag < KEpsilonNormalSqrt) return 0.0;
+            double d = System.Math.Clamp(Dot(from, to) / mag, -1.0, 1.0);
+            return System.Math.Acos(d) * 360.0 / (System.Math.PI * 2.0);
+        }
+
+        public static double SignedAngle(Position from, Position to, Position axis)
+        {
+            double angle = Angle(from, to);
+            double crossX = from.Y * to.Z - from.Z * to.Y;
+            double crossY = from.Z * to.X - from.X * to.Z;
+            double crossZ = from.X * to.Y - from.Y * to.X;
+            double sign = System.Math.Sign(axis.X * crossX + axis.Y * crossY + axis.Z * crossZ);
+            return angle * sign;
+        }
+
+        public static Position Cross(Position lhs, Position rhs) =>
+            new Position(lhs.Y * rhs.Z - lhs.Z * rhs.Y, lhs.Z * rhs.X - lhs.X * rhs.Z, lhs.X * rhs.Y - lhs.Y * rhs.X);
+
+        public Position Cross(Position other) => Cross(this, other);
+
+        public static double Dot(Position lhs, Position rhs) => lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z;
+
+        public double Dot(Position other) => Dot(this, other);
+
+        public static Position ProjectOnPlane(Position position, Position planeNormal)
+        {
+            double magSq = Dot(planeNormal, planeNormal);
+            if (magSq < KEpsilon) return position;
+            double dot = Dot(position, planeNormal);
+            return new Position(position.X - planeNormal.X * dot / magSq, position.Y - planeNormal.Y * dot / magSq, position.Z - planeNormal.Z * dot / magSq);
+        }
+
+        public static Position operator +(Position a, Position b) => new Position(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        public static Position operator -(Position a, Position b) => new Position(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        public static Position operator -(Position a) => new Position(-a.X, -a.Y, -a.Z);
+        public static Position operator *(Position a, float d) => new Position(a.X * d, a.Y * d, a.Z * d);
+        public static Position operator *(double d, Position a) => new Position(a.X * d, a.Y * d, a.Z * d);
+        public static Position operator /(Position a, float d) => new Position(a.X / d, a.Y / d, a.Z / d);
+
+        public override string ToString() => $"({X:N6}, {Y:N6}, {Z:N6})";
+
+        public override bool Equals(object? obj) =>
+            obj is Position other && X == other.X && Y == other.Y && Z == other.Z;
+
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z);
+
+        public static bool operator ==(Position? left, Position? right) =>
+            ReferenceEquals(left, right) || (left?.Equals(right) == true);
+
+        public static bool operator !=(Position? left, Position? right) => !(left == right);
     }
 
     // ── DataState ──────────────────────────────────────────────────────────────
     public enum DataState { Unsold = 0, Sold, Lost }
 
     // ── DiscoveryStatus ────────────────────────────────────────────────────────
-    public enum DiscoveryStatus { Unknown = 0, WorthMapping, Discovered }
+    // Matches real ODUtils: { Discovered=0, UnDiscovered=1, WorthMapping=2, MappedByUser=3, Noteable=4 }
+    public enum DiscoveryStatus { Discovered = 0, UnDiscovered, WorthMapping, MappedByUser, Noteable }
 
     // ── PlanetClass ────────────────────────────────────────────────────────────
     public enum PlanetClass
@@ -140,23 +265,21 @@ namespace ODUtils.Models
     // ── VolcanismType ──────────────────────────────────────────────────────────
     public enum VolcanismType { None = 0, MinorRocky, MinorMetallic, MinorCarbon, Rocky, Metallic, Carbon, MajorRocky, MajorMetallic, MajorCarbon, Nitrogen, Silicate, Iron, Water, Ammonia }
 
-    // ── BodyScanState ──────────────────────────────────────────────────────────
-    public enum BodyScanState
+    // ── ScanState ──────────────────────────────────────────────────────────────
+    // Matches real ODUtils: { None=0, Fss=1, Dss=2 }
+    public enum ScanState
     {
         [System.ComponentModel.Description("")] None = 0,
-        [System.ComponentModel.Description("Nav Beacon")] NavBeacon,
-        [System.ComponentModel.Description("Honk Scanned")] HonkScanned,
-        [System.ComponentModel.Description("FSS Scanned")] FssScanned,
-        [System.ComponentModel.Description("Predicted")] Predicted,
-        [System.ComponentModel.Description("DSS Scanned")] DssScanned,
-        [System.ComponentModel.Description("Analysed")] Analysed
+        [System.ComponentModel.Description("FSS Scanned")] Fss = 1,
+        [System.ComponentModel.Description("DSS Scanned")] Dss = 2
     }
 
     // ── StarLuminosityClass ────────────────────────────────────────────────────
     public enum StarLuminosityClass { Unknown = 0, O, Ia, Ib, II, III, IIIa, IIIb, IV, V, Va, Vb, Vz, VI, VII }
 
     // ── OrganicScanState ───────────────────────────────────────────────────────
-    public enum OrganicScanState { None = 0, Unavailable = 1, Discovered = 2, Analysed = 3, Sold = 4 }
+    // Matches real ODUtils: Unavailable=-1, None=0, Discovered=2, Analysed=3, Sold=4
+    public enum OrganicScanState { Unavailable = -1, None = 0, Discovered = 2, Analysed = 3, Sold = 4 }
 
     // ── OrganicScanStage ───────────────────────────────────────────────────────
     // Mirrors the journal values (in scan-progression order) so the progression
@@ -174,13 +297,28 @@ namespace ODUtils.Models
     }
 
     // ── ExoBiologyViewState ────────────────────────────────────────────────────
-    public enum ExoBiologyViewState { None = 0, CheckList, UnSoldList, Sold, Lost }
+    public enum ExoBiologyViewState { None = -1, CheckList = 0, UnSoldList, Sold, Lost }
 
     // ── CodexEntryHistory ──────────────────────────────────────────────────────
-    public enum CodexEntryHistory { Global = 0, Regional, Commander }
+    public enum CodexEntryHistory { Regional = 0, Global }
 
     // ── JournalLogAge ──────────────────────────────────────────────────────────
-    public enum JournalLogAge { AllLogs = 0, LastYear, LastSixMonths, LastThreeMonths, LastMonth, LastWeek }
+    public enum JournalLogAge
+    {
+        [System.ComponentModel.Description("Load All")] All,
+        [System.ComponentModel.Description("< 7 Days")] SevenDays,
+        [System.ComponentModel.Description("< 30 Days")] ThirtyDays,
+        [System.ComponentModel.Description("< 60 Days")] SixtyDays,
+        [System.ComponentModel.Description("< 180 Days")] OneHundredEightyDays,
+        [System.ComponentModel.Description("< One Year")] Oneyear,
+        [System.ComponentModel.Description("< Two Years")] Twoyears,
+        [System.ComponentModel.Description("< Three Years")] Threeyears,
+        [System.ComponentModel.Description("< Four Years")] Fouryears,
+        [System.ComponentModel.Description("< Five Years")] Fiveyears,
+        [System.ComponentModel.Description("< Six Years")] Sixyears,
+        [System.ComponentModel.Description("< Seven Years")] Sevenyears,
+        [System.ComponentModel.Description("< Eight Years")] Eightyears
+    }
 
     // ── Composition ───────────────────────────────────────────────────────────
     public sealed class Composition
@@ -266,13 +404,26 @@ namespace ODUtils.Models
         public OrganicScanStage ScanStage { get; set; }
         public DataState DataState { get; set; }
         public System.DateTime ScanTime { get; set; }
-        public long TotalValue { get; set; }
         public bool IsNewSpecies { get; set; }
         public bool BodyDssScanned { get; set; }
         public bool WasLogged { get; set; }
         public ODUtils.Exobiology.OrganicInfo? Info { get; set; }
-        public List<ScanLocation> ScanLocations { get; set; } = new();
+        public List<OrganicScanDetails> ScanLocations { get; set; } = new();
         public ScanNotificationState NotificationState { get; set; } = ScanNotificationState.TooClose;
+
+        // Computed properties matching real ODUtils
+        public long TotalValue => (Info == null) ? 0 : Info.Value + Bonus;
+        public long Value => Info?.Value ?? 0;
+        public long Bonus
+        {
+            get
+            {
+                if (Info == null) return 0;
+                if (ScanTime <= ODExplorer.Models.PatchDates.Type11PatchDate)
+                    return Body.WasMapped ? 0 : (ScanTime < ODUtils.Exobiology.OrganicValues.NewPriceDate ? Info.Value : Info.Value * 4);
+                return WasLogged ? 0 : (ScanTime < ODUtils.Exobiology.OrganicValues.NewPriceDate ? Info.Value : Info.Value * 4);
+            }
+        }
     }
 
     public enum ScanNotificationState
@@ -281,14 +432,14 @@ namespace ODUtils.Models
         FarEnough = 1
     }
 
-    public sealed class ScanLocation
+    public sealed class OrganicScanDetails
     {
+        public OrganicScanStage ScanStage { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public double Distance { get; set; }
-        public ScanNotificationState DistanceState { get; set; } = ScanNotificationState.TooClose;
-        public OrganicScanStage ScanStage { get; set; }
-        public bool HasPos => Latitude != 0 && Longitude != 0;
+        public ScanNotificationState DistanceState { get; set; }
+        public bool HasPos => System.Math.Abs(Longitude) > 0.01 && System.Math.Abs(Latitude) > 0.01;
     }
 
     // ── OrganicScanItemList ───────────────────────────────────────────────────
@@ -298,6 +449,7 @@ namespace ODUtils.Models
     }
 
     // ── Owner ─────────────────────────────────────────────────────────────────
+    // Legacy alias: real ODUtils uses StarSystem as SystemBody.Owner
     public sealed class Owner
     {
         public long Address { get; set; }
@@ -329,7 +481,7 @@ namespace ODUtils.Models
         public bool IsNonBody => !IsStar && !IsPlanet;
 
         // Scan/Discovery
-        public BodyScanState ScanState { get; set; }
+        public ScanState ScanState { get; set; }
         public DiscoveryStatus Status { get; set; }
         public DataState BodyDataState { get; set; }
         public bool WasDiscovered { get; set; }
@@ -396,12 +548,12 @@ namespace ODUtils.Models
     }
 
     // ── StarSystem ────────────────────────────────────────────────────────────
-    public sealed class StarSystem
+    public sealed class StarSystem : System.IComparable, System.IEquatable<object>
     {
         public string Name { get; set; } = string.Empty;
         public long SystemAddress { get; set; }
         public long Address { get; set; }
-        public Position Position { get; set; }
+        public Position Position { get; set; } = new(0, 0, 0);
         public SystemRegion Region { get; set; } = new();
         public StarType StarType { get; set; }
         public long EstimatedValue { get; set; }
@@ -409,27 +561,49 @@ namespace ODUtils.Models
         public bool VisitedByCommander { get; set; }
         public int DiscoveredBodyCount { get; set; }
         public int BodyCount { get; set; }
-        public int EdsmScannedBodyCount { get; set; }
+        public int EdsmScannedBodyCount { get; set; } = -1;
         public string EdsmUrl { get; set; } = string.Empty;
+        public bool AllBodiesFound { get; set; }
+        public List<SystemBody> SystemBodies { get; set; } = new();
+
+        // Computed properties matching real ODUtils
+        public long CommanderValue => SystemBodies.Sum(x => x.UnsoldCommanderValue);
         public int SoldCount { get; set; }
         public int LostCount { get; set; }
         public int UnsoldCount { get; set; }
-        public bool AllBodiesFound { get; set; }
-        public List<SystemBody> SystemBodies { get; set; } = new();
+
+        // IComparable
+        public int CompareTo(object? obj)
+        {
+            if (obj != null && obj is StarSystem other && Name != null)
+                return string.Compare(Name, other.Name, System.StringComparison.OrdinalIgnoreCase);
+            return 1;
+        }
+
+        // IEquatable / Equality
+        bool System.IEquatable<object>.Equals(object? obj) => CompareTo(obj) == 0;
+        public override bool Equals(object? obj) => CompareTo(obj) == 0;
+        public override int GetHashCode() => HashCode.Combine(Name?.GetHashCode(), Position?.GetHashCode());
+        public static bool operator ==(StarSystem? a, StarSystem? b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a is null || b is null) return false;
+            return a.Name == b.Name;
+        }
+        public static bool operator !=(StarSystem? a, StarSystem? b) => !(a == b);
     }
 
     namespace EdAstro
     {
         public enum EDAstroType
         {
-            Unknown = 0,
-            Community,
+            Community = 0,
             DeepSpaceOutpost,
+            Empty,
             Glitches,
             GreenGasGiants,
             Historical,
             InhabitedSystem,
-            Legacy,
             Memorials,
             MysteryAndXenology,
             Nebulae,
@@ -439,7 +613,7 @@ namespace ODUtils.Models
             PlanetaryFeatures,
             SightsAndScenery,
             StellarFeatures,
-            TouristBeacons,
+            TouristBeacons
         }
     }
 }

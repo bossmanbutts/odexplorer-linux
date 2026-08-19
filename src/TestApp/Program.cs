@@ -332,7 +332,7 @@ class Program
             Check("GEC maps all POIs", pois.Count == 2);
             Check("GEC maps name + galMap", pois is { Count: 2 } && pois[0].Name == "The Ammonia Lyceum" && pois[0].GalMapName == "Athaip WR-H d11-7577");
             Check("GEC maps types", pois[0].Type == ODUtils.Models.EdAstro.EDAstroType.SightsAndScenery
-                && pois[0].Type2 == ODUtils.Models.EdAstro.EDAstroType.Unknown
+                && pois[0].Type2 == ODUtils.Models.EdAstro.EDAstroType.Community
                 && pois[1].Type == ODUtils.Models.EdAstro.EDAstroType.GreenGasGiants
                 && pois[1].Type2 == ODUtils.Models.EdAstro.EDAstroType.Historical);
             Check("GEC maps numeric id64", pois[0].SystemAddress == 260354282082915);

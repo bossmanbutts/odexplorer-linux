@@ -162,6 +162,8 @@ namespace ODUtils.Journal
 
     public sealed class NavigationRoute
     {
+        public DateTimeOffset? Timestamp { get; set; }
+        public string Event { get; set; } = string.Empty;
         public List<SystemInRoute?> Route { get; set; } = [];
     }
 

@@ -20,6 +20,7 @@ using ODUtils.EliteDangerousHelpers.GalacticRegions;
 using ODUtils.EliteDangerousHelpers;
 using ODUtils.Exobiology;
 using ODUtils.Extensions;
+using ODUtils.Helpers;
 using ODUtils.Journal;
 using ODUtils.Models;
 using Composition = ODUtils.Models.Composition;
@@ -1076,7 +1077,7 @@ namespace ODExplorer.Stores
                     SystemBodies = system.SystemBodies
                 },
                 Parents = [],
-                ScanState = BodyScanState.None,
+                ScanState = ScanState.None,
                 PlanetClass = PlanetClass.Unknown
             };
             system.SystemBodies.Add(body);
@@ -1146,7 +1147,7 @@ namespace ODExplorer.Stores
             body.WasDiscovered = scanEvt.WasDiscovered ?? false;
             body.WasMapped = scanEvt.WasMapped ?? false;
             body.ScanDate = scanEvt.Timestamp;
-            body.ScanState = BodyScanState.FssScanned;
+            body.ScanState = ScanState.Fss;
             body.Rings = scanEvt.Rings is { Count: > 0 } ? [.. scanEvt.Rings] : null;
             body.Materials = scanEvt.Materials?.Select(m => new ShipMaterials { Name = m.Name.ToString(), Percent = m.Percent }).ToList();
             body.AtmosphereComposition = scanEvt.AtmosphereComposition?.Select(a => new ScanItemComponent { Name = a.Name, Percent = a.Percent }).ToList();
@@ -1203,7 +1204,7 @@ namespace ODExplorer.Stores
             body.WasMapped = true;
             body.MappedValue = body.FssValue > 0 ? (long)(body.FssValue * 1.5) : 0;
             body.UnsoldCommanderValue = body.MappedValue;
-            body.ScanState = BodyScanState.DssScanned;
+            body.ScanState = ScanState.Dss;
             body.ScanDate = timeStamp;
 
             UpdateBioMinMaxValue(body);
@@ -1228,11 +1229,11 @@ namespace ODExplorer.Stores
             if (dssScanned)
             {
                 body.DssScanned = true;
-                body.ScanState = BodyScanState.DssScanned;
+                body.ScanState = ScanState.Dss;
             }
-            else if (body.ScanState == BodyScanState.None)
+            else if (body.ScanState == ScanState.None)
             {
-                body.ScanState = BodyScanState.FssScanned;
+                body.ScanState = ScanState.Fss;
             }
 
             if (bioCount > 0)
@@ -1510,14 +1511,14 @@ namespace ODExplorer.Stores
             bio.IsNewSpecies = organicCheckListData.IsNewSpecies(scanOrganic.Species);
             bio.BodyDssScanned = body.DssScanned;
             bio.WasLogged = true;
-            bio.ScanLocations.Add(new ScanLocation
+            bio.ScanLocations.Add(new OrganicScanDetails
             {
                 Latitude = (double?)scanOrganic.OriginalEvent?["Latitude"] ?? 0,
                 Longitude = (double?)scanOrganic.OriginalEvent?["Longitude"] ?? 0,
                 ScanStage = bio.ScanStage
             });
             bio.Variants = BuildVariants(scanOrganic);
-            bio.TotalValue = ComputeTotalValue(bio, body);
+
         }
 
         private void UpdateFromCodex(OrganicScanItem bio, CodexEntryEvent.CodexEntryEventArgs codexEntry, SystemBody body)
@@ -1558,7 +1559,7 @@ namespace ODExplorer.Stores
                 }
             ];
 
-            bio.TotalValue = ComputeTotalValue(bio, body);
+
         }
 
         private OrganicScanItem NewBioFromScan(ScanOrganicEvent.ScanOrganicEventArgs scanOrganic, SystemBody body)
@@ -1585,7 +1586,7 @@ namespace ODExplorer.Stores
                 Info = OrganicValues.GetOrganicInfo(scanOrganic.Species, scanOrganic.Species_Localised, scanOrganic.Timestamp),
                 ScanLocations =
                 [
-                    new ScanLocation
+                    new OrganicScanDetails
                     {
                         Latitude = scanLat,
                         Longitude = scanLon,
@@ -1595,7 +1596,7 @@ namespace ODExplorer.Stores
                 Variants = BuildVariants(scanOrganic)
             };
 
-            bio.TotalValue = ComputeTotalValue(bio, body);
+
             return bio;
         }
 
@@ -1623,7 +1624,7 @@ namespace ODExplorer.Stores
                 Info = info,
                 ScanLocations =
                 [
-                    new ScanLocation
+                    new OrganicScanDetails
                     {
                         Latitude = codexEntry.Latitude,
                         Longitude = codexEntry.Longitude,
@@ -1644,7 +1645,7 @@ namespace ODExplorer.Stores
                 ]
             };
 
-            bio.TotalValue = ComputeTotalValue(bio, body);
+
             return bio;
         }
 
@@ -1698,16 +1699,6 @@ namespace ODExplorer.Stores
             return variant?.Colour ?? VariantColours.Unknown;
         }
 
-        private long ComputeTotalValue(OrganicScanItem bio, SystemBody body)
-        {
-            var value = bio.Info?.Value ?? 0;
-            if (value == 0)
-                return 0;
-
-            var bonus = body.WasMapped ? 0 : bio.ScanTime < OrganicValues.NewPriceDate ? value : value * 4;
-            return value + bonus;
-        }
-
         // Replaces the "Not Predicted" placeholders on a body with the species that
         // match its scan data, using the ODUtils exobiology prediction engine. Runs
         // as soon as the body has scan data (Scan event) or bio signals
@@ -1753,7 +1744,7 @@ namespace ODExplorer.Stores
                 bio.ScanTime = timeStamp;
                 bio.Info = OrganicValues.GetOrganicInfo(pred.SpeciesCodex, pred.SpeciesEnglishName, timeStamp);
                 bio.BodyDssScanned = body.DssScanned;
-                bio.TotalValue = ComputeTotalValue(bio, body);
+    
                 filled = true;
             }
 
@@ -1780,18 +1771,31 @@ namespace ODExplorer.Stores
 
         private void UpdateBioMinMaxValue(SystemBody body)
         {
-            var min = 0L;
-            var max = 0L;
+            if (body.OrganicScanItems is null || body.OrganicScanItems.Count == 0)
+                return;
 
-            if (body.OrganicScanItems is not null)
+            long min, max;
+
+            if (body.DssScanned)
             {
-                var valued = body.OrganicScanItems.Where(x => x.Info is not null && x.ScanStage >= OrganicScanStage.Prediction);
-
-                foreach (var bio in valued)
-                {
-                    min += bio.Info!.Value;
-                    max += bio.Info!.Value;
-                }
+                var valuedItems = body.OrganicScanItems
+                    .Where(x => (int)x.ScanStage > 0)
+                    .GroupBy(x => x.GenusCodex)
+                    .Select(g => g.Aggregate((a, b) => b.Value < a.Value ? b : a))
+                    .ToList();
+                var values = valuedItems.Select(x => x.Value).ToList();
+                min = MathHelpers.GetMinSumOfValues(values, body.BiologicalSignals);
+                max = MathHelpers.GetMaxSumOfValues(values, body.BiologicalSignals);
+            }
+            else
+            {
+                var valuedItems = body.OrganicScanItems
+                    .GroupBy(x => x.GenusCodex)
+                    .Select(g => g.Aggregate((a, b) => b.Value < a.Value ? b : a))
+                    .ToList();
+                var values = valuedItems.Select(x => x.Value).ToList();
+                min = MathHelpers.GetMinSumOfValues(values, body.BiologicalSignals);
+                max = MathHelpers.GetMaxSumOfValues(values, body.BiologicalSignals);
             }
 
             if (body.MinExoValue != min || body.MaxExoValue != max)
