@@ -37,7 +37,7 @@ namespace ODExplorer.ViewModels.ModelVMs
         public SystemBody Body => _body;
         public string GoverningStar => _body.GoverningStar.ToString();
         #region DataGrid Properties
-        public string Name => BodyNameLocal().ToUpperInvariant();
+        public string Name => _body.BodyName.ToUpperInvariant();
         public string ScanStage => _body.ScanState.GetEnumDescription();
         public string BodyDescription
         {
@@ -143,8 +143,9 @@ namespace ODExplorer.ViewModels.ModelVMs
                 return ret;
             }
         }
-        public string MappedValue => _body.MappedValue.ToString("N0");
-        public string FssValue => _body.FssValue.ToString("N0");
+        public string MappedValue => $"{_body.MappedValue:N0} Cr";
+        public string FssValue => $"{_body.FssValue:N0} Cr";
+        public string DataValueString => $"{_body.UnsoldCommanderValue:N0} Cr";
         public string DistanceFromArrivalLs => $"{_body.DistanceFromArrivalLs:N0} ls";
         public string OrbitalPeriod
         {
@@ -230,6 +231,26 @@ namespace ODExplorer.ViewModels.ModelVMs
                 return $"{_body.MinExoValue.FormatNumber()} - {_body.MaxExoValue.FormatNumber()}";
             }
         }
+
+        /// <summary>Exobiology species list for the body detail panel.</summary>
+        public string ExobioSpeciesList
+        {
+            get
+            {
+                if (OrganicScanItems == null || OrganicScanItems.Count == 0)
+                    return string.Empty;
+
+                var parts = new List<string>();
+                foreach (var item in OrganicScanItems)
+                {
+                    var value = item.Value.FormatNumber();
+                    parts.Add($"{item.SpeciesEnglish} ({value} Cr)");
+                }
+                return string.Join("\n", parts);
+            }
+        }
+
+        public bool HasExobioSpecies => OrganicScanItems != null && OrganicScanItems.Count > 0;
 
         public bool IsHighValueExo => _body.MinExoValue > SettingsStore.SystemGridSetting.ExoValuableBodyValue;
         #endregion

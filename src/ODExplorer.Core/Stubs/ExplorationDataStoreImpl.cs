@@ -692,7 +692,7 @@ namespace ODExplorer.Stores
                 .Where(x => x.BodyDataState == DataState.Unsold)
                 .Sum(x => x.UnsoldCommanderValue);
 
-            return value == 0 ? "?" : value.ToString("N0");
+            return value == 0 ? "?" : $"{value:N0} Cr";
         }
 
         internal string GetUnsoldExoValueString()
@@ -701,7 +701,7 @@ namespace ODExplorer.Stores
                 .Where(x => x.OrganicScanItems?.Any(b => b.DataState == DataState.Unsold && b.ScanStage == OrganicScanStage.Analyse) == true)
                 .Sum(x => x.MaxExoValue);
 
-            return value == 0 ? "?" : value.ToString("N0");
+            return value == 0 ? "?" : $"{value:N0} Cr";
         }
         #endregion
 

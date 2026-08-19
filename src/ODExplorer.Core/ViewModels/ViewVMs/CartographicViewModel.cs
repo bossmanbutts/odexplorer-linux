@@ -29,7 +29,7 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.mainView.OnBodyUpdated += MainView_OnBodyUpdated;
             this.mainView.OnBioUpdated += MainView_OnBioUpdated;
             this.parserStore.OnParserStoreLive += (_, _) => DispatcherHelper.Invoke(() => OnPropertyChanged(nameof(CurrentState)));
-           
+
             this.mainView.OnSelectedBodyUpdated += MainView_OnSelectedBodyUpdated;
             this.explorationData.OnFSDJump += ExplorationData_OnFSDJump;
             explorationData.OnCartoDataSold += ExplorationData_OnCartoValueChanged;
@@ -41,17 +41,15 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.spanshStore.OnCurrentContainerChanged += Spansh_OnCurrentContainerChanged;
 
             SwitchView = new RelayCommand<CartoViewState>(OnSwitchView);
+            CopySystemName = new RelayCommand(OnCopySystemName);
+            CycleSortDirection = new RelayCommand(OnCycleSortDirection);
+            SetSortCategory = new RelayCommand<BodySortCategory>(OnSetSortCategory);
 
             ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
                 if (CurrentSystem != null)
                 {
-                    var gridSettings = settingsStore.SystemGridSetting;
-                    var comparer = new SystemBodyViewModelMainComparer(gridSettings);
-                    var filtered = CurrentSystem.Bodies
-                        .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
-                        .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b) => comparer.Compare(a, b)));
-                    currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);
+                    RefreshBodiesView();
                 }
 
                 _ = Task.Factory.StartNew(() =>
@@ -113,15 +111,8 @@ namespace ODExplorer.ViewModels.ViewVMs
                 {
                     return CartoViewState.None;
                 }
-                return settingsStore.CartoViewState;
-            }
-            set
-            {
-                settingsStore.CartoViewState = value;
-                _ = Task.Factory.StartNew(() =>
-                {
-                    OnPropertyChanged(nameof(CurrentState));
-                });
+                // Unified view — always DetailedExo
+                return CartoViewState.DetailedExo;
             }
         }
 
@@ -155,6 +146,11 @@ namespace ODExplorer.ViewModels.ViewVMs
         public GridSize DetailedViewGridSize => settingsStore.CartoDetailedGridSize;
         public GridSize ExtendedBodyInfoGridSize => settingsStore.ExtendedBodyInfoGridSize;
         public GridSize CurrentExoGridSize => settingsStore.CurrentExoGridSize;
+
+        // ── Sort options ────────────────────────────────────────────────────
+        public BodySortCategory SelectedSortCategory => settingsStore.SystemGridSetting.BodySortingOptions;
+        public bool SortAscending => settingsStore.SystemGridSetting.SortDirection == System.ComponentModel.ListSortDirection.Ascending;
+        public string SortDirectionGlyph => SortAscending ? "▲" : "▼";
 
         private void MainView_OnSelectedBodyUpdated(object? sender, SystemBodyViewModel? e)
         {
@@ -251,10 +247,41 @@ namespace ODExplorer.ViewModels.ViewVMs
 
         #region Commands
         public ICommand SwitchView { get; }
+        public ICommand CopySystemName { get; }
+        public ICommand CycleSortDirection { get; }
+        public ICommand SetSortCategory { get; }
 
         private void OnSwitchView(CartoViewState state)
         {
-            CurrentState = state;
+            // No-op — unified view only
+        }
+
+        private void OnCopySystemName(object? _)
+        {
+            if (CurrentSystem?.Name is { Length: > 0 } name)
+            {
+                mainView.NotificationStore.CopyToClipBoard(name);
+            }
+        }
+
+        private void OnCycleSortDirection(object? _)
+        {
+            var current = settingsStore.SystemGridSetting.SortDirection;
+            settingsStore.SystemGridSetting.SortDirection = current == System.ComponentModel.ListSortDirection.Ascending
+                ? System.ComponentModel.ListSortDirection.Descending
+                : System.ComponentModel.ListSortDirection.Ascending;
+            settingsStore.OnSystemGridSettingsUpdated();
+            OnPropertyChanged(nameof(SortAscending));
+            OnPropertyChanged(nameof(SortDirectionGlyph));
+            RefreshBodiesView();
+        }
+
+        private void OnSetSortCategory(BodySortCategory category)
+        {
+            settingsStore.SystemGridSetting.BodySortingOptions = category;
+            settingsStore.OnSystemGridSettingsUpdated();
+            OnPropertyChanged(nameof(SelectedSortCategory));
+            RefreshBodiesView();
         }
         #endregion       
 

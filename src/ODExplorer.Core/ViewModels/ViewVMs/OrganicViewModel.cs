@@ -182,7 +182,16 @@ namespace ODExplorer.ViewModels.ViewVMs
             {
                 settingsStore.BiologyViewState = value;
                 OnPropertyChanged(nameof(CurrentState));
+                RaiseSwitchCanExecuteChanged();
             }
+        }
+
+        private void RaiseSwitchCanExecuteChanged()
+        {
+            (SwitchToCheckList as RelayCommand)?.RaiseCanExecuteChanged();
+            (SwitchToUnSoldList as RelayCommand)?.RaiseCanExecuteChanged();
+            (SwitchToSoldList as RelayCommand)?.RaiseCanExecuteChanged();
+            (SwitchToLostList as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         public Visibility OthersVisibility { get => Other.Count > 0 ? Visibility.Visible : Visibility.Collapsed; }

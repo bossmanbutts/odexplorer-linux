@@ -270,8 +270,8 @@ namespace ODUtils.Models
     public enum ScanState
     {
         [System.ComponentModel.Description("")] None = 0,
-        [System.ComponentModel.Description("FSS Scanned")] Fss = 1,
-        [System.ComponentModel.Description("DSS Scanned")] Dss = 2
+        [System.ComponentModel.Description("FSS")] Fss = 1,
+        [System.ComponentModel.Description("DSS")] Dss = 2
     }
 
     // ── StarLuminosityClass ────────────────────────────────────────────────────
