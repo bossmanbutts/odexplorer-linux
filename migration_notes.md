@@ -188,7 +188,7 @@ What the next agent should do (step-by-step):
 1) [done] Replace IOdUtilsAdapter NoOp with real implementation (or vendor minimal ODUtils types from source library if available) — `OdUtilsAdapter` (clipboard wl-copy/xclip, open-url); EDSM flow real HTTP.
 2) [done] Replace INotificationAdapter shell invocation with Avalonia's built-in toast — `ToastHost`; shell adapter deleted.
 3) [done] Replace IAudioPlayer shell invocation with a real audio library — PulseAudio `libpulse-simple` P/Invoke (see session note above).
-4) [blocked] Remove Stubs/ directory and reconcile types with actual external libraries — EliteJournalReader vendored real; ODUtils private/unrecoverable, stubs stay.
+4) [done] ODUtils stubs aligned with real decompiled source (commit `d3ac02b`) — all enum values, Position class, StarSystem, OrganicScanItem, helpers, IO match real implementations. Keeping stubs (simpler than fixing decompilation artifacts like CommandManager/Dispatcher).
 5) [done] Rebuild, test, commit.
 
 **Phase 3: Port remaining ViewModel/Store code to UI layer (medium-term)**
