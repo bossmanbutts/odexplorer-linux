@@ -37,6 +37,7 @@ namespace ODExplorer.ViewModels.ModelVMs
         public SystemBody Body => _body;
         public string GoverningStar => _body.GoverningStar.ToString();
         public long ParentStarBodyId => _body.ParentStarBodyId;
+        public List<long> ParentStarBodyIds => _body.ParentStarBodyIds;
         #region DataGrid Properties
         public string Name => _body.BodyName.ToUpperInvariant();
         public string ScanStage => _body.ScanState.GetEnumDescription();

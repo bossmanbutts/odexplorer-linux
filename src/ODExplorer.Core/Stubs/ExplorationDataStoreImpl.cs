@@ -749,6 +749,8 @@ namespace ODExplorer.Stores
                         if (UpdateBioPredictions(body, DateTime.UtcNow, notify: false))
                             TriggerBodyBiosUpdatedIfLive(body);
                     }
+
+                    UpdateBioMinMaxValue(body);
                 }
             }
         }
@@ -1096,7 +1098,12 @@ namespace ODExplorer.Stores
             var body = system.SystemBodies.FirstOrDefault(x => x.BodyID == bodyId);
 
             if (body is not null)
+            {
+                if (!string.IsNullOrEmpty(bodyName) && !string.Equals(body.BodyName, bodyName, StringComparison.Ordinal))
+                    body.BodyName = bodyName;
+
                 return body;
+            }
 
             return CreateMinimalBody(bodyId, bodyName, system);
         }
@@ -1183,14 +1190,15 @@ namespace ODExplorer.Stores
 
             if (!isStar && scanEvt.Parents is not null)
             {
+                body.ParentStarBodyIds.Clear();
                 foreach (var parent in scanEvt.Parents)
                 {
                     if (parent.Type == EliteJournalReader.Events.ParentType.Star)
                     {
-                        body.ParentStarBodyId = parent.BodyID;
-                        break;
+                        body.ParentStarBodyIds.Add(parent.BodyID);
                     }
                 }
+                body.ParentStarBodyId = body.ParentStarBodyIds.Count > 0 ? body.ParentStarBodyIds[0] : -1;
             }
 
             UpdateBioPredictions(body, scanEvt.Timestamp);
@@ -1527,6 +1535,7 @@ namespace ODExplorer.Stores
             bio.ScanTime = scanOrganic.Timestamp;
             bio.DataState = DataState.Unsold;
             bio.Info = OrganicValues.GetOrganicInfo(scanOrganic.Species, scanOrganic.Species_Localised, scanOrganic.Timestamp);
+            bio.StoredValue = bio.Info.Value;
             bio.IsNewSpecies = organicCheckListData.IsNewSpecies(scanOrganic.Species);
             bio.BodyDssScanned = body.DssScanned;
             bio.WasLogged = true;
@@ -1559,6 +1568,7 @@ namespace ODExplorer.Stores
             bio.ScanTime = codexEntry.Timestamp;
             bio.DataState = DataState.Unsold;
             bio.Info = OrganicValues.GetOrganicInfo(bio.SpeciesCodex, bio.SpeciesLocalised, bio.ScanTime);
+            bio.StoredValue = bio.Info.Value;
             bio.IsNewSpecies = false;
             bio.BodyDssScanned = body.DssScanned;
             bio.WasLogged = true;
@@ -1762,6 +1772,7 @@ namespace ODExplorer.Stores
                 bio.ScanStage = OrganicScanStage.Prediction;
                 bio.ScanTime = timeStamp;
                 bio.Info = OrganicValues.GetOrganicInfo(pred.SpeciesCodex, pred.SpeciesEnglishName, timeStamp);
+                bio.StoredValue = bio.Info.Value;
                 bio.BodyDssScanned = body.DssScanned;
     
                 filled = true;

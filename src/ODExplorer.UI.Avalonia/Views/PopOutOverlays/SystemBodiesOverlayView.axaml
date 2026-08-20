@@ -26,7 +26,7 @@
                 <DataGridTextColumn Header="Class" Binding="{Binding BodyDescription}" Width="*" />
                 <DataGridTextColumn Header="Dist (ls)" Binding="{Binding DistanceFromArrivalLs}" Width="Auto" />
                 <DataGridTextColumn Header="Mapped" Binding="{Binding MappedValue}" Width="Auto" />
-                <DataGridTextColumn Header="FSS" Binding="{Binding FssValue}" Width="Auto" />
+                <DataGridTextColumn Header="Discovery" Binding="{Binding FssValue}" Width="Auto" />
                 <DataGridTextColumn Header="Scan" Binding="{Binding ScanStage}" Width="Auto" />
             </DataGrid.Columns>
         </DataGrid>

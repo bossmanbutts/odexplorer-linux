@@ -342,13 +342,24 @@ namespace ODExplorer.ViewModels.ViewVMs
                 starById[star.BodyID] = star;
             }
 
-            // Group non-star bodies by their parent star
+            // Build lookup: star BodyID -> index in stars list (for ordering)
+            var starIndex = new Dictionary<long, int>();
+            for (int i = 0; i < stars.Count; i++)
+                starIndex[stars[i].BodyID] = i;
+
+            // Separate single-star children from binary-orbiting bodies
             var grouped = new Dictionary<long, List<SystemBodyViewModel>>();
             var orphans = new List<SystemBodyViewModel>();
+            var barycentreBodies = new List<SystemBodyViewModel>();
 
             foreach (var body in nonStars)
             {
-                if (body.ParentStarBodyId >= 0 && starById.TryGetValue(body.ParentStarBodyId, out var parentStar))
+                if (body.ParentStarBodyIds.Count > 1)
+                {
+                    // Body orbits multiple stars (barycentre / binary)
+                    barycentreBodies.Add(body);
+                }
+                else if (body.ParentStarBodyId >= 0 && starById.TryGetValue(body.ParentStarBodyId, out var parentStar))
                 {
                     if (!grouped.TryGetValue(parentStar.BodyID, out var list))
                     {
@@ -372,6 +383,60 @@ namespace ODExplorer.ViewModels.ViewVMs
                     : [];
 
                 tree.Add(new StarBodyGroup(star, new ObservableCollection<SystemBodyViewModel>(children)));
+
+                // Insert barycentre group after the last parent star of binary bodies
+                if (barycentreBodies.Count > 0)
+                {
+                    var bodiesForThisStar = barycentreBodies
+                        .Where(b => b.ParentStarBodyIds.Contains(star.BodyID))
+                        .ToList();
+
+                    if (bodiesForThisStar.Count > 0)
+                    {
+                        // Remove these bodies from the main list so they don't get added again
+                        foreach (var b in bodiesForThisStar)
+                            barycentreBodies.Remove(b);
+
+                        // Build label: "Barycentre (A + B)" using star name suffixes
+                        var parentNames = new List<string>();
+                        foreach (var pid in bodiesForThisStar.First().ParentStarBodyIds)
+                        {
+                            if (starById.TryGetValue(pid, out var ps))
+                                parentNames.Add(ps.Name.Replace(CurrentSystem!.Name, "").Trim());
+                        }
+                        if (parentNames.Count == 0)
+                            parentNames.Add("Binary");
+
+                        var label = $"Barycentre ({string.Join(" + ", parentNames)})";
+                        var sorted = bodiesForThisStar
+                            .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
+                            .ToList();
+                        tree.Add(new StarBodyGroup(label, new ObservableCollection<SystemBodyViewModel>(sorted)));
+                    }
+                }
+            }
+
+            // Handle remaining barycentre bodies that weren't placed (parent stars not in star list)
+            if (barycentreBodies.Count > 0)
+            {
+                var firstStar = stars.FirstOrDefault();
+                if (firstStar != null)
+                {
+                    var parentNames = new List<string>();
+                    foreach (var pid in barycentreBodies.First().ParentStarBodyIds)
+                    {
+                        if (starById.TryGetValue(pid, out var ps))
+                            parentNames.Add(ps.Name.Replace(CurrentSystem!.Name, "").Trim());
+                    }
+                    if (parentNames.Count == 0)
+                        parentNames.Add("Binary");
+
+                    var label = $"Barycentre ({string.Join(" + ", parentNames)})";
+                    var sorted = barycentreBodies
+                        .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
+                        .ToList();
+                    tree.Add(new StarBodyGroup(label, new ObservableCollection<SystemBodyViewModel>(sorted)));
+                }
             }
 
             if (orphans.Count > 0)

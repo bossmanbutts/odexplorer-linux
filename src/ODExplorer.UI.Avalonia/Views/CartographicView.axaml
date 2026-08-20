@@ -119,6 +119,33 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="models:StarBodyGroup">
                                     <StackPanel Margin="0,0,4,8">
+                                        <!-- Barycentre header -->
+                                        <Border Background="#333333"
+                                                BorderBrush="#505050"
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                Padding="8,6"
+                                                Margin="0,0,0,2"
+                                                Cursor="Hand"
+                                                Tapped="StarHeader_Tapped"
+                                                IsVisible="{Binding IsBarycentre}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                                <TextBlock Text="{Binding ExpandGlyph}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,6,0"
+                                                           FontSize="11"
+                                                           Foreground="#999999"
+                                                           IsVisible="{Binding HasChildren}" />
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Text="⊕" Foreground="#CD9B1D" FontSize="14" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding BarycentreLabel}"
+                                                               FontWeight="Bold"
+                                                               FontSize="13"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
                                         <!-- Star header -->
                                         <Border Background="#333333"
                                                 BorderBrush="#505050"
@@ -127,7 +154,8 @@
                                                 Padding="8,6"
                                                 Margin="0,0,0,2"
                                                 Cursor="Hand"
-                                                Tapped="StarHeader_Tapped">
+                                                Tapped="StarHeader_Tapped"
+                                                IsVisible="{Binding !IsBarycentre}">
                                             <Grid ColumnDefinitions="Auto,*,Auto,Auto">
                                                 <TextBlock Text="{Binding ExpandGlyph}"
                                                            VerticalAlignment="Center"
@@ -291,10 +319,10 @@
                                         <TextBlock Text="{Binding SelectedBody.GeologicalSignalsString}" />
                                     </StackPanel>
                                     <StackPanel Grid.Row="7" Orientation="Horizontal" Spacing="4">
-                                        <TextBlock Text="Mapped / FSS" Foreground="#999999" />
-                                        <TextBlock Text="{Binding SelectedBody.MappedValue}" />
-                                        <TextBlock Text="/" />
+                                        <TextBlock Text="Discovery / Mapped" Foreground="#999999" />
                                         <TextBlock Text="{Binding SelectedBody.FssValue}" />
+                                        <TextBlock Text="/" />
+                                        <TextBlock Text="{Binding SelectedBody.MappedValue}" />
                                     </StackPanel>
                                 </Grid>
 

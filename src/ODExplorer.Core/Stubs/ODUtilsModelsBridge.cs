@@ -413,7 +413,8 @@ namespace ODUtils.Models
 
         // Computed properties matching real ODUtils
         public long TotalValue => (Info == null) ? 0 : Info.Value + Bonus;
-        public long Value => Info?.Value ?? 0;
+        public long Value => Info?.Value ?? StoredValue;
+        public long StoredValue { get; set; }
         public long Bonus
         {
             get
@@ -539,6 +540,7 @@ namespace ODUtils.Models
         public StarType StarType { get; set; }
         public StarType GoverningStar { get; set; }
         public long ParentStarBodyId { get; set; } = -1;
+        public List<long> ParentStarBodyIds { get; set; } = [];
         public StarLuminosityClass StarLuminosity { get; set; }
         public double? StellarMass { get; set; }
         public double Age_MY { get; set; }
