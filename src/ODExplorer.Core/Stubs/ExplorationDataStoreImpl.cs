@@ -275,6 +275,9 @@ namespace ODExplorer.Stores
                 {
                     _cartoData[addr] = system;
 
+                    if (system.SystemBodies is null)
+                        system.SystemBodies = [];
+
                     // Reconstruct Owner.SystemBodies back-reference (null after
                     // ReferenceHandler.IgnoreCycles deserialization).
                     foreach (var body in system.SystemBodies)
@@ -730,6 +733,9 @@ namespace ODExplorer.Stores
         {
             foreach (var system in _cartoData.Values)
             {
+                if (system.SystemBodies is null)
+                    system.SystemBodies = [];
+
                 foreach (var body in system.SystemBodies)
                 {
                     if (body.BiologicalSignals <= 0)

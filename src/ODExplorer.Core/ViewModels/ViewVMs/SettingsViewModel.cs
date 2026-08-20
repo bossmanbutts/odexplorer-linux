@@ -401,8 +401,18 @@ namespace ODExplorer.ViewModels.ViewVMs
         }
         private void OnResetLastFile(object? obj)
         {
-            if (SelectedCommander != null)
-                SelectedCommander.LastFile = string.Empty;
+            if (SelectedCommander == null)
+                return;
+
+            SelectedCommander.LastFile = string.Empty;
+
+            if (databaseProvider is OdExplorerDatabaseProvider provider)
+            {
+                provider.AddCommander(new(SelectedCommander.Id, SelectedCommander.Name,
+                    SelectedCommander.JournalPath, string.Empty, SelectedCommander.IsHidden));
+            }
+
+            parserStore.ReadNewCommander(SelectedCommander.Id);
         }
 
         private void OnResetDataBase(object? obj)
