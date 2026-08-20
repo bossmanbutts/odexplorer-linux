@@ -21,6 +21,7 @@ namespace ODExplorer.Models
         public bool FilterUnconfirmedBios { get; set; } = true;
         public bool ShowBodyIcon { get; set; } = true;
         public bool ShowBodyId { get; set; } = true;
+        public bool ShowBeltClusters { get; set; } = false;
         public static SystemGridSettings DefaultValues()
         {
             return new()

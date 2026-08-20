@@ -36,6 +36,7 @@ namespace ODExplorer.ViewModels.ModelVMs
         private readonly SystemBody _body;
         public SystemBody Body => _body;
         public string GoverningStar => _body.GoverningStar.ToString();
+        public long ParentStarBodyId => _body.ParentStarBodyId;
         #region DataGrid Properties
         public string Name => _body.BodyName.ToUpperInvariant();
         public string ScanStage => _body.ScanState.GetEnumDescription();
@@ -145,7 +146,12 @@ namespace ODExplorer.ViewModels.ModelVMs
         }
         public string MappedValue => $"{_body.MappedValue:N0} Cr";
         public string FssValue => $"{_body.FssValue:N0} Cr";
-        public string DataValueString => $"{_body.UnsoldCommanderValue:N0} Cr";
+        public string DataValueString => _body.BodyDataState switch
+        {
+            DataState.Sold => _body.SoldCommanderValue > 0 ? $"{_body.SoldCommanderValue:N0} Cr" : string.Empty,
+            DataState.Lost => _body.LostCommanderValue > 0 ? $"{_body.LostCommanderValue:N0} Cr" : string.Empty,
+            _ => _body.UnsoldCommanderValue > 0 ? $"{_body.UnsoldCommanderValue:N0} Cr" : string.Empty,
+        };
         public string DistanceFromArrivalLs => $"{_body.DistanceFromArrivalLs:N0} ls";
         public string OrbitalPeriod
         {
@@ -318,6 +324,8 @@ namespace ODExplorer.ViewModels.ModelVMs
         public int GeologicalSignals => _body.GeologicalSignals;
         public string GeologicalSignalsString => _body.GeologicalSignals > 0 ? _body.GeologicalSignals.ToString() : string.Empty;
         public bool HasGeologicalSignals => _body.GeologicalSignals > 0;
+        public string GeologicalTypeDescription => _body.Volcanism.GetEnumDescription();
+        public string GeologicalValue => _body.GeologicalSignals > 0 ? "N/A" : string.Empty;
         public int BiologicalSignals => _body.BiologicalSignals;
         public string BiologicalSignalsString => _body.BiologicalSignals > 0 ? _body.BiologicalSignals.ToString() : string.Empty;
         public bool HasBiologicalSignals => _body.BiologicalSignals > 0;

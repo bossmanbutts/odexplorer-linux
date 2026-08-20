@@ -1174,6 +1174,18 @@ namespace ODExplorer.Stores
 
             body.GoverningStar = isStar ? body.StarType : GetGoverningStar(system, scanEvt.Parents);
 
+            if (!isStar && scanEvt.Parents is not null)
+            {
+                foreach (var parent in scanEvt.Parents)
+                {
+                    if (parent.Type == EliteJournalReader.Events.ParentType.Star)
+                    {
+                        body.ParentStarBodyId = parent.BodyID;
+                        break;
+                    }
+                }
+            }
+
             UpdateBioPredictions(body, scanEvt.Timestamp);
 
             RecalcSystemCounts(system);

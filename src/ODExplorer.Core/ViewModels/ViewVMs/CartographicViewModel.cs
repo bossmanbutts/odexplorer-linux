@@ -250,6 +250,18 @@ namespace ODExplorer.ViewModels.ViewVMs
             this.explorationData.OnFSDJump -= ExplorationData_OnFSDJump;
         }
 
+        public bool ShowBeltClusters
+        {
+            get => settingsStore.SystemGridSetting.ShowBeltClusters;
+            set
+            {
+                settingsStore.SystemGridSetting.ShowBeltClusters = value;
+                settingsStore.OnSystemGridSettingsUpdated();
+                OnPropertyChanged(nameof(ShowBeltClusters));
+                RefreshBodiesView();
+            }
+        }
+
         #region Commands
         public ICommand SwitchView { get; }
         public ICommand CopySystemName { get; }
@@ -314,6 +326,7 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             var allBodies = CurrentSystem.Bodies
                 .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
+                .Where(b => gridSettings.ShowBeltClusters || !b.FullName.Contains("Belt", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             var stars = allBodies.Where(b => b.IsStar)
@@ -322,32 +335,58 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             var nonStars = allBodies.Where(b => !b.IsStar).ToList();
 
+            // Build lookup: star BodyID -> star ViewModel
+            var starById = new Dictionary<long, SystemBodyViewModel>();
+            foreach (var star in stars)
+            {
+                starById[star.BodyID] = star;
+            }
+
+            // Group non-star bodies by their parent star
+            var grouped = new Dictionary<long, List<SystemBodyViewModel>>();
+            var orphans = new List<SystemBodyViewModel>();
+
+            foreach (var body in nonStars)
+            {
+                if (body.ParentStarBodyId >= 0 && starById.TryGetValue(body.ParentStarBodyId, out var parentStar))
+                {
+                    if (!grouped.TryGetValue(parentStar.BodyID, out var list))
+                    {
+                        list = new List<SystemBodyViewModel>();
+                        grouped[parentStar.BodyID] = list;
+                    }
+                    list.Add(body);
+                }
+                else
+                {
+                    orphans.Add(body);
+                }
+            }
+
             var tree = new ObservableCollection<StarBodyGroup>();
 
             foreach (var star in stars)
             {
-                var children = nonStars
-                    .Where(b => b.GoverningStar == star.Name)
-                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
-                    .ToList();
+                var children = grouped.TryGetValue(star.BodyID, out var list)
+                    ? list.OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2))).ToList()
+                    : [];
 
                 tree.Add(new StarBodyGroup(star, new ObservableCollection<SystemBodyViewModel>(children)));
             }
 
-            // Bodies with no matching star (shouldn't happen, but handle gracefully)
-            var orphans = nonStars
-                .Where(b => stars.All(s => b.GoverningStar != s.Name))
-                .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
-                .ToList();
-
             if (orphans.Count > 0)
             {
-                tree.Add(new StarBodyGroup(stars.FirstOrDefault()!, new ObservableCollection<SystemBodyViewModel>(orphans)));
+                var firstStar = stars.FirstOrDefault();
+                if (firstStar != null)
+                {
+                    tree.Add(new StarBodyGroup(firstStar, new ObservableCollection<SystemBodyViewModel>(
+                        orphans.OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2))))));
+                }
             }
 
             CurrentSystemTree = tree;
 
-            // Also keep flat list for backward compat (detail panel selection)
+            // Also keep flat list for detail panel selection
             var filtered = allBodies
                 .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)));
             currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);

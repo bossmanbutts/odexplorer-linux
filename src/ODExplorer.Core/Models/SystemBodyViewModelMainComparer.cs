@@ -43,6 +43,10 @@ namespace ODExplorer.Models
                     if (direction == 1)
                         return a.BiologicalSignals.CompareTo(b.BiologicalSignals);
                     return b.BiologicalSignals.CompareTo(a.BiologicalSignals);
+                case BodySortCategory.GeoSignals:
+                    if (direction == 1)
+                        return a.GeologicalSignals.CompareTo(b.GeologicalSignals);
+                    return b.GeologicalSignals.CompareTo(a.GeologicalSignals);
                 case BodySortCategory.Value:
                 default:
                     if (direction == 1)

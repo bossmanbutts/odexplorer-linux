@@ -50,6 +50,8 @@ namespace ODExplorer.Models
         Distance,
         [Description("Biological Signals")]
         BioSignals,
+        [Description("Geological Signals")]
+        GeoSignals,
         [Description("No Sorting")]
         None
     }

@@ -538,6 +538,7 @@ namespace ODUtils.Models
         // Star
         public StarType StarType { get; set; }
         public StarType GoverningStar { get; set; }
+        public long ParentStarBodyId { get; set; } = -1;
         public StarLuminosityClass StarLuminosity { get; set; }
         public double? StellarMass { get; set; }
         public double Age_MY { get; set; }

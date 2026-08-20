@@ -169,7 +169,7 @@ namespace ODExplorer.Stores
             parserStore.UnregisterParser(this);
         }
 
-        public JournalHistoryArgs GetEventsToParse(DateTime defaultAge) => new(new[] { JournalTypeEnum.CarrierStats, JournalTypeEnum.CarrierJumpRequest, JournalTypeEnum.CarrierLocation, JournalTypeEnum.CarrierJumpCancelled }, defaultAge, this, ParseHistoryStream);
+        public JournalHistoryArgs GetEventsToParse(DateTime defaultAge) => new(new[] { JournalTypeEnum.FSDJump, JournalTypeEnum.CarrierStats, JournalTypeEnum.CarrierJumpRequest, JournalTypeEnum.CarrierLocation, JournalTypeEnum.CarrierJumpCancelled }, defaultAge, this, ParseHistoryStream);
 
         public void ParseHistory(IEnumerable<JournalEntry> journalEntries, int currentCmdrId) { }
 
@@ -274,7 +274,7 @@ namespace ODExplorer.Stores
             // stop). Only ever moves forward.
             int index = CurrentContainer.Targets.FindIndex(x => x.SystemName.Equals(system, StringComparison.OrdinalIgnoreCase));
 
-            if (index > CurrentIndex)
+            if (index >= 0 && index > CurrentIndex)
             {
                 CurrentIndex = index;
 
@@ -284,11 +284,12 @@ namespace ODExplorer.Stores
                 {
                     notificationStore.ShowSpanshNotification(Notifications.SpanshNotificationType.Refuel);
                 }
+            }
 
-                if (NextTarget != null && settingsStore.SpanshCSVSettings.AutoCopySystemToClipboard)
-                {
-                    notificationStore.CopyToClipBoard(NextTarget.SystemName);
-                }
+            // Auto-copy next system whenever player is on a route target
+            if (index >= 0 && NextTarget != null && settingsStore.SpanshCSVSettings.AutoCopySystemToClipboard)
+            {
+                notificationStore.CopyToClipBoard(NextTarget.SystemName);
             }
         }
 

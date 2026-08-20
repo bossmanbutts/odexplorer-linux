@@ -161,8 +161,10 @@ namespace ODUtils.Spansh
                         ProcessTouristRoute(ret, fields);
                         break;
                     case CsvType.Exobiology:
-                    case CsvType.ExobiologyOld:
                         ProcessExoRoute(ret, fields);
+                        break;
+                    case CsvType.ExobiologyOld:
+                        ProcessExoRouteOld(ret, fields);
                         break;
                     case CsvType.Colonisation:
                         ProcessColonisationRoute(ret, fields);
@@ -284,7 +286,26 @@ namespace ODUtils.Spansh
             target.BodiesInfo!.Add(new BodiesInfo
             {
                 Body = GetBodyName(Field(fields, 1), target.SystemName),
-                Distance = Field(fields, 4).ToUpperInvariant(),
+                Distance = $"{ParseN0(Field(fields, 3))} ls",
+                Property1 = ParseN0(Field(fields, 5)),
+            });
+        }
+
+        private static void ProcessExoRouteOld(List<ExplorationTarget> ret, string[] fields)
+        {
+            string systemName = fields[0];
+            ExplorationTarget? target = FindTarget(ret, systemName);
+
+            if (target is null)
+            {
+                target = new ExplorationTarget { SystemName = systemName.ToUpperInvariant(), BodiesInfo = [] };
+                ret.Add(target);
+            }
+
+            target.BodiesInfo!.Add(new BodiesInfo
+            {
+                Body = GetBodyName(Field(fields, 1), target.SystemName),
+                Distance = $"{ParseN0(Field(fields, 3))} ls",
                 Property1 = ParseN0(Field(fields, 5)),
             });
         }

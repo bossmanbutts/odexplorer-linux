@@ -89,12 +89,20 @@
                     <Button Content="Bio" Padding="8,2" FontSize="11"
                             Command="{Binding SetSortCategory}"
                             CommandParameter="{x:Static models:BodySortCategory.BioSignals}" />
+                    <Button Content="Geo" Padding="8,2" FontSize="11"
+                            Command="{Binding SetSortCategory}"
+                            CommandParameter="{x:Static models:BodySortCategory.GeoSignals}" />
                     <Button Content="Distance" Padding="8,2" FontSize="11"
                             Command="{Binding SetSortCategory}"
                             CommandParameter="{x:Static models:BodySortCategory.Distance}" />
                     <Button Content="{Binding SortDirectionGlyph}" Padding="6,2" FontSize="11"
                             ToolTip.Tip="Toggle ascending/descending"
                             Command="{Binding CycleSortDirection}" />
+                    <CheckBox Content="Belts"
+                              IsChecked="{Binding ShowBeltClusters}"
+                              VerticalAlignment="Center"
+                              Margin="12,0,0,0"
+                              FontSize="11" />
                 </StackPanel>
 
                 <!-- Bodies label -->
@@ -118,9 +126,16 @@
                                                 CornerRadius="4"
                                                 Padding="8,6"
                                                 Margin="0,0,0,2"
-                                                Cursor="Hand">
-                                            <Grid ColumnDefinitions="*,Auto,Auto">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                Cursor="Hand"
+                                                Tapped="StarHeader_Tapped">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                                <TextBlock Text="{Binding ExpandGlyph}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="0,0,6,0"
+                                                           FontSize="11"
+                                                           Foreground="#999999"
+                                                           IsVisible="{Binding HasChildren}" />
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
                                                     <TextBlock Text="★" Foreground="#FFD700" FontSize="14" VerticalAlignment="Center" />
                                                     <TextBlock Text="{Binding Star.Name}"
                                                                FontWeight="Bold"
@@ -132,17 +147,18 @@
                                                                FontSize="12"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="1" Text="{Binding Star.ScanStage}"
+                                                <TextBlock Grid.Column="2" Text="{Binding Star.ScanStage}"
                                                            Foreground="#AAAAAA"
                                                            VerticalAlignment="Center"
                                                            Margin="8,0,0,0" />
-                                                <TextBlock Grid.Column="2" Text="{Binding Star.DataValueString}"
+                                                <TextBlock Grid.Column="3" Text="{Binding Star.DataValueString}"
                                                            VerticalAlignment="Center"
                                                            Margin="8,0,0,0" />
                                             </Grid>
                                         </Border>
                                         <!-- Child bodies -->
-                                        <ItemsControl ItemsSource="{Binding Children}" Margin="12,0,0,0">
+                                        <ItemsControl ItemsSource="{Binding Children}" Margin="12,0,0,0"
+                                                      IsVisible="{Binding IsExpanded}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
                                                     <Border Background="#282828"
@@ -283,12 +299,26 @@
                                 </Grid>
 
                                 <!-- Exobiology species for this body -->
-                                <StackPanel Spacing="4" IsVisible="{Binding SelectedBody.HasExobioSpecies}">
+                                <StackPanel Spacing="4" IsVisible="{Binding SelectedBody.HasBiologicalSignals}">
                                     <TextBlock Text="Exobiology" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding SelectedBody.ExobioSpeciesList}"
+                                    <TextBlock Text="{Binding SelectedBody.OrganicValues}"
                                                FontSize="12"
                                                Foreground="#8FBC8F"
                                                TextWrapping="Wrap" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="4" IsVisible="{Binding SelectedBody.HasGeologicalSignals}">
+                                    <TextBlock Text="Geology" FontWeight="SemiBold" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Signals" Foreground="#999999" FontSize="12" />
+                                            <TextBlock Text="{Binding SelectedBody.GeologicalSignalsString}" FontSize="12" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="Type" Foreground="#999999" FontSize="12" />
+                                            <TextBlock Text="{Binding SelectedBody.GeologicalTypeDescription}" FontSize="12" />
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
 
                                 <StackPanel Spacing="4" IsVisible="{Binding SelectedBody.HasRings}">
