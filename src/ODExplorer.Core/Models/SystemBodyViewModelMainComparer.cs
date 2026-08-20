@@ -39,6 +39,10 @@ namespace ODExplorer.Models
                     if (direction == 1)
                         return a.DistanceFromArrival.CompareTo(b.DistanceFromArrival);
                     return b.DistanceFromArrival.CompareTo(a.DistanceFromArrival);
+                case BodySortCategory.Name:
+                    if (direction == 1)
+                        return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+                    return string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase);
                 case BodySortCategory.BioSignals:
                     if (direction == 1)
                         return a.BiologicalSignals.CompareTo(b.BiologicalSignals);

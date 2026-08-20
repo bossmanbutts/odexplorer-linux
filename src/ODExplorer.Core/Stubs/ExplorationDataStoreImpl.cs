@@ -1186,6 +1186,11 @@ namespace ODExplorer.Stores
                 system.StarType = body.StarType;
             }
 
+            if (isStar && scanEvt.Parents is not null)
+            {
+                body.HasBarycentreParent = scanEvt.Parents.Any(p => p.Type == EliteJournalReader.Events.ParentType.Null);
+            }
+
             body.GoverningStar = isStar ? body.StarType : GetGoverningStar(system, scanEvt.Parents);
 
             if (!isStar && scanEvt.Parents is not null)

@@ -46,6 +46,8 @@ namespace ODExplorer.Models
     {
         [Description("Mapped Value")]
         Value,
+        [Description("Name")]
+        Name,
         [Description("Distance From Arrival")]
         Distance,
         [Description("Biological Signals")]

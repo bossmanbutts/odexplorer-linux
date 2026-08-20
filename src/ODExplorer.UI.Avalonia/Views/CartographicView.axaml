@@ -82,8 +82,11 @@
 
                 <!-- Sort bar -->
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="4,0,4,4">
-                    <TextBlock Text="Sort:" VerticalAlignment="Center" Foreground="#999999" FontSize="12" />
-                    <Button Content="Value" Padding="8,2" FontSize="11"
+    <TextBlock Text="Sort:" VerticalAlignment="Center" Foreground="#999999" FontSize="12" />
+    <Button Content="Name" Padding="8,2" FontSize="11"
+            Command="{Binding SetSortCategory}"
+            CommandParameter="{x:Static models:BodySortCategory.Name}" />
+    <Button Content="Value" Padding="8,2" FontSize="11"
                             Command="{Binding SetSortCategory}"
                             CommandParameter="{x:Static models:BodySortCategory.Value}" />
                     <Button Content="Bio" Padding="8,2" FontSize="11"
@@ -156,7 +159,7 @@
                                                 Cursor="Hand"
                                                 Tapped="StarHeader_Tapped"
                                                 IsVisible="{Binding !IsBarycentre}">
-                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                            <Grid ColumnDefinitions="Auto,*,Auto">
                                                 <TextBlock Text="{Binding ExpandGlyph}"
                                                            VerticalAlignment="Center"
                                                            Margin="0,0,6,0"
@@ -175,11 +178,7 @@
                                                                FontSize="12"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
-                                                <TextBlock Grid.Column="2" Text="{Binding Star.ScanStage}"
-                                                           Foreground="#AAAAAA"
-                                                           VerticalAlignment="Center"
-                                                           Margin="8,0,0,0" />
-                                                <TextBlock Grid.Column="3" Text="{Binding Star.DataValueString}"
+                                                <TextBlock Grid.Column="2" Text="{Binding Star.DataValueString}"
                                                            VerticalAlignment="Center"
                                                            Margin="8,0,0,0" />
                                             </Grid>
@@ -197,19 +196,16 @@
                                                             Margin="0,0,0,4"
                                                             Cursor="Hand"
                                                             Tapped="Body_Tapped">
-                                                        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                                             <TextBlock Text="{Binding Name}"
                                                                        FontWeight="Bold"
                                                                        VerticalAlignment="Center"
                                                                        TextTrimming="CharacterEllipsis" />
-                                                            <TextBlock Grid.Column="1" Text="{Binding ScanStage}"
-                                                                       Foreground="#AAAAAA"
-                                                                       VerticalAlignment="Center" />
-                                                            <TextBlock Grid.Column="2" Text="{Binding DataValueString}"
+                                                            <TextBlock Grid.Column="1" Text="{Binding DataValueString}"
                                                                        VerticalAlignment="Center"
                                                                        HorizontalAlignment="Right"
                                                                        Margin="8,0,0,0" />
-                                                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
+                                                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
                                                                 <TextBlock Text="{Binding BodyDescription}" Foreground="#BBBBBB" FontSize="11" />
                                                                 <TextBlock Text="{Binding DistanceFromArrivalLs}" Foreground="#999999" FontSize="11" />
                                                                 <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBiologicalSignals}">

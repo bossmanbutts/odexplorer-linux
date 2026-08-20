@@ -38,6 +38,7 @@ namespace ODExplorer.ViewModels.ModelVMs
         public string GoverningStar => _body.GoverningStar.ToString();
         public long ParentStarBodyId => _body.ParentStarBodyId;
         public List<long> ParentStarBodyIds => _body.ParentStarBodyIds;
+        public bool HasBarycentreParent => _body.HasBarycentreParent;
         #region DataGrid Properties
         public string Name => _body.BodyName.ToUpperInvariant();
         public string ScanStage => _body.ScanState.GetEnumDescription();
@@ -555,11 +556,16 @@ namespace ODExplorer.ViewModels.ModelVMs
             OnPropertyChanged(nameof(SurfaceGravity));
             OnPropertyChanged(nameof(HasRings));
             OnPropertyChanged(nameof(OrganicScanItems));
+            OnPropertyChanged(nameof(OrganicValues));
+            OnPropertyChanged(nameof(HasExobioSpecies));
             OnPropertyChanged(nameof(GoverningStar));
             OnPropertyChanged(nameof(IsHighValueExo));
             OnPropertyChanged(nameof(DistanceFromArrival));
             OnPropertyChanged(nameof(BodyID));
             OnPropertyChanged(nameof(WasFootFalled));
+            OnPropertyChanged(nameof(FssValue));
+            OnPropertyChanged(nameof(MappedValue));
+            OnPropertyChanged(nameof(DataValueString));
         }
         #endregion
     }
