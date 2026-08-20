@@ -102,17 +102,24 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
 
-                        <ItemsControl ItemsSource="{Binding CurrentTarget.BodiesInfo}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="spansh:BodiesInfo">
-                                    <Grid ColumnDefinitions="*,120,100" Margin="0,1">
-                                        <TextBlock Text="{Binding Body}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Distance}" />
-                                        <TextBlock Grid.Column="2" Text="{Binding Property1}" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <StackPanel Spacing="2" IsVisible="{Binding CurrentTarget.HasBodiesInfo}">
+                            <Grid ColumnDefinitions="*,120,100" Margin="0,1">
+                                <TextBlock Text="Body" FontWeight="SemiBold" FontSize="11" Foreground="#999999" />
+                                <TextBlock Grid.Column="1" Text="Distance" FontWeight="SemiBold" FontSize="11" Foreground="#999999" />
+                                <TextBlock Grid.Column="2" Text="Value" FontWeight="SemiBold" FontSize="11" Foreground="#999999" />
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding CurrentTarget.BodiesInfo}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="modelvms:BodiesInfoViewModel">
+                                        <Grid ColumnDefinitions="*,120,100" Margin="0,1">
+                                            <TextBlock Text="{Binding Body}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Distance}" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Property1}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                     </StackPanel>
                 </GroupBox>
             </Grid>

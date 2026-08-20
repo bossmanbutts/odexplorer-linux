@@ -222,13 +222,13 @@ namespace ODExplorer.ViewModels.ModelVMs
             get
             {
                 if (OrganicScanItems == null || OrganicScanItems.Count == 0)
-                    return string.Empty;
+                    return "Value unknown until object is scanned";
 
                 if (_body.MinExoValue == _body.MaxExoValue)
                 {
-                    return $"{_body.MaxExoValue.FormatNumber()}";
+                    return $"{_body.MaxExoValue.FormatNumber()} Cr";
                 }
-                return $"{_body.MinExoValue.FormatNumber()} - {_body.MaxExoValue.FormatNumber()}";
+                return $"{_body.MinExoValue.FormatNumber()} - {_body.MaxExoValue.FormatNumber()} Cr";
             }
         }
 

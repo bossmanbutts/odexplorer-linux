@@ -46,24 +46,10 @@ namespace ODExplorer.Models
     {
         [Description("Mapped Value")]
         Value,
-        [Description("Surface Gravity")]
-        Gravity,
         [Description("Distance From Arrival")]
         Distance,
-        [Description("Body Type")]
-        Type,
-        [Description("Body Name")]
-        Name,
-        [Description("Body ID")]
-        BodyId,
         [Description("Biological Signals")]
         BioSignals,
-        [Description("Geological Signals")]
-        GeoSignals,
-        [Description("Worth Mapping/Value")]
-        WorthMappingValue,
-        [Description("Worth Mapping/Distance")]
-        WorthMappingDistance,
         [Description("No Sorting")]
         None
     }

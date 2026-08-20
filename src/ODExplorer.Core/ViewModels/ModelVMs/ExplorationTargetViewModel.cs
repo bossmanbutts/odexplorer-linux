@@ -21,5 +21,6 @@ namespace ODExplorer.ViewModels.ModelVMs
         public string? Property3 => Target.Property3;
         public string? Property4 => Target.Property4;
         public List<BodiesInfoViewModel> BodiesInfo { get; private set; }
+        public bool HasBodiesInfo => BodiesInfo.Count > 0;
     }
 }

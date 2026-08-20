@@ -25,7 +25,7 @@ namespace ODExplorer.Models
         {
             return new()
             {
-                BodySortingOptions = BodySortCategory.WorthMappingDistance,
+                BodySortingOptions = BodySortCategory.Distance,
                 SortDirection = ListSortDirection.Ascending,
                 InfoDisplayOptions = BodyInfoIconDisplay.All,
                 TemperatureDisplay = Temperature.Kelvin,

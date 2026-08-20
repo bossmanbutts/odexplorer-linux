@@ -58,6 +58,7 @@ namespace ODExplorer.ViewModels.ViewVMs
         private void SetCSVType(CsvType type)
         {
             CurrentType = type;
+            (SetCurrentCSVType as RelayCommand<CsvType>)?.RaiseCanExecuteChanged();
         }
 
         public override void Dispose()
@@ -146,6 +147,7 @@ namespace ODExplorer.ViewModels.ViewVMs
                 OnPropertyChanged(nameof(NextTarget));
                 OnPropertyChanged(nameof(CurrentIndex));
                 OnPropertyChanged(nameof(RemainingCount));
+                RaiseNavCanExecuteChanged();
                 return;
             }
             currentTarget = CurrentIndex < Targets.Count - 1 ? Targets[CurrentIndex]
@@ -156,6 +158,14 @@ namespace ODExplorer.ViewModels.ViewVMs
             OnPropertyChanged(nameof(NextTarget));
             OnPropertyChanged(nameof(CurrentIndex));
             OnPropertyChanged(nameof(RemainingCount));
+            RaiseNavCanExecuteChanged();
+        }
+
+        private void RaiseNavCanExecuteChanged()
+        {
+            (PreviousTargetCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (NextTargetCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (StartStopFleetCarrierTimer as RelayCommand<bool>)?.RaiseCanExecuteChanged();
         }
 
         private void CsvStore_OnCurrentContainerChanged(object? sender, SpanshCsvContainer? e)
@@ -166,6 +176,8 @@ namespace ODExplorer.ViewModels.ViewVMs
 
             if (e is null)
             {
+                OnPropertyChanged(nameof(Targets));
+                RaiseNavCanExecuteChanged();
                 return;
             }
 

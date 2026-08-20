@@ -103,6 +103,17 @@ namespace ODExplorer.ViewModels.ViewVMs
             }
         }
 
+        private ObservableCollection<StarBodyGroup>? currentSystemTree;
+        public ObservableCollection<StarBodyGroup>? CurrentSystemTree
+        {
+            get => currentSystemTree;
+            set
+            {
+                currentSystemTree = value;
+                OnPropertyChanged(nameof(CurrentSystemTree));
+            }
+        }
+
         public CartoViewState CurrentState
         {
             get
@@ -201,19 +212,13 @@ namespace ODExplorer.ViewModels.ViewVMs
             if (CurrentSystem is null)
             {
                 CurrentSystemBodies = null;
+                CurrentSystemTree = null;
                 return;
             }
 
             ODExplorer.Models.DispatcherHelper.Invoke(() =>
             {
-                var gridSettings = settingsStore.SystemGridSetting;
-                var comparer = new SystemBodyViewModelMainComparer(gridSettings);
-                var filtered = CurrentSystem.Bodies
-                    .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
-                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)));
-
-                currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);
-                OnPropertyChanged(nameof(CurrentSystemBodies));
+                BuildTree();
             });
         }
 
@@ -291,14 +296,62 @@ namespace ODExplorer.ViewModels.ViewVMs
             {
                 if (CurrentSystem == null)
                     return;
-                var gridSettings = settingsStore.SystemGridSetting;
-                var comparer = new SystemBodyViewModelMainComparer(gridSettings);
-                var filtered = CurrentSystem.Bodies
-                    .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
-                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)));
-                currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);
-                OnPropertyChanged(nameof(CurrentSystemBodies));
+                BuildTree();
             });
+        }
+
+        private void BuildTree()
+        {
+            if (CurrentSystem == null)
+            {
+                CurrentSystemBodies = null;
+                CurrentSystemTree = null;
+                return;
+            }
+
+            var gridSettings = settingsStore.SystemGridSetting;
+            var comparer = new SystemBodyViewModelMainComparer(gridSettings);
+
+            var allBodies = CurrentSystem.Bodies
+                .Where(b => !gridSettings.IgnoreNonBodies || !b.IsNonBody)
+                .ToList();
+
+            var stars = allBodies.Where(b => b.IsStar)
+                .OrderBy(b => b.DistanceFromArrival)
+                .ToList();
+
+            var nonStars = allBodies.Where(b => !b.IsStar).ToList();
+
+            var tree = new ObservableCollection<StarBodyGroup>();
+
+            foreach (var star in stars)
+            {
+                var children = nonStars
+                    .Where(b => b.GoverningStar == star.Name)
+                    .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
+                    .ToList();
+
+                tree.Add(new StarBodyGroup(star, new ObservableCollection<SystemBodyViewModel>(children)));
+            }
+
+            // Bodies with no matching star (shouldn't happen, but handle gracefully)
+            var orphans = nonStars
+                .Where(b => stars.All(s => b.GoverningStar != s.Name))
+                .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)))
+                .ToList();
+
+            if (orphans.Count > 0)
+            {
+                tree.Add(new StarBodyGroup(stars.FirstOrDefault()!, new ObservableCollection<SystemBodyViewModel>(orphans)));
+            }
+
+            CurrentSystemTree = tree;
+
+            // Also keep flat list for backward compat (detail panel selection)
+            var filtered = allBodies
+                .OrderBy(b => b, Comparer<SystemBodyViewModel>.Create((a, b2) => comparer.Compare(a, b2)));
+            currentSystemBodies = new ObservableCollection<SystemBodyViewModel>(filtered);
+            OnPropertyChanged(nameof(CurrentSystemBodies));
         }
 
         private void ExplorationData_OnFSDJump(object? sender, string e)

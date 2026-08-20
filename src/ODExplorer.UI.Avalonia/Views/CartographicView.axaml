@@ -83,24 +83,15 @@
                 <!-- Sort bar -->
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="4,0,4,4">
                     <TextBlock Text="Sort:" VerticalAlignment="Center" Foreground="#999999" FontSize="12" />
-                    <Button Content="Name" Padding="8,2" FontSize="11"
-                            Command="{Binding SetSortCategory}"
-                            CommandParameter="{x:Static models:BodySortCategory.Name}" />
                     <Button Content="Value" Padding="8,2" FontSize="11"
                             Command="{Binding SetSortCategory}"
                             CommandParameter="{x:Static models:BodySortCategory.Value}" />
                     <Button Content="Bio" Padding="8,2" FontSize="11"
                             Command="{Binding SetSortCategory}"
                             CommandParameter="{x:Static models:BodySortCategory.BioSignals}" />
-                    <Button Content="Geo" Padding="8,2" FontSize="11"
-                            Command="{Binding SetSortCategory}"
-                            CommandParameter="{x:Static models:BodySortCategory.GeoSignals}" />
                     <Button Content="Distance" Padding="8,2" FontSize="11"
                             Command="{Binding SetSortCategory}"
                             CommandParameter="{x:Static models:BodySortCategory.Distance}" />
-                    <Button Content="Type" Padding="8,2" FontSize="11"
-                            Command="{Binding SetSortCategory}"
-                            CommandParameter="{x:Static models:BodySortCategory.Type}" />
                     <Button Content="{Binding SortDirectionGlyph}" Padding="6,2" FontSize="11"
                             ToolTip.Tip="Toggle ascending/descending"
                             Command="{Binding CycleSortDirection}" />
@@ -114,53 +105,92 @@
 
                 <!-- Body list + detail panel -->
                 <Grid Grid.Row="3" ColumnDefinitions="2*,3*">
-                    <!-- Body list -->
-                    <ListBox Grid.Column="0"
-                             ItemsSource="{Binding CurrentSystemBodies}"
-                             SelectedItem="{Binding SelectedBody, Mode=TwoWay}"
-                             SelectionMode="Single">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
-                                <Border Background="#282828"
-                                        BorderBrush="#404040"
-                                        BorderThickness="1"
-                                        CornerRadius="4"
-                                        Padding="8"
-                                        Margin="0,0,4,4">
-                                    <Grid ColumnDefinitions="50,*,Auto,Auto" RowDefinitions="Auto,Auto">
-                                        <TextBlock Text="{Binding BodyID}" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}"
-                                                   FontWeight="Bold"
-                                                   VerticalAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="2" Text="{Binding ScanStage}"
-                                                   Foreground="#AAAAAA"
-                                                   VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="3" Text="{Binding DataValueString}"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Right"
-                                                   Margin="8,0,0,0" />
-                                        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="10" Margin="50,2,0,0">
-                                            <TextBlock Text="{Binding BodyDescription}" Foreground="#BBBBBB" FontSize="11" />
-                                            <TextBlock Text="{Binding DistanceFromArrivalLs}" Foreground="#999999" FontSize="11" />
-                                            <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBiologicalSignals}">
-                                                <TextBlock Text="Bio" Foreground="#8FBC8F" FontSize="11" />
-                                                <TextBlock Text="{Binding BiologicalSignalsString}" Foreground="#8FBC8F" FontSize="11" />
-                                            </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasGeologicalSignals}">
-                                                <TextBlock Text="Geo" Foreground="#CD9B1D" FontSize="11" />
-                                                <TextBlock Text="{Binding GeologicalSignalsString}" Foreground="#CD9B1D" FontSize="11" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <!-- Tree body list -->
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding CurrentSystemTree}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:StarBodyGroup">
+                                    <StackPanel Margin="0,0,4,8">
+                                        <!-- Star header -->
+                                        <Border Background="#333333"
+                                                BorderBrush="#505050"
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                Padding="8,6"
+                                                Margin="0,0,0,2"
+                                                Cursor="Hand">
+                                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock Text="★" Foreground="#FFD700" FontSize="14" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding Star.Name}"
+                                                               FontWeight="Bold"
+                                                               FontSize="13"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Star.BodyDescription}"
+                                                               Foreground="#BBBBBB"
+                                                               FontSize="12"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Text="{Binding Star.ScanStage}"
+                                                           Foreground="#AAAAAA"
+                                                           VerticalAlignment="Center"
+                                                           Margin="8,0,0,0" />
+                                                <TextBlock Grid.Column="2" Text="{Binding Star.DataValueString}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="8,0,0,0" />
+                                            </Grid>
+                                        </Border>
+                                        <!-- Child bodies -->
+                                        <ItemsControl ItemsSource="{Binding Children}" Margin="12,0,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="modelvms:SystemBodyViewModel">
+                                                    <Border Background="#282828"
+                                                            BorderBrush="#404040"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4"
+                                                            Padding="8"
+                                                            Margin="0,0,0,4"
+                                                            Cursor="Hand"
+                                                            Tapped="Body_Tapped">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                                            <TextBlock Text="{Binding Name}"
+                                                                       FontWeight="Bold"
+                                                                       VerticalAlignment="Center"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding ScanStage}"
+                                                                       Foreground="#AAAAAA"
+                                                                       VerticalAlignment="Center" />
+                                                            <TextBlock Grid.Column="2" Text="{Binding DataValueString}"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Right"
+                                                                       Margin="8,0,0,0" />
+                                                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="10" Margin="0,2,0,0">
+                                                                <TextBlock Text="{Binding BodyDescription}" Foreground="#BBBBBB" FontSize="11" />
+                                                                <TextBlock Text="{Binding DistanceFromArrivalLs}" Foreground="#999999" FontSize="11" />
+                                                                <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasBiologicalSignals}">
+                                                                    <TextBlock Text="Bio" Foreground="#8FBC8F" FontSize="11" />
+                                                                    <TextBlock Text="{Binding BiologicalSignalsString}" Foreground="#8FBC8F" FontSize="11" />
+                                                                </StackPanel>
+                                                                <StackPanel Orientation="Horizontal" Spacing="3" IsVisible="{Binding HasGeologicalSignals}">
+                                                                    <TextBlock Text="Geo" Foreground="#CD9B1D" FontSize="11" />
+                                                                    <TextBlock Text="{Binding GeologicalSignalsString}" Foreground="#CD9B1D" FontSize="11" />
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                     <TextBlock Text="No bodies scanned yet. Use the Full Spectrum Scanner to discover bodies."
                                Foreground="#888888"
                                Margin="8"
-                               IsVisible="{Binding CurrentSystemBodies, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
+                               IsVisible="{Binding CurrentSystemTree, Converter={StaticResource CountToBool}, ConverterParameter=empty}" />
 
                     <!-- Detail panel -->
                     <Border Grid.Column="1" BorderBrush="#404040" BorderThickness="1" CornerRadius="4" Margin="4,0,0,0">
