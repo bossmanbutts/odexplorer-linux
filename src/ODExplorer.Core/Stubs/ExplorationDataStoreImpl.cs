@@ -295,7 +295,8 @@ namespace ODExplorer.Stores
 
         public void ClearData()
         {
-            SaveCartoData();
+            if (_cartoData.Count > 0)
+                SaveCartoData();
             CurrentSystem = null;
             CurrentBody = null;
             CurrentBioItem = null;
